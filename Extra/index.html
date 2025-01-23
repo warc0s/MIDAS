@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MIDAS - Transformando Datos en Oro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;600;800&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --gold-gradient: linear-gradient(135deg, #FFD700 0%, #B8860B 50%, #DAA520 100%);
+            --navy-blue: #0a192f;
+            --light-gold: #F0E68C;
+            --dark-gold: #B8860B;
+        }
+
+        body {
+            font-family: 'Raleway', sans-serif;
+            background: radial-gradient(circle at center, var(--navy-blue) 0%, #050d1a 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .background-effects {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(2px 2px at 20px 30px, var(--light-gold), rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 40px 70px, var(--dark-gold), rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 50px 160px, var(--light-gold), rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 90px 40px, var(--dark-gold), rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 130px 80px, var(--light-gold), rgba(0,0,0,0));
+            background-repeat: repeat;
+            animation: shine 4s linear infinite;
+            opacity: 0.3;
+        }
+
+        .container {
+            text-align: center;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+            background: rgba(10, 25, 47, 0.3);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(218, 165, 32, 0.1);
+            box-shadow: 0 0 30px rgba(218, 165, 32, 0.1);
+            max-width: 90%;
+            width: 800px;
+            margin: 20px;
+        }
+
+        .logo-container {
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        h1 {
+            font-size: clamp(4rem, 10vw, 8rem);
+            font-weight: 800;
+            background: var(--gold-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            letter-spacing: 4px;
+            position: relative;
+            animation: titleFloat 3s ease-in-out infinite;
+        }
+
+        h1::after {
+            content: 'MIDAS';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--gold-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: blur(20px);
+            opacity: 0.5;
+            z-index: -1;
+        }
+
+        .tagline {
+            font-size: clamp(1.2rem, 3vw, 1.8rem);
+            margin: 2rem 0;
+            color: var(--light-gold);
+            font-weight: 300;
+            text-shadow: 0 0 10px rgba(240, 230, 140, 0.3);
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 1s ease-out forwards 0.5s;
+        }
+
+        .countdown {
+            display: flex;
+            justify-content: center;
+            gap: clamp(0.5rem, 2vw, 2rem);
+            flex-wrap: wrap;
+            margin-top: 3rem;
+        }
+
+        .countdown-item {
+            background: linear-gradient(145deg, rgba(218, 165, 32, 0.1), rgba(10, 25, 47, 0.2));
+            padding: clamp(1rem, 2vw, 1.5rem);
+            border-radius: 15px;
+            min-width: clamp(80px, 15vw, 120px);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(218, 165, 32, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .countdown-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(218, 165, 32, 0.1);
+        }
+
+        .countdown-value {
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            font-weight: bold;
+            background: var(--gold-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .countdown-label {
+            font-size: clamp(0.8rem, 1.5vw, 1rem);
+            color: var(--light-gold);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .data-particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+
+        .decorative-line {
+            width: 150px;
+            height: 2px;
+            background: var(--gold-gradient);
+            margin: 2rem auto;
+            position: relative;
+            border-radius: 2px;
+        }
+
+        .decorative-line::before,
+        .decorative-line::after {
+            content: '';
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: var(--gold-gradient);
+            border-radius: 50%;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .decorative-line::before {
+            left: -5px;
+        }
+
+        .decorative-line::after {
+            right: -5px;
+        }
+
+        @keyframes titleFloat {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes shine {
+            0% {
+                background-position: 0 0;
+            }
+            100% {
+                background-position: 400px 400px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1.5rem;
+            }
+            
+            .countdown {
+                gap: 1rem;
+            }
+            
+            .countdown-item {
+                min-width: calc(50% - 1rem);
+                margin-bottom: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            h1 {
+                font-size: 3.5rem;
+            }
+            
+            .tagline {
+                font-size: 1rem;
+            }
+        }
+
+        /* Efecto de partículas doradas */
+        .particle {
+            position: absolute;
+            background: radial-gradient(circle, var(--light-gold) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0;
+            animation: particleFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes particleFloat {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 0;
+            }
+            50% {
+                opacity: 0.5;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-effects"></div>
+    <div class="container">
+        <div class="logo-container">
+            <h1>MIDAS</h1>
+        </div>
+        <div class="decorative-line"></div>
+        <p class="tagline">Pronto tus datos brillarán como el oro</p>
+        <div class="countdown">
+            <div class="countdown-item">
+                <div class="countdown-value" id="days">00</div>
+                <div class="countdown-label">Días</div>
+            </div>
+            <div class="countdown-item">
+                <div class="countdown-value" id="hours">00</div>
+                <div class="countdown-label">Horas</div>
+            </div>
+            <div class="countdown-item">
+                <div class="countdown-value" id="minutes">00</div>
+                <div class="countdown-label">Minutos</div>
+            </div>
+            <div class="countdown-item">
+                <div class="countdown-value" id="seconds">00</div>
+                <div class="countdown-label">Segundos</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Cuenta regresiva
+        const countDownDate = new Date("March 4, 2025 00:00:00").getTime();
+
+        const countdown = setInterval(function() {
+            const now = new Date().getTime();
+            const distance = countDownDate - now;
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            document.getElementById("days").innerHTML = days.toString().padStart(2, '0');
+            document.getElementById("hours").innerHTML = hours.toString().padStart(2, '0');
+            document.getElementById("minutes").innerHTML = minutes.toString().padStart(2, '0');
+            document.getElementById("seconds").innerHTML = seconds.toString().padStart(2, '0');
+
+            if (distance < 0) {
+                clearInterval(countdown);
+                document.querySelector(".countdown").innerHTML = "¡El momento ha llegado!";
+            }
+        }, 1000);
+
+        // Sistema de partículas
+        function createParticle() {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            
+            // Tamaño aleatorio entre 3 y 8 pixels
+            const size = Math.random() * 5 + 3;
+            particle.style.width = `${size}px`;
+            particle.style.height = `${size}px`;
+            
+            // Posición inicial aleatoria en el eje X
+            const startPositionX = Math.random() * window.innerWidth;
+            particle.style.left = `${startPositionX}px`;
+            particle.style.bottom = '0';
+            
+            document.body.appendChild(particle);
+            
+            // Eliminar la partícula después de la animación
+            setTimeout(() => {
+                particle.remove();
+            }, 3000);
+        }
+
+        // Crear partículas periódicamente
+        setInterval(createParticle, 200);
+
+        // Efecto de hover en los elementos del countdown
+        document.querySelectorAll('.countdown-item').forEach(item => {
+            item.addEventListener('mouseenter', () => {
+                item.style.transform = 'translateY(-5px)';
+            });
+            
+            item.addEventListener('mouseleave', () => {
+                item.style.transform = 'translateY(0)';
+            });
+        });
+    </script>
+</body>
+</html>
