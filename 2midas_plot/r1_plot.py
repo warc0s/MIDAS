@@ -17,8 +17,15 @@ load_dotenv()
 
 # Configurar modelo
 model_client = OpenAIChatCompletionClient(
-    model="gpt-4o-mini",
-    api_key=os.getenv("OPENAI_API_KEY")
+    model="meta-llama/Llama-3.3-70B-Instruct-Turbo",
+    base_url="https://api.deepinfra.com/v1/openai",
+    api_key = os.getenv("DEEPINFRA_KEY"),
+    model_info={
+        "vision": False,
+        "function_calling": True,
+        "json_output": True,
+        "family": "unknown",
+    },
 )
 
 # Nueva herramienta para transformaciones de datos
