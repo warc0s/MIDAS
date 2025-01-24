@@ -1,0 +1,258 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Midas Help | Herramienta #6</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .message-entrance {
+            animation: messageEntrance 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28) both;
+        }
+
+        @keyframes messageEntrance {
+            0% { opacity: 0; transform: translateY(20px) scale(0.95); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .chatbot-message {
+            background: linear-gradient(145deg, #121828 0%, #1A2236 100%);
+            box-shadow: 0 8px 32px rgba(18, 24, 40, 0.1);
+            border: 1px solid rgba(212, 175, 55, 0.15);
+        }
+
+        .user-message {
+            background: linear-gradient(45deg, #D4AF37 0%, #FFD700 30%, #FFE55C 100%);
+            box-shadow: 0 8px 24px rgba(212, 175, 55, 0.2);
+        }
+
+        .ai-gradient-text {
+            background: linear-gradient(135deg, #D4AF37 0%, #FFE55C 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .loading-dots:after {
+            content: '.';
+            animation: dots 1.4s infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60% { content: '...'; }
+            80%, 100% { content: ''; }
+        }
+
+        .prose :where(code):not(:where([class~="not-prose"] *)) {
+            background: rgba(212, 175, 55, 0.15);
+            padding: 0.2em 0.4em;
+            border-radius: 0.25rem;
+        }
+    </style>
+</head>
+<body class="h-full bg-[#0B0F19]">
+    <div class="flex flex-col h-full max-w-3xl mx-auto">
+        <!-- Header Premium -->
+        <header class="pt-8 px-4">
+            <div class="flex items-center space-x-4">
+                <div class="relative group">
+                    <div class="absolute inset-0 bg-gradient-to-r from-[#D4AF37] to-[#FFE55C] rounded-xl blur opacity-30 group-hover:opacity-50 transition duration-500"></div>
+                    <div class="relative bg-[#121828] px-6 py-3 rounded-xl border border-[#2D3748]">
+                        <h1 class="text-2xl font-bold ai-gradient-text">Midas Help</h1>
+                    </div>
+                </div>
+                <div class="h-px flex-1 bg-gradient-to-r from-[#D4AF3722] via-[#D4AF37aa] to-[#D4AF3722]"></div>
+            </div>
+        </header>
+
+        <!-- Chat Container -->
+        <div class="flex-1 overflow-hidden relative mt-4">
+            <div class="h-full overflow-y-auto scrollbar-thin scrollbar-thumb-[#2D3748] scrollbar-track-transparent px-4" id="chatContainer">
+                <!-- Mensaje del Sistema -->
+                <div class="message-entrance mb-6">
+                    <div class="chatbot-message rounded-[1.75rem] p-5 backdrop-blur-lg">
+                        <div class="flex items-start space-x-4">
+                            <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#D4AF37] to-[#FFE55C] flex items-center justify-center animate-float">
+                                <svg class="w-5 h-5 text-[#0B0F19]" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                                    <path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z"/>
+                                </svg>
+                            </div>
+                            <div class="flex-1 space-y-2.5">
+                                <h3 class="text-[#FFD700] font-semibold text-lg">Asistente Midas AI</h3>
+                                <p class="text-[#CBD5E0] leading-relaxed text-[15px]">Hola, soy tu asistente de inteligencia artificial premium. ¿En qué puedo ayudarte hoy?</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Área de Entrada -->
+        <div class="pb-8 pt-4 px-4">
+            <div class="relative group">
+                <div class="absolute inset-0 bg-gradient-to-r from-[#D4AF37] to-[#FFE55C] blur opacity-10 group-hover:opacity-20 transition duration-500 rounded-2xl"></div>
+                <div class="relative flex items-center space-x-4 bg-[#121828] rounded-2xl p-4 border border-[#2D3748] shadow-2xl">
+                    <input 
+                        id="userInput"
+                        type="text" 
+                        placeholder="Escribe tu consulta..." 
+                        class="flex-1 bg-transparent text-[#E2E8F0] placeholder-[#4A5568] focus:outline-none text-[15px]"
+                    >
+                    <button 
+                        onclick="sendMessage()"
+                        class="p-3 bg-gradient-to-br from-[#D4AF37] to-[#FFE55C] rounded-xl hover:scale-105 transition-transform duration-200 shadow-lg"
+                    >
+                        <svg class="w-6 h-6 text-[#0B0F19]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class ChatSystem {
+            constructor() {
+                this.container = document.getElementById('chatContainer')
+                this.history = JSON.parse(localStorage.getItem('chatHistory')) || []
+                this.loadingMessageId = null
+                this.setupEventListeners()
+                this.loadHistory()
+            }
+
+            setupEventListeners() {
+                document.getElementById('userInput').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault()
+                        this.sendMessage()
+                    }
+                })
+            }
+
+            loadHistory() {
+                this.history.forEach(msg => this.addMessageElement(msg.role, msg.content, false))
+                this.scrollToBottom()
+            }
+
+            async sendMessage() {
+                const input = document.getElementById('userInput')
+                const message = input.value.trim()
+                if (!message) return
+
+                input.value = ''
+                this.addMessage('user', message)
+                this.showLoading()
+
+                try {
+                    const response = await fetch('/query', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ message })
+                    })
+
+                    if (!response.ok) throw new Error(await response.text())
+                    const data = await response.json()
+
+                    this.removeLoading()
+                    this.addMessage('assistant', data.response)
+                    this.saveHistory()
+                } catch (error) {
+                    this.removeLoading()
+                    this.addMessage('assistant', `**Error:** ${error.message}`)
+                    console.error('API Error:', error)
+                }
+            }
+
+            addMessage(role, content) {
+                this.addMessageElement(role, content)
+                this.history.push({ role, content })
+                this.scrollToBottom()
+            }
+
+            addMessageElement(role, content, animate = true) {
+                const isAI = role === 'assistant'
+                const div = document.createElement('div')
+                div.className = `message-entrance mb-6 ${animate ? 'opacity-0' : ''}`
+
+                div.innerHTML = `
+                    <div class="${isAI ? '' : 'flex justify-end'}">
+                        <div class="${isAI ? 
+                            'chatbot-message rounded-[1.75rem] hover:border-[#D4AF3733] transition-all' : 
+                            'user-message rounded-[1.25rem] hover:shadow-xl transition-transform'} 
+                            p-5 max-w-[85%] transform hover:scale-[1.01]">
+                            <div class="flex items-start gap-4 ${isAI ? '' : 'flex-row-reverse'}">
+                                ${isAI ? `
+                                    <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#D4AF37] to-[#FFE55C] flex items-center justify-center shrink-0">
+                                        <svg class="w-5 h-5 text-[#0B0F19]" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                                            <path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z"/>
+                                        </svg>
+                                    </div>
+                                ` : `
+                                    <div class="w-9 h-9 rounded-xl bg-[#0B0F19]/80 flex items-center justify-center shrink-0 border border-[#D4AF37]/20">
+                                        <svg class="w-5 h-5 text-[#FFE55C]" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/>
+                                        </svg>
+                                    </div>
+                                `}
+                                <div class="flex-1 ${isAI ? 'text-[#CBD5E0]' : 'text-[#0B0F19]'} prose prose-invert max-w-none text-[15px] leading-snug">
+                                    ${marked.parse(content)}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `
+
+                if (!animate) div.style.opacity = 1
+                this.container.appendChild(div)
+                return div
+            }
+
+            showLoading() {
+                const div = document.createElement('div')
+                div.id = 'loadingMessage'
+                div.className = 'message-entrance mb-6'
+                div.innerHTML = `
+                    <div class="chatbot-message rounded-[1.75rem] p-5 backdrop-blur-lg">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#D4AF37] to-[#FFE55C] flex items-center justify-center">
+                                <div class="w-5 h-5 border-2 border-[#0B0F19] border-t-transparent rounded-full animate-spin"></div>
+                            </div>
+                            <div class="text-[#CBD5E0] loading-dots text-[15px]">Procesando</div>
+                        </div>
+                    </div>
+                `
+                this.container.appendChild(div)
+                this.scrollToBottom()
+            }
+
+            removeLoading() {
+                const loadingDiv = document.getElementById('loadingMessage')
+                if (loadingDiv) loadingDiv.remove()
+            }
+
+            saveHistory() {
+                localStorage.setItem('chatHistory', JSON.stringify(this.history))
+            }
+
+            scrollToBottom() {
+                setTimeout(() => {
+                    this.container.scrollTop = this.container.scrollHeight
+                }, 100)
+            }
+        }
+
+        const chatSystem = new ChatSystem()
+    </script>
+</body>
+</html>
