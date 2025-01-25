@@ -58,10 +58,99 @@
             padding: 0.2em 0.4em;
             border-radius: 0.25rem;
         }
+
+        /* Nuevos estilos añadidos */
+        .chatbot-message h3 {
+            color: #FFD700 !important;
+            font-weight: 600 !important;
+            font-size: clamp(1rem, 2vw, 1.125rem) !important;
+            margin-bottom: 0.5rem !important;
+        }
+
+        /* Estilos responsivos */
+        @media (max-width: 640px) {
+            .chat-container {
+                width: 100% !important;
+                padding: 0.5rem;
+            }
+            
+            .chatbot-message, .user-message {
+                padding: 1rem !important;
+            }
+
+            input[type="text"] {
+                font-size: 0.9rem;
+            }
+
+            header h1 {
+                font-size: clamp(1.25rem, 4vw, 1.5rem);
+            }
+
+            #clearChat {
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (min-width: 641px) and (max-width: 768px) {
+            .chat-container {
+                width: 95% !important;
+                margin-left: auto;
+                margin-right: auto;
+            }
+        }
+
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .chat-container {
+                width: 85% !important;
+            }
+        }
+
+        @media (min-width: 1025px) {
+            .chat-container {
+                width: 75% !important;
+                max-width: 1200px;
+            }
+        }
+
+        /* Ajustes generales responsivos */
+        .text-[15px] {
+            font-size: clamp(0.875rem, 1.5vw, 0.9375rem);
+        }
+
+        .p-5 {
+            padding: clamp(1rem, 3vw, 1.25rem);
+        }
+
+        .space-x-4 > * + * {
+            margin-left: clamp(0.75rem, 2vw, 1rem);
+        }
+
+        .w-9 {
+            width: clamp(2rem, 4vw, 2.25rem);
+        }
+
+        .h-9 {
+            height: clamp(2rem, 4vw, 2.25rem);
+        }
+
+        @media (min-width: 768px) {
+            .chat-container {
+                max-width: 90% !important;
+                margin-left: auto;
+                margin-right: auto;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .chat-container {
+                max-width: 80% !important;
+            }
+        }
     </style>
 </head>
 <body class="h-full bg-[#0B0F19]">
-    <div class="flex flex-col h-full max-w-3xl mx-auto">
+    <div class="flex flex-col h-full mx-auto chat-container">
         <!-- Header Premium -->
         <header class="pt-8 px-4">
             <div class="flex items-center space-x-4">
@@ -71,6 +160,12 @@
                         <h1 class="text-2xl font-bold ai-gradient-text">Midas Help</h1>
                     </div>
                 </div>
+                <button id="clearChat" class="px-4 py-2 bg-[#121828] hover:bg-[#1A2236] text-[#FFD700] rounded-xl border border-[#2D3748] transition-all hover:border-[#D4AF37] flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                    </svg>
+                    Limpiar chat
+                </button>
                 <div class="h-px flex-1 bg-gradient-to-r from-[#D4AF3722] via-[#D4AF37aa] to-[#D4AF3722]"></div>
             </div>
         </header>
@@ -81,15 +176,15 @@
                 <!-- Mensaje del Sistema -->
                 <div class="message-entrance mb-6">
                     <div class="chatbot-message rounded-[1.75rem] p-5 backdrop-blur-lg">
-                        <div class="flex items-start space-x-4">
+                        <div class="flex items-center space-x-4">
                             <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#D4AF37] to-[#FFE55C] flex items-center justify-center animate-float">
                                 <svg class="w-5 h-5 text-[#0B0F19]" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                                     <path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z"/>
                                 </svg>
                             </div>
                             <div class="flex-1 space-y-2.5">
-                                <h3 class="text-[#FFD700] font-semibold text-lg">Asistente Midas AI</h3>
-                                <p class="text-[#CBD5E0] leading-relaxed text-[15px]">Hola, soy tu asistente de inteligencia artificial premium. ¿En qué puedo ayudarte hoy?</p>
+                                <h3 class="text-[#FFD700] font-semibold text-lg">Midas Help</h3>
+                                <p class="text-[#CBD5E0] leading-relaxed text-[15px]">Hola, soy tu asistente de inteligencia artificial sobre el TFM Midas. ¿En qué puedo ayudarte hoy?</p>
                             </div>
                         </div>
                     </div>
@@ -127,6 +222,17 @@
                 this.container = document.getElementById('chatContainer')
                 this.history = JSON.parse(localStorage.getItem('chatHistory')) || []
                 this.loadingMessageId = null
+                this.welcomeMessage = {
+                    role: 'assistant',
+                    content: '### Midas Help\n\nHola, soy tu asistente de inteligencia artificial sobre el TFM Midas. ¿En qué puedo ayudarte hoy?'
+                }
+                
+                // Añadir mensaje de bienvenida si no hay historial
+                if(this.history.length === 0) {
+                    this.history.push(this.welcomeMessage)
+                    this.saveHistory()
+                }
+
                 this.setupEventListeners()
                 this.loadHistory()
             }
@@ -138,9 +244,14 @@
                         this.sendMessage()
                     }
                 })
+
+                document.getElementById('clearChat').addEventListener('click', () => {
+                    this.clearChat()
+                })
             }
 
             loadHistory() {
+                this.container.innerHTML = ''
                 this.history.forEach(msg => this.addMessageElement(msg.role, msg.content, false))
                 this.scrollToBottom()
             }
@@ -191,7 +302,7 @@
                             'chatbot-message rounded-[1.75rem] hover:border-[#D4AF3733] transition-all' : 
                             'user-message rounded-[1.25rem] hover:shadow-xl transition-transform'} 
                             p-5 max-w-[85%] transform hover:scale-[1.01]">
-                            <div class="flex items-start gap-4 ${isAI ? '' : 'flex-row-reverse'}">
+                            <div class="flex items-center gap-4 ${isAI ? '' : 'flex-row-reverse'}">
                                 ${isAI ? `
                                     <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#D4AF37] to-[#FFE55C] flex items-center justify-center shrink-0">
                                         <svg class="w-5 h-5 text-[#0B0F19]" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
@@ -249,6 +360,12 @@
                 setTimeout(() => {
                     this.container.scrollTop = this.container.scrollHeight
                 }, 100)
+            }
+
+            clearChat() {
+                this.history = [this.welcomeMessage]
+                this.saveHistory()
+                this.loadHistory()
             }
         }
 
