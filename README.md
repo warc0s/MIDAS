@@ -9,4 +9,4 @@ El sistema estará compuesto por varios componentes interconectados, incluyendo 
 ## Integrantes 👥
 
 - [Marcos García Estévez](https://warcos.dev)
-- [Jesús Aceituno](https://github.com/jesusact)
+- [Jesús Aceituno Valero](https://github.com/jesusact)
