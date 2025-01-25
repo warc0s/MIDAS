@@ -1,4 +1,4 @@
-# MIDAS - Machine Intelligence Data Analysis System 🤖
+# MIDAS - Multi-agent Intelligent Data Automation System 🤖
 
 ![Logo](https://github.com/warc0s/MIDAS/blob/main/Extra/logo1.png)
 
