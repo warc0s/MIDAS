@@ -1,6 +1,6 @@
 # MIDAS - Multi-agent Intelligent Data Automation System 🤖
 
-![Logo](https://github.com/warc0s/MIDAS/blob/main/Extra/logo1.png)
+<img src="https://github.com/warc0s/MIDAS/blob/main/Extra/logo1.png" alt="Logo" width="50%">
 
 MIDAS es un sistema impulsado por IA que busca automatizar y optimizar el flujo de trabajo del aprendizaje automático. Al igual que el Rey Midas convertía todo lo que tocaba en oro, este sistema ayuda a transformar conjuntos de datos sin procesar en valiosos modelos entrenados mediante una arquitectura multiagente inteligente.
 
