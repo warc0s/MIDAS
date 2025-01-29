@@ -1,0 +1,47 @@
+analysis_task:
+  description: >
+    Analyze the provided CSV file (dataset.csv) and create a detailed visualization plan.
+    Perform the following steps:
+    1. Load and inspect the dataset
+    2. Show first 3 rows
+    3. List all columns with their data types
+    4. Identify numeric/categorical columns
+    5. Detect missing values
+    6. Create visualization plan based on column types
+    7. Specify required data transformations for common plot types
+    
+    Output should include:
+    - Dataset summary
+    - Column inventory
+    - Recommended visualizations
+    - Transformation steps for each visualization type
+  expected_output: >
+    A detailed visualization plan in text format, including:
+    - Dataset structure overview
+    - Column descriptions and data types
+    - Data quality assessment
+    - Recommended visualizations
+    - Step-by-step transformation instructions for each plot type
+  agent: data_analyst_agent
+
+code_generation_task:
+  description: >
+    Generate complete Python code based on the analysis plan with these features:
+    1. Read dataset.csv
+    2. Data transformations from plan
+    3. Plot generation with matplotlib/seaborn
+    4. Save plot to file
+    
+    The code should:
+    - Include all necessary imports
+    - Include type annotations
+    - Save generated plot as plot.png
+    - Output success/error messages
+  expected_output: >
+    A complete Python script (grafica.py) that:
+    - Performs necessary data transformations
+    - Generates professional visualizations
+    - Handles errors gracefully
+    - Saves both the plot and the code
+  agent: code_writer_agent
+
