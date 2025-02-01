@@ -380,7 +380,7 @@ class DataAlchemistAgent(BaseAgent):
             ('scaler', StandardScaler())
         ])
 
-        # Se fuerza a OneHotEncoder a devolver un array denso (sparse=False)
+        # Se fuerza a OneHotEncoder a devolver un array denso
         categorical_transformer = Pipeline(steps=[
             ('imputer', SimpleImputer(strategy='most_frequent')),
             ('onehot', OneHotEncoder(handle_unknown='ignore'))
