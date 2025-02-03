@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MIDAS - Del Dato al Oro</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(45deg, #1a1a1a, #2d2d2d);
+      color: #fff;
+    }
+
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem;
+      background: radial-gradient(circle at center, #3d3d3d 0%, #1a1a1a 100%);
+    }
+
+    .logo {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      background: linear-gradient(45deg, #ffd700, #daa520);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: glow 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes glow {
+      from { text-shadow: 0 0 10px #ffd700; }
+      to { text-shadow: 0 0 20px #daa520, 0 0 10px #ffd700; }
+    }
+
+    .slogan {
+      font-size: 1.5rem;
+      margin-bottom: 2rem;
+      color: #ccc;
+    }
+
+    .cta-buttons {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 3rem;
+      justify-content: center;
+    }
+
+    .cta-button {
+      padding: 1rem 2rem;
+      border: 2px solid #ffd700;
+      border-radius: 30px;
+      text-decoration: none;
+      color: #ffd700;
+      transition: all 0.3s ease;
+    }
+
+    .cta-button:hover {
+      background: #ffd700;
+      color: #1a1a1a;
+    }
+
+    /* Contenedor para las tarjetas de 3 columnas */
+    .cards-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      padding: 0 2rem 4rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Contenedor para la última fila (2 tarjetas) con estructura similar */
+    .cards-last-row {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 2rem;
+      padding: 0 2rem 4rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Se modifica la tarjeta para que su contenido se distribuya en columna,
+       dejando el enlace alineado al fondo */
+    .card {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 15px;
+      padding: 2rem;
+      text-align: center;
+      transition: transform 0.3s ease;
+      border: 1px solid transparent;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .card:hover {
+      transform: translateY(-10px);
+      border-color: #ffd700;
+      background: rgba(255, 215, 0, 0.05);
+    }
+
+    .card i {
+      font-size: 2.5rem;
+      color: #ffd700;
+      margin-bottom: 1rem;
+    }
+
+    .card h3 {
+      margin-bottom: 1rem;
+      color: #ffd700;
+    }
+
+    .card p {
+      color: #ccc;
+      margin-bottom: 1.5rem;
+    }
+
+    /* El enlace se empuja hacia el fondo para mantener la alineación */
+    .card a {
+      text-decoration: none;
+      color: #ffd700;
+      font-weight: bold;
+      margin-top: auto;
+      display: block;
+    }
+
+    footer {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 2rem;
+      text-align: center;
+      margin-top: 4rem;
+    }
+
+    .credits {
+      color: #666;
+      margin-top: 1rem;
+    }
+
+    .credits a {
+      color: #888;
+      text-decoration: none;
+    }
+
+    @media (max-width: 768px) {
+      .cards-container, .cards-last-row {
+        grid-template-columns: 1fr;
+        padding: 0 1rem 4rem;
+      }
+      
+      .hero {
+        padding: 1rem;
+      }
+      
+      .logo {
+        font-size: 3rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <section class="hero">
+    <div class="logo">MIDAS</div>
+    <p class="slogan">Del Dato al Oro</p>
+    
+    <div class="cta-buttons">
+      <a href="https://github.com/tuusuario/midas" class="cta-button">
+        <i class="fab fa-github"></i> Ver en GitHub
+      </a>
+      <!-- Botón de Probar Demo eliminado -->
+    </div>
+
+    <!-- Contenedor de tarjetas (primeras 6 tarjetas) -->
+    <div class="cards-container">
+      <div class="card">
+        <i class="fas fa-drafting-compass"></i>
+        <h3>Midas Architect</h3>
+        <p>Diseña tu arquitectura de agentes con asistencia de LLM+RAG</p>
+        <a href="https://architech.midastfm.com">Acceder →</a>
+      </div>
+
+      <div class="card">
+        <i class="fas fa-chart-line"></i>
+        <h3>Midas Plot</h3>
+        <p>EDA automatizado: gráficos interactivos y análisis de correlaciones</p>
+        <a href="https://plot.midastfm.com">Explorar →</a>
+      </div>
+
+      <div class="card">
+        <i class="fas fa-magic"></i>
+        <h3>Midas Touch</h3>
+        <p>Pipeline de ML end-to-end: desde preprocesado hasta optimización</p>
+        <a href="https://touch.midastfm.com">Transformar →</a>
+      </div>
+
+      <div class="card">
+        <i class="fas fa-robot"></i>
+        <h3>Midas Help</h3>
+        <p>Asistente contextual para desarrolladores</p>
+        <a href="https://help.midastfm.com">Consultar →</a>
+      </div>
+
+      <div class="card">
+        <i class="fas fa-vial"></i>
+        <h3>Midas Test</h3>
+        <p>Quality Assurance automático con reportes XAI</p>
+        <a href="https://test.midastfm.com">Validar →</a>
+      </div>
+
+      <div class="card">
+        <i class="fas fa-rocket"></i>
+        <h3>Midas Deploy</h3>
+        <p>Genera tu API o interfaz Streamlit</p>
+        <a href="https://deploy.midastfm.com">Desplegar →</a>
+      </div>
+    </div>
+
+    <!-- Contenedor para la última fila (2 tarjetas) con diseño similar -->
+    <div class="cards-last-row">
+      <div class="card">
+        <i class="fab fa-hubspot"></i>
+        <h3>Midas Hub</h3>
+        <p>Interfaz unificada para gestión completa</p>
+        <a href="https://hub.midastfm.com">Unificar →</a>
+      </div>
+
+      <div class="card">
+        <i class="fas fa-book"></i>
+        <h3>Consultar Documentación</h3>
+        <p>Accede a la documentación completa</p>
+        <a href="https://docs.midastfm.com">Consultar →</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="credits">
+      Desarrollado por <a href="https://warcos.dev">Marcos García Estévez</a> 
+      y <a href="https://www.linkedin.com/in/jesus-aceituno-valero/">Jesús Aceituno Valero</a>
+    </div>
+  </footer>
+</body>
+</html>
