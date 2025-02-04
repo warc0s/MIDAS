@@ -14,8 +14,28 @@
     }
 
     body {
-      background: linear-gradient(45deg, #1a1a1a, #2d2d2d);
+      background: radial-gradient(circle at center, #0f0f0f 0%, #1a1a1a 100%);
       color: #fff;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: repeating-linear-gradient(
+        0deg,
+        rgba(255, 215, 0, 0.03) 0px,
+        rgba(255, 215, 0, 0.03) 1px,
+        transparent 1px,
+        transparent 4px
+      );
+      pointer-events: none;
+      z-index: -1;
     }
 
     .hero {
@@ -26,144 +46,282 @@
       justify-content: center;
       text-align: center;
       padding: 2rem;
-      background: radial-gradient(circle at center, #3d3d3d 0%, #1a1a1a 100%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 200vw;
+      height: 200vh;
+      background: radial-gradient(circle, rgba(255,215,0,0.1) 0%, transparent 70%);
+      pointer-events: none;
+      animation: pulse 6s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.3; }
+      50% { opacity: 0.1; transform: translate(-50%, -50%) scale(1.1); }
+      100% { opacity: 0.3; }
     }
 
     .logo {
-      font-size: 4rem;
-      margin-bottom: 1rem;
-      background: linear-gradient(45deg, #ffd700, #daa520);
+      font-size: 4.5rem;
+      margin-bottom: 1.5rem;
+      background: linear-gradient(45deg, #ffd700, #daa520, #ffd700);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       animation: glow 2s ease-in-out infinite alternate;
+      position: relative;
+      z-index: 1;
+      font-weight: 700;
+      letter-spacing: -2px;
     }
 
     @keyframes glow {
-      from { text-shadow: 0 0 10px #ffd700; }
-      to { text-shadow: 0 0 20px #daa520, 0 0 10px #ffd700; }
+      0% { text-shadow: 0 0 10px rgba(255,215,0,0.5); }
+      100% { text-shadow: 0 0 25px rgba(218,165,32,0.8), 0 0 15px rgba(255,215,0,0.6); }
     }
 
     .slogan {
       font-size: 1.5rem;
-      margin-bottom: 2rem;
-      color: #ccc;
+      margin-bottom: 3rem;
+      color: #aaa;
+      font-weight: 300;
+      letter-spacing: 1px;
+      position: relative;
+      z-index: 1;
+      opacity: 0;
+      animation: fadeInUp 1s 0.5s forwards;
     }
 
     .cta-buttons {
       display: flex;
-      gap: 1rem;
-      margin-bottom: 3rem;
+      gap: 1.5rem;
+      margin-bottom: 4rem;
       justify-content: center;
+      position: relative;
+      z-index: 1;
+      opacity: 0;
+      animation: fadeInUp 1s 0.8s forwards;
     }
 
     .cta-button {
-      padding: 1rem 2rem;
-      border: 2px solid #ffd700;
-      border-radius: 30px;
+      padding: 1.2rem 2.5rem;
+      border: 2px solid rgba(255,215,0,0.5);
+      border-radius: 50px;
       text-decoration: none;
       color: #ffd700;
-      transition: all 0.3s ease;
+      transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+      background: rgba(0,0,0,0.3);
+      backdrop-filter: blur(5px);
+      position: relative;
+      overflow: hidden;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+    }
+
+    .cta-button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        120deg,
+        transparent,
+        rgba(255,215,0,0.1),
+        transparent
+      );
+      transition: 0.6s;
     }
 
     .cta-button:hover {
-      background: #ffd700;
-      color: #1a1a1a;
+      background: rgba(255,215,0,0.1);
+      border-color: #ffd700;
+      transform: translateY(-3px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.3);
     }
 
-    /* Contenedor para las tarjetas de 3 columnas */
-    .cards-container {
+    .cta-button:hover::before {
+      left: 100%;
+    }
+
+    .cards-container,
+    .cards-last-row {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
       gap: 2rem;
       padding: 0 2rem 4rem;
       max-width: 1200px;
       margin: 0 auto;
+      position: relative;
+      z-index: 1;
     }
 
-    /* Contenedor para la última fila (2 tarjetas) con estructura similar */
-    .cards-last-row {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 2rem;
-      padding: 0 2rem 4rem;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    /* Se modifica la tarjeta para que su contenido se distribuya en columna,
-       dejando el enlace alineado al fondo */
     .card {
-      background: rgba(255, 255, 255, 0.05);
+      background: rgba(30,30,30,0.6);
       border-radius: 15px;
       padding: 2rem;
       text-align: center;
-      transition: transform 0.3s ease;
-      border: 1px solid transparent;
+      transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+      border: 1px solid rgba(255,215,0,0.1);
       display: flex;
       flex-direction: column;
       height: 100%;
+      backdrop-filter: blur(10px);
+      opacity: 0;
+      transform: translateY(20px);
+      animation: cardEntry 0.6s forwards;
+    }
+
+    .card:nth-child(1) { animation-delay: 0.3s; }
+    .card:nth-child(2) { animation-delay: 0.4s; }
+    .card:nth-child(3) { animation-delay: 0.5s; }
+    .card:nth-child(4) { animation-delay: 0.6s; }
+    .card:nth-child(5) { animation-delay: 0.7s; }
+    .card:nth-child(6) { animation-delay: 0.8s; }
+    .card:nth-child(7) { animation-delay: 0.9s; }
+    .card:nth-child(8) { animation-delay: 1s; }
+
+    @keyframes cardEntry {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     .card:hover {
       transform: translateY(-10px);
       border-color: #ffd700;
-      background: rgba(255, 215, 0, 0.05);
+      background: rgba(40,40,40,0.7);
+      box-shadow: 0 15px 30px rgba(0,0,0,0.4);
     }
 
     .card i {
-      font-size: 2.5rem;
+      font-size: 2.8rem;
       color: #ffd700;
-      margin-bottom: 1rem;
+      margin-bottom: 1.5rem;
+      transition: transform 0.3s ease;
+    }
+
+    .card:hover i {
+      transform: scale(1.2) rotate(-5deg);
     }
 
     .card h3 {
       margin-bottom: 1rem;
       color: #ffd700;
+      font-size: 1.4rem;
+      font-weight: 600;
     }
 
     .card p {
-      color: #ccc;
+      color: #aaa;
       margin-bottom: 1.5rem;
+      line-height: 1.6;
+      font-weight: 300;
     }
 
-    /* El enlace se empuja hacia el fondo para mantener la alineación */
     .card a {
       text-decoration: none;
       color: #ffd700;
-      font-weight: bold;
+      font-weight: 500;
       margin-top: auto;
-      display: block;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: color 0.3s ease;
+      position: relative;
+    }
+
+    .card a::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0;
+      height: 1px;
+      background: #ffd700;
+      transition: width 0.3s ease;
+    }
+
+    .card a:hover::after {
+      width: 100%;
     }
 
     footer {
-      background: rgba(0, 0, 0, 0.3);
+      background: rgba(0, 0, 0, 0.4);
       padding: 2rem;
       text-align: center;
       margin-top: 4rem;
+      border-top: 1px solid rgba(255,215,0,0.1);
+      position: relative;
+      backdrop-filter: blur(5px);
     }
 
     .credits {
       color: #666;
       margin-top: 1rem;
+      font-size: 0.9rem;
     }
 
     .credits a {
       color: #888;
       text-decoration: none;
+      transition: color 0.3s ease;
+      position: relative;
+    }
+
+    .credits a::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0;
+      height: 1px;
+      background: #ffd700;
+      transition: width 0.3s ease;
+    }
+
+    .credits a:hover {
+      color: #ffd700;
+    }
+
+    .credits a:hover::after {
+      width: 100%;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     @media (max-width: 768px) {
+      .logo {
+        font-size: 3.5rem;
+      }
+
       .cards-container, .cards-last-row {
         grid-template-columns: 1fr;
         padding: 0 1rem 4rem;
       }
-      
-      .hero {
-        padding: 1rem;
-      }
-      
-      .logo {
-        font-size: 3rem;
+
+      .cta-button {
+        padding: 1rem 2rem;
+        font-size: 0.9rem;
       }
     }
   </style>
@@ -174,10 +332,9 @@
     <p class="slogan">Del Dato al Oro</p>
     
     <div class="cta-buttons">
-      <a href="https://github.com/tuusuario/midas" class="cta-button">
+      <a href="https://github.com/warc0s/MIDAS" class="cta-button">
         <i class="fab fa-github"></i> Ver en GitHub
       </a>
-      <!-- Botón de Probar Demo eliminado -->
     </div>
 
     <!-- Contenedor de tarjetas (primeras 6 tarjetas) -->
@@ -225,7 +382,7 @@
       </div>
     </div>
 
-    <!-- Contenedor para la última fila (2 tarjetas) con diseño similar -->
+    <!-- Contenedor para la última fila (2 tarjetas) -->
     <div class="cards-last-row">
       <div class="card">
         <i class="fab fa-hubspot"></i>
@@ -236,9 +393,9 @@
 
       <div class="card">
         <i class="fas fa-book"></i>
-        <h3>Consultar Documentación</h3>
+        <h3>Documentación</h3>
         <p>Accede a la documentación completa</p>
-        <a href="https://docs.midastfm.com">Consultar →</a>
+        <a href="https://docs.midastfm.com">Revisar →</a>
       </div>
     </div>
   </section>
