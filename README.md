@@ -12,5 +12,44 @@ Profesional, escalable y orientado a resultados, MIDAS no solo reduce la carga m
 
 ## Integrantes 👥
 
-- [Marcos García Estévez](https://warcos.dev)
-- [Jesús Aceituno Valero](https://github.com/jesusact)
+<table>
+  <tr>
+    <td align="center" width="400">
+      <div style="border: 3px solid #FFD700; border-radius: 15px; padding: 20px; background-color: rgba(255, 215, 0, 0.05);">
+        <div style="border: 2px solid #FFD700; border-radius: 50%; padding: 3px; margin: 0 auto;">
+          <a href="https://warcos.dev">
+            <img src="https://github.com/warc0s.png" width="220" alt="Marcos García" style="border-radius: 50%; border: 2px solid #FFF; box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);">
+          </a>
+        </div>
+        <h2 style="color: #FFD700; margin: 15px 0; font-family: 'Helvetica Neue', sans-serif;">Marcos García Estévez</h2>
+        <div style="display: flex; gap: 10px; justify-content: center; margin-top: 15px;">
+          <a href="https://github.com/warc0s">
+            <img src="https://custom-icon-badges.demolab.com/badge/-GitHub-1a1a1a?style=for-the-badge&logo=github&logoColor=FFD700" alt="GitHub">
+          </a>
+          <a href="https://warcos.dev">
+            <img src="https://custom-icon-badges.demolab.com/badge/-Portfolio-1a1a1a?style=for-the-badge&logo=browser&logoColor=FFD700" alt="Portfolio">
+          </a>
+        </div>
+      </div>
+    </td>
+    
+  <td align="center" width="400">
+    <div style="border: 3px solid #FFD700; border-radius: 15px; padding: 20px; background-color: rgba(255, 215, 0, 0.05);">
+      <div style="border: 2px solid #FFD700; border-radius: 50%; padding: 3px; margin: 0 auto;">
+        <a href="https://github.com/jesusact">
+          <img src="https://github.com/jesusact.png" width="220" alt="Jesús Aceituno" style="border-radius: 50%; border: 2px solid #FFF; box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);">
+        </a>
+      </div>
+      <h2 style="color: #FFD700; margin: 15px 0; font-family: 'Helvetica Neue', sans-serif;">Jesús Aceituno Valero</h2>
+      <div style="display: flex; gap: 10px; justify-content: center; margin-top: 15px;">
+        <a href="https://github.com/jesusact">
+          <img src="https://custom-icon-badges.demolab.com/badge/-GitHub-1a1a1a?style=for-the-badge&logo=github&logoColor=FFD700" alt="GitHub">
+        </a>
+        <a href="https://www.linkedin.com/in/jesus-aceituno-valero/">
+          <img src="https://custom-icon-badges.demolab.com/badge/-LinkedIn-1a1a1a?style=for-the-badge&logo=linkedin&logoColor=FFD700" alt="LinkedIn">
+        </a>
+      </div>
+    </div>
+  </td>
+  </tr>
+</table>
