@@ -1,3 +1,7 @@
+# PRIMER PASO ANTES QUE NADA
+# pip install --upgrade google-genai
+# gcloud auth application-default login
+
 from google import genai
 from google.genai import types
 import base64
