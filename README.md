@@ -2,13 +2,26 @@
 
 <img src="https://github.com/warc0s/MIDAS/blob/main/Extra/logo1.png" alt="Logo" width="50%">
 
-MIDAS es un sistema multiagente diseñado para transformar conjuntos de datos sin procesar en modelos de aprendizaje automático optimizados y listos para producción. Inspirado en la leyenda del Rey Midas, el sistema opera como un "toque dorado" moderno: automatiza y perfecciona cada etapa del ciclo de vida de los datos, desde la carga inicial hasta el despliegue de modelos, garantizando precisión y eficiencia en cada paso.
+## Sección 1: Justificación y descripción del proyecto
 
-El sistema implementa un pipeline completo de transformación a través de módulos especializados: **Midas Plot** realiza análisis exploratorio y visualización avanzada, **Midas Touch** ejecuta la limpieza, entrenamiento y optimización de modelos, **Midas Test** implementa validación rigurosa y métricas de rendimiento, mientras que **Midas Deploy** automatiza la creación de interfaces web para predicciones. Todo ello se unifica en **Midas Hub**, una interfaz central que orquesta la comunicación entre componentes y permite interacciones mediante lenguaje natural.
+MIDAS es un sistema multiagente multicomponente que automatiza integralmente el proceso de desarrollo de modelos de machine learning, desde la ingesta de datos hasta su despliegue en producción. El proyecto nace para resolver un problema crítico en la industria: el desarrollo de modelos de ML, el cual tradicionalmente requiere múltiples herramientas, conocimientos especializados y procesos manuales que consumen tiempo y recursos. Inspirado en la leyenda del Rey Midas, nuestro sistema actúa como un "toque dorado" moderno que transforma datos sin procesar en soluciones de ML listas para usar.
 
-Como herramientas complementarias, MIDAS incluye **Midas Architect**, un asistente especializado en el diseño de sistemas multiagente que guía el desarrollo del proyecto, y **Midas Help**, un chatbot basado en RAG que proporciona soporte técnico sobre la implementación.
+La necesidad de MIDAS se fundamenta en tres pilares principales:
 
-Profesional, escalable y orientado a resultados, MIDAS no solo reduce la carga manual en proyectos de ML, sino que también establece un nuevo estándar en automatización inteligente. Su arquitectura modular, potenciada por modelos de lenguaje en cada componente, facilita la adaptación a diversos dominios y casos de uso. El sistema demuestra que la verdadera "transformación en oro" reside en la capacidad de convertir no solo datos brutos en modelos precisos, sino también en hacer accesible todo el proceso de machine learning a través de interacciones naturales e intuitivas.
+- La creciente demanda de automatización en procesos de ML.
+- La escasez de soluciones integrales que cubran todo el pipeline de datos.
+- La importancia de hacer accesible el ML a usuarios con diferentes niveles de experiencia técnica.
+
+El sistema implementa una arquitectura modular innovadora a través de 7 componentes especializados:
+
+- **Midas Plot** realiza análisis exploratorio y visualización avanzada, permitiendo comprender patrones y relaciones en los datos de manera intuitiva.
+- **Midas Touch** ejecuta la limpieza, entrenamiento y optimización de modelos, automatizando las tareas más complejas del proceso.
+- **Midas Test** implementa validación rigurosa y métricas de rendimiento, asegurando la calidad del modelo obtenido.
+- **Midas Deploy** facilita el despliegue mediante interfaces web automatizadas para predicciones.
+  
+Todo el sistema se coordina a través de **Midas Hub**, una interfaz central que orquesta la comunicación entre componentes mediante lenguaje natural. Complementariamente, **Midas Architect** guía el diseño del sistema multiagente, mientras que **Midas Help** proporciona soporte técnico contextual de nuestro TFM basado en RAG.
+
+Profesional, escalable y orientado a resultados, MIDAS redefine la automatización en proyectos de Machine Learning. Su arquitectura modular, donde cada componente está estratégicamente diseñado y optimizado, establece un nuevo paradigma en el desarrollo de modelos ML. El sistema demuestra que la verdadera "transformación en oro" va más allá de convertir datos en modelos precisos - consiste en hacer accesible todo el proceso de ML a través de interacciones naturales e intuitivas, democratizando así el desarrollo de modelos para equipos de cualquier tamaño y experiencia.
 
 ## Integrantes 👥
 
