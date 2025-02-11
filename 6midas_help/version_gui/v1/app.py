@@ -3,26 +3,26 @@ import sys
 import threading
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify, render_template
-from llama_index.core import SimpleDirectoryReader, VectorStoreIndex, Settings
+from llama_index.core import SimpleDirectoryReader, VectorStoreIndex, Settings, ChatPromptTemplate
 from llama_index.embeddings.deepinfra import DeepInfraEmbeddingModel
 from llama_index.llms.deepinfra import DeepInfraLLM
 import logging
 
-# Configure logging
+# Configuración del logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Initialize Flask app
+# Inicialización de la app Flask
 app = Flask(__name__)
 
-# Load environment variables
+# Cargar variables de entorno
 load_dotenv()
 DEEPINFRA_API_KEY = os.getenv("DEEPINFRA_API_KEY")
 if not DEEPINFRA_API_KEY:
     logger.error("DEEPINFRA_API_KEY not configured in environment variables.")
     sys.exit("Server configuration incomplete. Contact administrator.")
 
-# Configure embedding model
+# Configuración del modelo de embeddings
 Settings.embed_model = DeepInfraEmbeddingModel(
     model_id="BAAI/bge-m3",
     api_token=DEEPINFRA_API_KEY,
@@ -33,14 +33,14 @@ Settings.embed_model = DeepInfraEmbeddingModel(
 
 Settings.chunk_size = 512
 
-# Configure LLM
+# Configuración del LLM
 Settings.llm = DeepInfraLLM(
     model="meta-llama/Llama-3.3-70B-Instruct-Turbo",
     api_key=DEEPINFRA_API_KEY,
     temperature=0,
 )
 
-# Load documents and create index
+# Cargar documentos y crear el índice vectorial
 execution_dir = os.getcwd()
 md_filename = "info_llmstoryteller.md"
 md_path = os.path.join(execution_dir, md_filename)
@@ -60,9 +60,60 @@ logger.info("Creating vector index...")
 index = VectorStoreIndex.from_documents(documents, embed_model=Settings.embed_model)
 logger.info("Index created successfully.")
 
-query_engine = index.as_query_engine(llm=Settings.llm)
+# --- Configuración de prompts personalizados ---
 
-# --- Nueva lógica para impedir consultas simultáneas ---
+# Prompt para preguntas (QA)
+qa_prompt_str = (
+    "Estás asistiendo con dudas sobre el TFM 'Midas'. "
+    "Solo responde preguntas relacionadas con este tema. "
+    "Si la consulta no está relacionada, responde: 'Lo siento, solo puedo contestar dudas relacionadas con el TFM Midas'.\n"
+    "Información de contexto:\n"
+    "---------------------\n"
+    "{context_str}\n"
+    "---------------------\n"
+    "Con la información de contexto, responde a la siguiente pregunta: {query_str}\n"
+)
+
+# Prompt para refinar la respuesta
+refine_prompt_str = (
+    "Tenemos la oportunidad de refinar la respuesta original (solo si es necesario) con más contexto a continuación.\n"
+    "------------\n"
+    "{context_msg}\n"
+    "------------\n"
+    "Con el nuevo contexto, refina la respuesta original para contestar mejor la pregunta: {query_str}.\n"
+    "Si la pregunta no está relacionada con el TFM Midas, mantén la respuesta original o indica que no puedes contestar.\n"
+    "Respuesta original: {existing_answer}\n"
+)
+
+# Crear las plantillas de prompts utilizando ChatPromptTemplate
+chat_text_qa_msgs = [
+    (
+        "system",
+        "Responde solo a preguntas relacionadas con el TFM 'Midas'. "
+        "Si la consulta no se relaciona, responde: 'Lo siento, solo puedo contestar dudas relacionadas con el TFM Midas'."
+    ),
+    ("user", qa_prompt_str),
+]
+text_qa_template = ChatPromptTemplate.from_messages(chat_text_qa_msgs)
+
+chat_refine_msgs = [
+    (
+        "system",
+        "Responde solo a preguntas relacionadas con el TFM 'Midas'. "
+        "Si la consulta no se relaciona, responde: 'Lo siento, solo puedo contestar dudas relacionadas con el TFM Midas'."
+    ),
+    ("user", refine_prompt_str),
+]
+refine_template = ChatPromptTemplate.from_messages(chat_refine_msgs)
+
+# Crear el query engine pasando los prompts personalizados
+query_engine = index.as_query_engine(
+    llm=Settings.llm,
+    text_qa_template=text_qa_template,
+    refine_template=refine_template
+)
+
+# --- Lógica para impedir consultas simultáneas ---
 processing_query = False
 processing_lock = threading.Lock()
 # --------------------------------------------------------
@@ -84,7 +135,6 @@ def handle_query():
         # Verifica si ya se está procesando otra consulta
         with processing_lock:
             if processing_query:
-                # Se informa que ya hay una consulta en curso
                 return jsonify({
                     'error': 'El chatbot ya está procesando una consulta. Por favor, espere.'
                 }), 429
