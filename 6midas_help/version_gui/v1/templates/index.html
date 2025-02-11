@@ -67,6 +67,14 @@
             margin-bottom: 0.5rem !important;
         }
 
+        /* Estilos para el aviso de procesamiento */
+        .processing-notice {
+            display: none; /* inicialmente oculto */
+        }
+        .processing-notice.visible {
+            display: block;
+        }
+
         /* Estilos responsivos */
         @media (max-width: 640px) {
             .chat-container {
@@ -147,6 +155,34 @@
                 max-width: 80% !important;
             }
         }
+        
+        /* ============================
+           Custom Scrollbar Styles
+           ============================
+           Se han añadido estilos para que la "barrita" del scroll
+           combine con la paleta de colores y gradientes de la página.
+        */
+
+        /* Para navegadores WebKit (Chrome, Edge, Safari) */
+        #chatContainer::-webkit-scrollbar {
+            width: 8px;
+        }
+        #chatContainer::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        #chatContainer::-webkit-scrollbar-thumb {
+            background: linear-gradient(145deg, #D4AF37, #FFE55C);
+            border-radius: 4px;
+        }
+        #chatContainer::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(145deg, #FFE55C, #D4AF37);
+        }
+
+        /* Para Firefox */
+        #chatContainer {
+            scrollbar-width: thin;
+            scrollbar-color: #D4AF37 transparent;
+        }
     </style>
 </head>
 <body class="h-full bg-[#0B0F19]">
@@ -204,6 +240,7 @@
                         class="flex-1 bg-transparent text-[#E2E8F0] placeholder-[#4A5568] focus:outline-none text-[15px]"
                     >
                     <button 
+                        id="sendButton"
                         onclick="sendMessage()"
                         class="p-3 bg-gradient-to-br from-[#D4AF37] to-[#FFE55C] rounded-xl hover:scale-105 transition-transform duration-200 shadow-lg"
                     >
@@ -212,6 +249,10 @@
                         </svg>
                     </button>
                 </div>
+            </div>
+            <!-- Aviso de procesamiento (fuera del chat) -->
+            <div id="processingNotice" class="processing-notice text-center text-[#CBD5E0] text-sm mt-2">
+                Procesando consulta, por favor espere...
             </div>
         </div>
     </div>
@@ -226,6 +267,7 @@
                     role: 'assistant',
                     content: '### Midas Help\n\nHola, soy tu asistente de inteligencia artificial sobre el TFM Midas. ¿En qué puedo ayudarte hoy?'
                 }
+                this.processing = false  // Indicador para evitar envíos múltiples
                 
                 // Añadir mensaje de bienvenida si no hay historial
                 if(this.history.length === 0) {
@@ -257,9 +299,25 @@
             }
 
             async sendMessage() {
+                // Evitar envíos múltiples mientras se procesa una consulta
+                if (this.processing) {
+                    return;
+                }
+                this.processing = true;
+                // Mostrar aviso de procesamiento y deshabilitar entrada y botón
+                document.getElementById("processingNotice").classList.add("visible");
+                document.getElementById("userInput").disabled = true;
+                document.getElementById("sendButton").disabled = true;
+                
                 const input = document.getElementById('userInput')
                 const message = input.value.trim()
-                if (!message) return
+                if (!message) {
+                    this.processing = false;
+                    document.getElementById("processingNotice").classList.remove("visible");
+                    document.getElementById("userInput").disabled = false;
+                    document.getElementById("sendButton").disabled = false;
+                    return;
+                }
 
                 input.value = ''
                 this.addMessage('user', message)
@@ -282,6 +340,11 @@
                     this.removeLoading()
                     this.addMessage('assistant', `**Error:** ${error.message}`)
                     console.error('API Error:', error)
+                } finally {
+                    this.processing = false;
+                    document.getElementById("processingNotice").classList.remove("visible");
+                    document.getElementById("userInput").disabled = false;
+                    document.getElementById("sendButton").disabled = false;
                 }
             }
 
@@ -367,6 +430,11 @@
                 this.saveHistory()
                 this.loadHistory()
             }
+        }
+
+        // Función global para que el botón invoque el envío del mensaje
+        function sendMessage() {
+            chatSystem.sendMessage();
         }
 
         const chatSystem = new ChatSystem()
