@@ -1,5 +1,6 @@
 import os
 import sys
+import threading
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify, render_template
 from llama_index.core import SimpleDirectoryReader, VectorStoreIndex, Settings
@@ -61,19 +62,34 @@ logger.info("Index created successfully.")
 
 query_engine = index.as_query_engine(llm=Settings.llm)
 
+# --- Nueva lógica para impedir consultas simultáneas ---
+processing_query = False
+processing_lock = threading.Lock()
+# --------------------------------------------------------
+
 @app.route('/')
 def home():
     return render_template('index.html')
 
 @app.route('/query', methods=['POST'])
 def handle_query():
+    global processing_query
     try:
         data = request.json
         user_input = data.get('message', '').strip()
         
         if not user_input:
-            return jsonify({'error': 'Query cannot be empty'}), 400
-            
+            return jsonify({'error': 'La consulta no puede estar vacía'}), 400
+
+        # Verifica si ya se está procesando otra consulta
+        with processing_lock:
+            if processing_query:
+                # Se informa que ya hay una consulta en curso
+                return jsonify({
+                    'error': 'El chatbot ya está procesando una consulta. Por favor, espere.'
+                }), 429
+            processing_query = True
+
         logger.info(f"Processing query: {user_input}")
         response = query_engine.query(user_input)
         
@@ -85,6 +101,10 @@ def handle_query():
     except Exception as e:
         logger.error(f"Error processing query: {e}")
         return jsonify({'error': str(e)}), 500
+    finally:
+        # Aseguramos liberar el bloqueo, incluso si ocurre un error
+        with processing_lock:
+            processing_query = False
 
 if __name__ == '__main__':
     app.run(debug=True)
