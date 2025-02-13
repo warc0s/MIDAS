@@ -5,7 +5,7 @@ from sklearn.pipeline import Pipeline
 
 config_list = [
     {
-        "model": "meta-llama/Meta-Llama-3-70B-Instruct",
+        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
         "base_url": "https://api.deepinfra.com/v1/openai",
         "api_key": os.getenv("DEEPINFRA_KEY"),
 
