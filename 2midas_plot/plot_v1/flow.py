@@ -21,7 +21,7 @@ class FlowPlotV1(Flow):
             'clean_code': ''
         }
         # Define el modelo a usar en litellm (ajusta según tu configuración)
-        self.model = "gemini/gemini-1.5-flash"
+        self.model = "gemini/gemini-2.0-flash-exp"
 
     @start()
     def inicio(self):
