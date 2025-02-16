@@ -6,7 +6,8 @@ from flow import FlowPlotV1
 import pandas as pd
 import time
 from io import BytesIO
-from typing import Optional
+import os
+from dotenv import load_dotenv
 
 # --------------------------------------------------------------------------------
 # CONFIGURACIÓN DE LA PÁGINA
@@ -19,19 +20,19 @@ st.set_page_config(
 )
 
 # --------------------------------------------------------------------------------
-# CONSTANTES
+# CONSTANTES Y VARIABLES DE SESIÓN
 # --------------------------------------------------------------------------------
 LOGO_URL = "https://cdn-icons-png.flaticon.com/512/1534/1534959.png"
 
-# --------------------------------------------------------------------------------
-# CONFIGURACIÓN DE SESIÓN
-# --------------------------------------------------------------------------------
-# Para no perder el texto escrito en el prompt si hay un rerun
 if "user_prompt" not in st.session_state:
     st.session_state["user_prompt"] = ""
 
 if "csv_content" not in st.session_state:
     st.session_state["csv_content"] = None
+
+# Para almacenar la imagen generada y preservar el estado
+if "generated_image" not in st.session_state:
+    st.session_state["generated_image"] = None
 
 # --------------------------------------------------------------------------------
 # CSS PERSONALIZADO (Dark Blue & Gold más oscuro)
@@ -174,7 +175,6 @@ def show_upload_section():
             help="Formatos soportados: CSV (codificación UTF-8, Latin-1)"
         )
 
-        # Muestra chardet inmediatamente al subir archivo
         if uploaded_file:
             content = uploaded_file.getvalue()
             encoding = detect_encoding(content)
@@ -195,11 +195,22 @@ def show_prompt_section():
             placeholder="Ej: Gráfico de líneas comparando ventas y gastos por mes",
             help="Sé específico: tipo de gráfico, ejes, colores, estilo"
         )
-        st.session_state["user_prompt"] = user_prompt  # Actualiza estado
+        st.session_state["user_prompt"] = user_prompt
 
         st.markdown("**Ejemplos de prompts:**")
         st.markdown("- Gráfico de barras verticales mostrando ventas por mes")
         st.markdown("- Pie chart con distribución de gastos por categoría")
+
+def get_friendly_error_message(e: Exception) -> str:
+    """
+    Transforma ciertos errores técnicos a mensajes más comprensibles para el usuario.
+    """
+    error_msg = str(e)
+    if "string argument should contain only ASCII characters" in error_msg:
+        return ("Parece que hay caracteres especiales en los datos que no son compatibles. "
+                "Asegúrate de que el CSV utiliza una codificación adecuada, como UTF-8.")
+    # Puedes agregar más casos específicos según sea necesario.
+    return "Ocurrió un error durante el proceso. Por favor, revisa tus datos o la configuración."
 
 # --------------------------------------------------------------------------------
 # LÓGICA PRINCIPAL
@@ -237,55 +248,63 @@ def main():
         else:
             show_data_preview(st.session_state["csv_content"])
 
-        # Botón para generar visualización: disponible tras subir CSV
-        if st.button("🚀 Generar Visualización", use_container_width=True):
+        # Si ya se generó la imagen, se muestra y se permite descargar sin perder el estado
+        if st.session_state["generated_image"]:
             try:
-                # Se genera la visualización
-                encoding = detect_encoding(st.session_state["csv_content"])
-                csv_content_str = st.session_state["csv_content"].decode(encoding, errors='replace')
+                image_data = base64.b64decode(st.session_state["generated_image"])
+                st.subheader("Resultado del Análisis")
+                st.image(image_data, use_column_width=True, caption="Visualización Generada por IA")
+                st.download_button(
+                    label="📥 Exportar como PNG",
+                    data=image_data,
+                    file_name="midas_plot.png",
+                    mime="image/png"
+                )
+                with st.expander("Código utilizado", expanded=False):
+                    flow = FlowPlotV1(api_input={})
+                    generated_code = flow.get_generated_code()
+                    if generated_code:
+                        st.code(generated_code, language="python")
+                    else:
+                        st.warning("No se pudo recuperar el código generado")
+            except Exception as e:
+                st.error(get_friendly_error_message(e))
+                with st.expander("Detalles técnicos", expanded=False):
+                    st.exception(e)
+        else:
+            if st.button("🚀 Generar Visualización", use_container_width=True):
+                try:
+                    with st.spinner("Generando gráfica, por favor espera..."):
+                        encoding = detect_encoding(st.session_state["csv_content"])
+                        csv_content_str = st.session_state["csv_content"].decode(encoding, errors='replace')
 
-                flow = FlowPlotV1(api_input={
-                    'prompt': st.session_state["user_prompt"],
-                    'csv_content': csv_content_str
-                })
-                base64_image = flow.kickoff()
+                        flow = FlowPlotV1(api_input={
+                            'prompt': st.session_state["user_prompt"],
+                            'csv_content': csv_content_str
+                        })
+                        base64_image = flow.kickoff()
+                        st.session_state["generated_image"] = base64_image
 
-                if base64_image:
-                    image_data = base64.b64decode(base64_image)
-
-                    st.subheader("Resultado del Análisis")
-                    col_img, col_exp = st.columns([0.7, 0.3])
-
-                    with col_img:
-                        st.image(
-                            image_data, 
-                            use_column_width=True, 
-                            caption="Visualización Generada por IA"
-                        )
-
-                    with col_exp:
-                        # Eliminamos el tiempo de procesamiento
+                    if base64_image:
+                        image_data = base64.b64decode(base64_image)
+                        st.subheader("Resultado del Análisis")
+                        st.image(image_data, use_column_width=True, caption="Visualización Generada por IA")
                         st.download_button(
                             label="📥 Exportar como PNG",
                             data=image_data,
                             file_name="midas_plot.png",
-                            mime="image/png",
-                            use_container_width=True
+                            mime="image/png"
                         )
-
-                    # Desplegable con el "Código utilizado"
-                    with st.expander("Código utilizado", expanded=False):
-                        generated_code = flow.get_generated_code()
-                        if generated_code:
-                            st.code(generated_code, language="python")
-                        else:
-                            st.warning("No se pudo recuperar el código generado")
-
-            except Exception as e:
-                st.error("**Error en el proceso**")
-                with st.expander("Detalles técnicos", expanded=False):
-                    st.exception(e)
-
+                        with st.expander("Código utilizado", expanded=False):
+                            generated_code = flow.get_generated_code()
+                            if generated_code:
+                                st.code(generated_code, language="python")
+                            else:
+                                st.warning("No se pudo recuperar el código generado")
+                except Exception as e:
+                    st.error(get_friendly_error_message(e))
+                    with st.expander("Detalles técnicos", expanded=False):
+                        st.exception(e)
     else:
         st.info(
             """
@@ -301,7 +320,7 @@ def main():
         """
         <footer>
             <div style="opacity: 0.8;">
-                © 2024 Midas Plot | Versión 2.0 | 
+                2024 Midas Plot | Versión 2.1 | 
                 <a href="#privacy" style="color: var(--secondary); text-decoration: none;">Privacidad</a> | 
                 <a href="#terms" style="color: var(--secondary); text-decoration: none;">Términos</a>
             </div>
