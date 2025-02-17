@@ -253,7 +253,7 @@ def main():
             try:
                 image_data = base64.b64decode(st.session_state["generated_image"])
                 st.subheader("Resultado del Análisis")
-                st.image(image_data, use_column_width=True, caption="Visualización Generada por IA")
+                st.image(image_data, use_container_width=True, caption="Visualización Generada por IA")
                 st.download_button(
                     label="📥 Exportar como PNG",
                     data=image_data,
@@ -288,7 +288,7 @@ def main():
                     if base64_image:
                         image_data = base64.b64decode(base64_image)
                         st.subheader("Resultado del Análisis")
-                        st.image(image_data, use_column_width=True, caption="Visualización Generada por IA")
+                        st.image(image_data, use_container_width=True, caption="Visualización Generada por IA")
                         st.download_button(
                             label="📥 Exportar como PNG",
                             data=image_data,
