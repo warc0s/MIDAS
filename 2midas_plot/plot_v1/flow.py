@@ -21,7 +21,7 @@ class FlowPlotV1(Flow):
             'clean_code': ''
         }
         # Define el modelo a usar en litellm (ajusta según tu configuración)
-        self.model = "gemini/gemini-2.0-flash-exp"
+        self.model = "gemini/gemini-2.0-flash"
 
     @start()
     def inicio(self):
@@ -144,7 +144,8 @@ print(base64.b64encode(buf.read()).decode('utf-8'))
         # Llamamos a la función de litellm para obtener la respuesta (código)
         response = completion(
             model=self.model,
-            messages=[{"role": "user", "content": prompt}]
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0
         )
         return response.choices[0].message.content
 
