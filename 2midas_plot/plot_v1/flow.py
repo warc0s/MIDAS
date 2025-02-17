@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import sys
 import re
 from datetime import datetime
 
@@ -27,26 +26,20 @@ class FlowPlotV1(Flow):
     def inicio(self):
         """
         Paso inicial del Flow:
-        - Toma el prompt y el contenido CSV si viene de la API (o de CLI en modo local).
+        - Toma el prompt y el contenido CSV desde la API.
         - Genera el código Python (raw_code) vía LLM.
         """
-        if self.api_input:
-            # Modo API
-            user_request = self.api_input['prompt']
-            csv_content = self.api_input['csv_content']
-            self._custom_state['inputs'] = {
-                'topic': user_request,
-                'current_year': str(datetime.now().year),
-                'csv_content': csv_content
-            }
-        else:
-            # Modo CLI (interactivo)
-            user_request = self._get_visualization_request()
-            self._custom_state['inputs'] = {
-                'topic': user_request,
-                'current_year': str(datetime.now().year),
-                'csv_content': None
-            }
+        if not self.api_input:
+            raise ValueError("Se requiere 'api_input'. El modo CLI ha sido removido.")
+        
+        # Modo API
+        user_request = self.api_input['prompt']
+        csv_content = self.api_input['csv_content']
+        self._custom_state['inputs'] = {
+            'topic': user_request,
+            'current_year': str(datetime.now().year),
+            'csv_content': csv_content
+        }
         
         # Generamos el código con LLM
         raw_code = self._generate_plot_code()
@@ -89,16 +82,8 @@ class FlowPlotV1(Flow):
             
             return base64_output
 
-    def _get_visualization_request(self):
-        """
-        Si corres esto en modo CLI, aquí pides al usuario que describa el gráfico.
-        """
-        print("¿Qué gráfico necesitas generar? Ejemplo:")
-        print("  'Gráfico de barras con el conteo de ventas por categoría'")
-        return input("\nDescribe tu gráfico: ").strip()
-
     def get_generated_code(self) -> str:
-        """Retorna el código Python limpio utilizado para generar la visualización"""
+        """Retorna el código Python limpio utilizado para generar la visualización."""
         return self._custom_state.get('clean_code', '')
 
     def _generate_plot_code(self):
@@ -127,7 +112,8 @@ Requisitos estrictos:
 3. Imprimir EXCLUSIVAMENTE el string base64 sin ningún texto adicional.
 4. No guardes archivos en disco (excepto leer el CSV si existe).
 5. Redacta en español los títulos de las graficas.
-6. Formato obligatorio:
+6. Usa colores visuales y estilos que faciliten la lectura y visualización de la gráfica generada.
+7. Formato obligatorio:
 
 import matplotlib.pyplot as plt
 import io
@@ -153,7 +139,6 @@ print(base64.b64encode(buf.read()).decode('utf-8'))
     def _extraer_base64(self, stdout):
         """
         Busca una cadena que empiece con el típico encabezado base64 de PNG (iVBORw0KGgo).
-        Puedes ajustar la lógica según tus necesidades.
         """
         lines = stdout.split('\n')
         for line in lines:
@@ -161,13 +146,3 @@ print(base64.b64encode(buf.read()).decode('utf-8'))
             if candidate.startswith('iVBORw0KGgo'):
                 return candidate
         return None
-
-if __name__ == "__main__":
-    """Modo CLI: se inicia el flow y pide descripción de gráfico en consola."""
-    try:
-        flow = FlowPlotV1()
-        resultado_base64 = flow.kickoff()
-        print("Base64 result:\n", resultado_base64)
-    except Exception as e:
-        print(f"Error en el flujo: {e}", file=sys.stderr)
-        sys.exit(1)
