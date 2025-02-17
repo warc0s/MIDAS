@@ -126,7 +126,8 @@ Requisitos estrictos:
 2. Codificar la imagen como base64 en memoria usando io.BytesIO.
 3. Imprimir EXCLUSIVAMENTE el string base64 sin ningún texto adicional.
 4. No guardes archivos en disco (excepto leer el CSV si existe).
-5. Formato obligatorio:
+5. Redacta en español los títulos de las graficas.
+6. Formato obligatorio:
 
 import matplotlib.pyplot as plt
 import io
