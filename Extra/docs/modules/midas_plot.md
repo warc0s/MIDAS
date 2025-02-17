@@ -2,7 +2,12 @@
 
 ## 1. Descripción General
 
-**MIDAS Plot** es el componente MIDAS que genera visualizaciones de datos a partir de descripciones en lenguaje natural. Aprovecha modelos LLM para transformar prompts en código Python, el cual se ejecuta de forma segura en un entorno sandbox e2b. El sistema utiliza un flujo basado en CrewAI Flow para gestionar todo el proceso, garantizando una integración robusta y modular.
+**MIDAS Plot** es el componente MIDAS que genera visualizaciones de datos a partir de descripciones en lenguaje natural. Este sistema utiliza un flujo basado en CrewAI Flow para gestionar todo el proceso, el cual se compone de los pasos: 
+
+1. Recolectar el CSV que sube el usuario.
+2. El agente genera el codigo matplotlib a partir del prompt de usuario, la petición de su gráfica.
+3. Ejecutar dicho codigo de forma segura en un entorno e2b, devolviendo el grafico en base64.
+4. Renderizar dicho base64 para que aparezca la gráfica en el Streamlit, y pueda descargarse.
 
 ---
 
@@ -15,7 +20,7 @@ El backend se organiza mediante un **CrewAI Flow** que gestiona el proceso compl
 - **Clase Principal: `FlowPlotV1`**
   - **Herencia:** Extiende de la clase `Flow` de CrewAI, permitiendo la definición de un flujo modular con pasos encadenados.
   - **Atributos:**
-    - `api_input`: Entrada opcional desde API o modo CLI.
+    - `api_input`: Entrada opcional desde API.
     - `_custom_state`: Diccionario que almacena información a lo largo del flujo (prompt, código generado, código limpio, etc.).
     - `model`: Modelo LLM (por ejemplo, `"gemini/gemini-2.0-flash"`) usado para la generación del código.
 
@@ -32,7 +37,6 @@ El backend se organiza mediante un **CrewAI Flow** que gestiona el proceso compl
      - Captura la salida estándar y extrae la imagen en formato base64 (se espera que sea la única salida impresa).
 
 - **Funciones Auxiliares:**
-  - **`_get_visualization_request`:** En modo CLI, solicita al usuario la descripción del gráfico.
   - **`_generate_plot_code`:** Construye el prompt para el LLM, especificando:
     - Uso obligatorio de matplotlib y pandas (si se requiere).
     - La necesidad de codificar la imagen como base64.
@@ -50,30 +54,22 @@ El backend se organiza mediante un **CrewAI Flow** que gestiona el proceso compl
 
 ## 3. Funcionalidades Clave
 
-- **Generación Automática de Código Python:**
-  - Transforma descripciones en lenguaje natural en código para generar gráficos mediante matplotlib.
+- **Generación Automática de Código Python:** Transforma descripciones en lenguaje natural en código para generar gráficos mediante matplotlib.
   
-- **Ejecución Segura en Sandbox:**
-  - El código generado se ejecuta en un entorno aislado, previniendo riesgos de seguridad.
+- **Ejecución Segura en Sandbox:** El código generado se ejecuta en un entorno aislado, previniendo riesgos de seguridad.
   
-- **Soporte para Datos CSV:**
-  - Permite cargar y utilizar datasets en formato CSV, integrándolos en el proceso de visualización.
+- **Soporte para Datos CSV:** Permite cargar y utilizar datasets en formato CSV, integrándolos en el proceso de visualización.
   
-- **Manejo de Errores:**
-  - Implementa un sistema de validación y mensajes amigables para informar sobre posibles errores en la generación o ejecución del código.
+- **Manejo de Errores:** Implementa un sistema de validación y mensajes amigables para informar sobre posibles errores en la generación o ejecución del código.
 
 ---
 
 ## 4. Guía de Uso
 
-1. **Carga de Datos:**
-   - El usuario puede cargar un archivo CSV para proveer datos al proceso de visualización.
-2. **Descripción de la Visualización:**
-   - Se introduce un prompt en lenguaje natural describiendo el gráfico deseado.
-3. **Generación y Ejecución del Código:**
-   - El sistema genera el código Python, lo sanitiza y lo ejecuta en el sandbox.
-4. **Visualización e Iteración:**
-   - Se muestra el resultado (imagen en formato PNG codificada en base64) y se permite al usario descargar la imagen.
+1. **Carga de Datos:** El usuario puede cargar un archivo CSV para proveer datos al proceso de visualización.
+2. **Descripción de la Visualización:** Se introduce un prompt en lenguaje natural describiendo el gráfico deseado.
+3. **Generación y Ejecución del Código:** El sistema genera el código Python, lo sanitiza y lo ejecuta en el sandbox.
+4. **Visualización e Iteración:** Se muestra el resultado (imagen en formato PNG codificada en base64) y se permite al usario descargar la imagen.
 
 ---
 
