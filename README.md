@@ -20,7 +20,7 @@ El sistema implementa una arquitectura modular innovadora a través de 8 compone
 - **Midas Test** implementa validación rigurosa y métricas de rendimiento, asegurando la calidad del modelo obtenido.
 - **Midas Deploy** facilita el despliegue mediante interfaces web automatizadas para predicciones.
 
-Todo el sistema se coordina a través de Midas Assistant, una interfaz central que guía al usuario en la utilización efectiva de cada componente. Complementariamente, Midas Architect guía el diseño del sistema multiagente, mientras que Midas Help proporciona soporte técnico contextual de nuestro TFM basado en RAG.
+Todo el sistema se coordina a través de **Midas Assistant**, una interfaz central que guía al usuario en la utilización efectiva de cada componente. Complementariamente, **Midas Architect** guía el diseño del sistema multiagente, mientras que **Midas Help** proporciona soporte técnico contextual de nuestro TFM basado en RAG.
 
 Profesional, escalable y orientado a resultados, MIDAS redefine la automatización en proyectos de Machine Learning. Su arquitectura modular, donde cada componente está estratégicamente diseñado y optimizado, establece un nuevo paradigma en el desarrollo de modelos ML. El sistema demuestra que la verdadera "transformación en oro" va más allá de convertir datos en modelos precisos - consiste en hacer accesible todo el proceso de ML a través de interacciones naturales e intuitivas, democratizando así el desarrollo de modelos para equipos de cualquier tamaño y experiencia.
 
