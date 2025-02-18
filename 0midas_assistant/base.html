@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Midas Hub - Versión Sin Streaming</title>
+  <style>
+    /* ========================================
+       RESET Y TIPOGRAFÍA
+    ======================================== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    /* ========================================
+       ANIMACIÓN DE ENTRADA DE LA PÁGINA
+    ======================================== */
+    html, body {
+      width: 100%;
+      height: 100%;
+    }
+    body {
+      animation: fadeIn 1s ease forwards;
+      background: radial-gradient(circle at center, #0f0f0f 0%, #1a1a1a 100%);
+      color: #fff;
+      overflow: hidden;
+      padding: 20px;
+      position: relative;
+    }
+    @keyframes fadeIn {
+      0% { opacity: 0; }
+      100% { opacity: 1; }
+    }
+
+    /* ========================================
+       REJILLA DORADA FIJA
+    ======================================== */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: repeating-linear-gradient(
+        0deg,
+        rgba(255,215,0,0.03) 0px,
+        rgba(255,215,0,0.03) 1px,
+        transparent 1px,
+        transparent 4px
+      );
+      pointer-events: none;
+      z-index: -2;
+    }
+
+    /* ========================================
+       ANIMACIÓN SUTIL DE TRAZOS DORADOS
+    ======================================== */
+    .gold-animation {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(120deg, transparent 40%, rgba(255,215,0,0.05) 50%, transparent 60%);
+      background-size: 300% 300%;
+      pointer-events: none;
+      z-index: -1;
+      animation: goldStreaks 30s linear infinite;
+    }
+    @keyframes goldStreaks {
+      0%   { transform: translate(0, 0); }
+      50%  { transform: translate(-25%, -25%); }
+      100% { transform: translate(0, 0); }
+    }
+
+    /* ========================================
+       CONTENEDOR PRINCIPAL DEL CHAT
+    ======================================== */
+    .chat-container {
+      width: 90%;
+      max-width: 600px;
+      margin: 40px auto;
+      background: rgba(30,30,30,0.7);
+      border: 1px solid rgba(255,215,0,0.2);
+      border-radius: 15px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      overflow: hidden;
+      animation: fadeInUp 0.8s ease-out;
+      position: relative;
+      z-index: 1;
+    }
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ========================================
+       CABECERA CON EFECTO GLOW
+    ======================================== */
+    .chat-header {
+      background: linear-gradient(45deg, #1a1a1a, #0f0f0f);
+      padding: 20px;
+      text-align: center;
+      border-bottom: 1px solid rgba(255,215,0,0.2);
+      position: relative;
+      overflow: hidden;
+    }
+    .chat-header h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      background: linear-gradient(45deg, #ffd700, #daa520, #ffd700);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: glow 2s ease-in-out infinite alternate;
+      position: relative;
+      z-index: 1;
+    }
+    @keyframes glow {
+      0% {
+        text-shadow: 0 0 10px rgba(255,215,0,0.5);
+      }
+      100% {
+        text-shadow: 0 0 25px rgba(218,165,32,0.8), 0 0 15px rgba(255,215,0,0.6);
+      }
+    }
+
+    /* ========================================
+       ÁREA DE MENSAJES
+    ======================================== */
+    .chat-messages {
+      padding: 20px;
+      max-height: 400px;
+      overflow-y: auto;
+      background: rgba(20,20,20,0.5);
+    }
+    /* SCROLLBAR PERSONALIZADO */
+    .chat-messages::-webkit-scrollbar {
+      width: 8px;
+    }
+    .chat-messages::-webkit-scrollbar-track {
+      background: rgba(0,0,0,0.3);
+      border-radius: 10px;
+    }
+    .chat-messages::-webkit-scrollbar-thumb {
+      background: rgba(255,215,0,0.4);
+      border-radius: 10px;
+    }
+
+    /* ========================================
+       ÁREA DE ENTRADA DEL CHAT
+    ======================================== */
+    .chat-input {
+      display: flex;
+      border-top: 1px solid rgba(255,215,0,0.2);
+      background: rgba(30,30,30,0.9);
+    }
+    .chat-input input {
+      flex: 1;
+      padding: 15px;
+      border: none;
+      outline: none;
+      font-size: 1rem;
+      background: transparent;
+      color: #fff;
+    }
+    .chat-input input::placeholder {
+      color: #aaa;
+    }
+    .chat-input button {
+      padding: 15px 25px;
+      border: 1px solid rgba(255,215,0,0.2);
+      background: rgba(255,215,0,0.05);
+      color: #ffd700;
+      font-size: 1rem;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+    .chat-input button::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #ffd700, transparent);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .chat-input button:hover {
+      background: rgba(255,215,0,0.1);
+      border-color: rgba(255,215,0,0.4);
+      transform: translateY(-3px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+    }
+    .chat-input button:hover::after {
+      opacity: 1;
+    }
+
+    /* ========================================
+       BURBUJAS DE MENSAJE
+    ======================================== */
+    .message {
+      display: flex;
+      margin-bottom: 15px;
+      opacity: 0;
+      animation: messageEntry 0.5s forwards;
+    }
+    /* ANIMACIONES DIFERENTES PARA USER Y BOT */
+    .message.user {
+      justify-content: flex-end;
+      animation-name: slideInRight;
+    }
+    .message.bot {
+      justify-content: flex-start;
+      animation-name: slideInLeft;
+    }
+    @keyframes slideInRight {
+      0%   { transform: translateX(50%); opacity: 0; }
+      100% { transform: translateX(0);   opacity: 1; }
+    }
+    @keyframes slideInLeft {
+      0%   { transform: translateX(-50%); opacity: 0; }
+      100% { transform: translateX(0);     opacity: 1; }
+    }
+    @keyframes messageEntry {
+      0% { opacity: 0; transform: translateY(10px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    .message-content {
+      max-width: 70%;
+      padding: 12px 18px;
+      border-radius: 15px;
+      position: relative;
+      font-size: 0.95rem;
+      line-height: 1.4;
+      backdrop-filter: blur(5px);
+      word-wrap: break-word;
+    }
+    .message.user .message-content {
+      background: linear-gradient(145deg, rgba(255,215,0,0.7), rgba(255,215,0,0.5));
+      color: #000;
+      border-bottom-right-radius: 5px;
+      box-shadow: 0 0 8px rgba(255,215,0,0.5);
+    }
+    .message.bot .message-content {
+      background: rgba(255,255,255,0.9);
+      color: #000;
+      border-bottom-left-radius: 5px;
+    }
+
+    /* ========================================
+       ANIMACIÓN PARA "PENSANDO" (TRES PUNTITOS)
+    ======================================== */
+    .thinking {
+      position: relative;
+      overflow: hidden;
+    }
+    .thinking::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,215,0,0.3), transparent);
+      animation: shimmer 1.5s infinite;
+    }
+    @keyframes shimmer {
+      0%   { left: -100%; }
+      100% { left: 100%;  }
+    }
+    .thinking span {
+      display: inline-block;
+      width: 5px;
+      height: 5px;
+      margin-left: 3px;
+      border-radius: 50%;
+      background-color: #ffd700;
+      opacity: 0;
+      animation: blink 1.4s infinite;
+    }
+    .thinking span:nth-child(1) { animation-delay: 0s;   }
+    .thinking span:nth-child(2) { animation-delay: 0.2s; }
+    .thinking span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes blink {
+      0%   { opacity: 0; }
+      50%  { opacity: 1; }
+      100% { opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Animación de trazos dorados en el fondo -->
+  <div class="gold-animation"></div>
+
+  <div class="chat-container">
+    <div class="chat-header">
+      <h1>Midas Hub</h1>
+    </div>
+
+    <div class="chat-messages" id="chat-messages">
+      <!-- Los mensajes se inyectarán aquí -->
+    </div>
+
+    <div class="chat-input">
+      <input type="text" id="user-input" placeholder="Escribe tu mensaje..." autocomplete="off">
+      <button id="send-btn">Enviar</button>
+    </div>
+  </div>
+
+  <script>
+    // Array de respuestas para simular la "transformación en oro"
+    const respuestas = [
+      "¡La transformación es real, los datos se convierten en oro!",
+      "Cada interacción es una chispa dorada de conocimiento.",
+      "Tu mensaje resuena como oro puro.",
+      "El sistema multiagente destila la esencia del oro en cada byte.",
+      "Estoy refinando esa información dorada…",
+      "Cada bit se transforma en una pepita de sabiduría."
+    ];
+
+    const chatMessages = document.getElementById('chat-messages');
+    const userInput    = document.getElementById('user-input');
+    const sendBtn      = document.getElementById('send-btn');
+
+    // Función para agregar un mensaje al chat
+    function agregarMensaje(mensaje, tipo) {
+      const messageDiv = document.createElement('div');
+      messageDiv.classList.add('message', tipo);
+
+      const messageContent = document.createElement('div');
+      messageContent.classList.add('message-content');
+      messageContent.innerText = mensaje;
+
+      messageDiv.appendChild(messageContent);
+      chatMessages.appendChild(messageDiv);
+
+      // Scroll automático al final
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    // Función para simular la respuesta del bot con animación de "Pensando"
+    function simularRespuestaBot() {
+      // Crear contenedor para "Pensando..."
+      const thinkingDiv = document.createElement('div');
+      thinkingDiv.classList.add('message', 'bot');
+
+      const thinkingContent = document.createElement('div');
+      thinkingContent.classList.add('message-content', 'thinking');
+      thinkingContent.innerHTML = 'Pensando<span></span><span></span><span></span>';
+
+      thinkingDiv.appendChild(thinkingContent);
+      chatMessages.appendChild(thinkingDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+
+      // Simular retardo aleatorio entre 5 y 10 segundos (5000-10000ms)
+      const delay = Math.floor(Math.random() * 5000) + 5000;
+      setTimeout(() => {
+        // Quitar la burbuja "Pensando"
+        chatMessages.removeChild(thinkingDiv);
+        // Seleccionar respuesta aleatoria y agregarla de inmediato
+        const respuestaAleatoria = respuestas[Math.floor(Math.random() * respuestas.length)];
+        agregarMensaje(respuestaAleatoria, 'bot');
+      }, delay);
+    }
+
+    // Función para enviar el mensaje del usuario
+    function enviarMensaje() {
+      const mensaje = userInput.value.trim();
+      if (mensaje === "") return;
+      agregarMensaje(mensaje, 'user');
+      userInput.value = "";
+      simularRespuestaBot();
+    }
+
+    // Eventos para el botón y para la tecla Enter
+    sendBtn.addEventListener('click', enviarMensaje);
+    userInput.addEventListener('keypress', function(event) {
+      if (event.key === 'Enter') {
+        enviarMensaje();
+      }
+    });
+  </script>
+</body>
+</html>
