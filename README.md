@@ -4,7 +4,7 @@
 
 ## Sección 1: Justificación y descripción del proyecto
 
-MIDAS es un sistema multiagente multicomponente que automatiza integralmente el proceso de desarrollo de modelos de machine learning, desde la ingesta de datos hasta su despliegue en producción. El proyecto nace para resolver un problema crítico en la industria: el desarrollo de modelos de ML, el cual tradicionalmente requiere múltiples herramientas, conocimientos especializados y procesos manuales que consumen tiempo y recursos. Inspirado en la leyenda del Rey Midas, nuestro sistema actúa como un "toque dorado" moderno que transforma datos sin procesar en soluciones de ML listas para usar.
+MIDAS es un sistema multiagente multicomponente que automatiza integralmente el proceso de desarrollo de modelos de machine learning, desde la creación o ingesta de datos, hasta su despliegue en producción. El proyecto nace para resolver un problema crítico en la industria: el desarrollo de modelos de ML, el cual tradicionalmente requiere múltiples herramientas, conocimientos especializados y procesos manuales que consumen tiempo y recursos. Inspirado en la leyenda del Rey Midas, nuestro sistema actúa como un "toque dorado" moderno que transforma datos o ideas sin procesar en soluciones de ML listas para usar.
 
 La necesidad de MIDAS se fundamenta en tres pilares principales:
 
@@ -12,14 +12,15 @@ La necesidad de MIDAS se fundamenta en tres pilares principales:
 - La escasez de soluciones integrales que cubran todo el pipeline de datos.
 - La importancia de hacer accesible el ML a usuarios con diferentes niveles de experiencia técnica.
 
-El sistema implementa una arquitectura modular innovadora a través de 7 componentes especializados:
+El sistema implementa una arquitectura modular innovadora a través de 8 componentes especializados:
 
-- **Midas Plot** realiza análisis exploratorio y visualización avanzada, permitiendo comprender patrones y relaciones en los datos de manera intuitiva.
+- **Midas Dataset** genera conjuntos de datos sintéticos personalizados según las especificaciones del usuario en términos de temática, dimensiones y características.
+- **Midas Plot** genera gráficos a partir de un dataset proporcionado por el usuario, interpretando solicitudes en lenguaje natural.
 - **Midas Touch** ejecuta la limpieza, entrenamiento y optimización de modelos, automatizando las tareas más complejas del proceso.
 - **Midas Test** implementa validación rigurosa y métricas de rendimiento, asegurando la calidad del modelo obtenido.
 - **Midas Deploy** facilita el despliegue mediante interfaces web automatizadas para predicciones.
-  
-Todo el sistema se coordina a través de **Midas Hub**, una interfaz central que orquesta la comunicación entre componentes mediante lenguaje natural. Complementariamente, **Midas Architect** guía el diseño del sistema multiagente, mientras que **Midas Help** proporciona soporte técnico contextual de nuestro TFM basado en RAG.
+
+Todo el sistema se coordina a través de Midas Assistant, una interfaz central que guía al usuario en la utilización efectiva de cada componente. Complementariamente, Midas Architect guía el diseño del sistema multiagente, mientras que Midas Help proporciona soporte técnico contextual de nuestro TFM basado en RAG.
 
 Profesional, escalable y orientado a resultados, MIDAS redefine la automatización en proyectos de Machine Learning. Su arquitectura modular, donde cada componente está estratégicamente diseñado y optimizado, establece un nuevo paradigma en el desarrollo de modelos ML. El sistema demuestra que la verdadera "transformación en oro" va más allá de convertir datos en modelos precisos - consiste en hacer accesible todo el proceso de ML a través de interacciones naturales e intuitivas, democratizando así el desarrollo de modelos para equipos de cualquier tamaño y experiencia.
 
