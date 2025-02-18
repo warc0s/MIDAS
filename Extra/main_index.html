@@ -6,6 +6,29 @@
   <title>MIDAS - Del Dato al Oro</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <style>
+    /* Sticky footer: se define altura total y se usa flex */
+    html, body {
+      min-height: 100vh;
+      width: 100%;
+      overflow-x: hidden;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow-y: auto;
+    }
+    /* La sección principal ocupa el espacio disponible */
+    .hero {
+      flex: 1;
+      padding: 2rem 1rem;
+      min-height: auto;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+    }
 
     .cta-button.doc-button {
       border: 1px solid rgba(255,215,0,0.2);
@@ -47,7 +70,7 @@
       }
     }
 
-   .cards-container {
+    .cards-container {
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
       max-width: 1400px;
       margin: 2rem auto;
@@ -178,7 +201,7 @@
     body {
       background: radial-gradient(circle at center, #0f0f0f 0%, #1a1a1a 100%);
       color: #fff;
-      min-height: 100vh;
+      /* Se elimina min-height ya que se usa flex */
       position: relative;
     }
 
@@ -200,46 +223,15 @@
       z-index: -1;
     }
 
-    .hero {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 2rem;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .hero::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 200vw;
-      height: 200vh;
-      background: radial-gradient(circle, rgba(255,215,0,0.1) 0%, transparent 70%);
-      pointer-events: none;
-      animation: pulse 6s infinite;
-    }
-
-    @keyframes pulse {
-      0% { opacity: 0.3; }
-      50% { opacity: 0.1; transform: translate(-50%, -50%) scale(1.1); }
-      100% { opacity: 0.3; }
-    }
-
     .logo {
-      font-size: 4.5rem;
-      margin-bottom: 1.5rem;
+      font-size: clamp(3rem, 8vw, 6rem);
+      margin-top: 2rem;
       background: linear-gradient(45deg, #ffd700, #daa520, #ffd700);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       animation: glow 2s ease-in-out infinite alternate;
       position: relative;
-      z-index: 1;
+      z-index: 2;
       font-weight: 700;
       letter-spacing: -2px;
     }
@@ -418,11 +410,11 @@
       width: 100%;
     }
 
+    /* Footer: se elimina el margin externo (especialmente el margin-top) para que el footer esté pegado al final */
     footer {
       background: rgba(0, 0, 0, 0.4);
-      padding: 2rem 1rem;
+      padding: 1rem 0;
       text-align: center;
-      margin-top: 4rem;
       border-top: 1px solid rgba(255,215,0,0.1);
       position: relative;
       backdrop-filter: blur(5px);
@@ -430,7 +422,6 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      min-height: 120px;
     }
 
     .credits {
@@ -438,12 +429,11 @@
       font-size: 0.9rem;
       max-width: 1200px;
       margin: 0 auto;
-      padding: 0 1rem;
       line-height: 1.6;
     }
 
     .credits a {
-      color: #888;
+      color: #ffd700;
       text-decoration: none;
       transition: color 0.3s ease;
       position: relative;
@@ -451,8 +441,41 @@
       margin: 0 0.5rem;
     }
 
-    /* Añadir esto para responsividad */
+    .credits a::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0;
+      height: 1px;
+      background: #ffd700;
+      transition: width 0.3s ease;
+    }
+
+    .credits a:hover::after {
+      width: 100%;
+    }
+
+    /* Responsividad */
     @media (max-width: 768px) {
+      .hero {
+        padding: 1rem;
+      }
+      
+      .cards-container {
+        padding: 1rem;
+        gap: 1rem;
+      }
+      
+      .cards-secondary-group {
+        padding: 0 1rem 1rem;
+        gap: 1rem;
+      }
+      
+      .card {
+        margin-bottom: 1rem;
+      }
+      
       footer {
         padding: 1.5rem 0.5rem;
       }
@@ -470,6 +493,21 @@
     }
 
     @media (max-width: 480px) {
+      .logo {
+        margin-top: 1rem;
+      }
+      
+      .slogan {
+        font-size: 1.2rem;
+        margin: 0.5rem 0;
+      }
+      
+      .cta-buttons {
+        flex-direction: column;
+        width: 100%;
+        gap: 0.5rem;
+      }
+      
       .credits {
         font-size: 0.8rem;
       }
@@ -575,7 +613,8 @@
         <a href="https://help.midastfm.com">Consultar →</a>
       </div>
     </div>
-
+  </section>
+  
   <footer>
     <div class="credits">
       Desarrollado con amor por <a href="https://warcos.dev">Marcos García Estévez</a> 
