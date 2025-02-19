@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>MIDAS TFM - Tríptico</title>
+  <!-- Fuente moderna: Montserrat -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    /* Reset básico */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    /* Configuración para impresión: A4 horizontal */
+    @page {
+      size: A4 landscape;
+      margin: 0;
+    }
+    
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background: linear-gradient(135deg, #f8f4e8, #fff9e6);
+      color: #2c1810;
+    }
+    
+    /* Cada página ocupa un A4 horizontal */
+    .page {
+      width: 297mm;
+      height: 210mm;
+      page-break-after: always;
+      background: white;
+      position: relative;
+      border: 1mm solid #D4AF37;
+      box-shadow: 0 0 15mm rgba(212, 175, 55, 0.1);
+    }
+    
+    /* Contenedor interno para distribuir en 3 columnas (paneles) */
+    .page-wrapper {
+      display: flex;
+      flex-direction: row;
+      width: 100%;
+      height: 100%;
+      padding: 15mm;
+      gap: 10mm;
+    }
+    
+    .section {
+      flex: 1;
+      padding: 10mm;
+      position: relative;
+      background: linear-gradient(135deg, #ffffff, #fffaf0);
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(212, 175, 55, 0.15);
+      border: 1px solid rgba(212, 175, 55, 0.2);
+    }
+    
+    /* Líneas divisorias entre paneles */
+    .section:not(:first-child)::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -5mm;
+      width: 2px;
+      height: 100%;
+      background: linear-gradient(180deg, 
+        rgba(212, 175, 55, 0.2),
+        rgba(212, 175, 55, 1) 20%,
+        rgba(212, 175, 55, 1) 80%,
+        rgba(212, 175, 55, 0.2)
+      );
+    }
+    
+    /* Estilos para encabezados y textos */
+    .header {
+      font-size: 42px;
+      font-weight: 700;
+      text-align: center;
+      background: linear-gradient(45deg, #D4AF37, #FFD700, #D4AF37);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      margin-bottom: 10mm;
+      padding-bottom: 5mm;
+      border-bottom: 3px solid;
+      border-image: linear-gradient(90deg, transparent, #D4AF37, transparent) 1;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .subheader {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 5mm;
+      color: #2c1810;
+      padding-bottom: 3mm;
+      border-bottom: 2px solid #D4AF37;
+      position: relative;
+      white-space: nowrap;
+    }
+
+    .subheader span {
+      font-size: 0.8em;
+      color: #D4AF37;
+      font-weight: 900;
+      margin-left: 8px;
+    }
+    
+    .component {
+      margin-bottom: 12mm;
+      position: relative;
+    }
+    
+    .component-title {
+      display: flex;
+      align-items: center;
+      font-weight: 900;
+      background: linear-gradient(45deg, #D4AF37, #FFD700);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      margin: 4mm 0;
+      font-size: 20px;
+      padding-left: 5px;
+      border-left: 3px solid #D4AF37;
+      letter-spacing: 0.5px;
+    }
+    
+    .text {
+      font-size: 14px;
+      line-height: 1.8;
+      color: #2c1810;
+      margin-bottom: 5mm;
+      padding: 0 5px;
+    }
+
+    .text strong {
+      font-weight: 900;
+      color: #2c1810;
+    }
+
+    .text em {
+      font-style: italic;
+      color: #D4AF37;
+    }
+    
+    .demo-link {
+      display: block;
+      margin-top: 4mm;
+      text-align: center;
+      padding: 1mm 0;
+      border-top: 1px solid rgba(212, 175, 55, 0.05);
+    }
+    
+    a.link {
+      color: #D4AF37;
+      text-decoration: none;
+      transition: all 0.3s;
+      padding: 2px 5px;
+      border-radius: 3px;
+      position: relative;
+    }
+    
+    a.link:hover {
+      color: #2c1810;
+      background: rgba(212, 175, 55, 0.1);
+    }
+    
+    a.link::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 1px;
+      background: #D4AF37;
+      transform: scaleX(0);
+      transition: transform 0.3s;
+    }
+    
+    a.link:hover::after {
+      transform: scaleX(1);
+    }
+    
+    .footer {
+      font-size: 12px;
+      margin-top: 10mm;
+      text-align: center;
+      color: #2c1810;
+      padding: 5mm;
+      border-top: 1px solid rgba(212, 175, 55, 0.3);
+    }
+    
+    /* Estilos para logos */
+    .logo-main {
+      display: block;
+      max-width: 90%;
+      height: auto;
+      margin: 20mm auto 10mm auto;
+    }
+    
+    .tool-logo {
+      width: 64px;
+      height: 64px;
+      vertical-align: middle;
+      margin-right: 12px;
+      transition: transform 0.3s ease;
+      object-fit: contain;
+    }
+    
+    .tool-logo:hover {
+      transform: scale(1.1);
+    }
+    
+    /* Impresión: asegurar que se conserven los colores de fondo */
+    @media print {
+      body {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .section {
+        box-shadow: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Página 1: Portada y Componentes 1-4 -->
+  <div class="page">
+    <div class="page-wrapper">
+      <!-- Panel 1: Portada -->
+      <div class="section">
+        <img src="https://github.com/warc0s/MIDAS/blob/main/Extra/Logos/transparentes/midas_main_trans_lite.png?raw=true" alt="MIDAS Logo" class="logo-main" style="margin: 5mm auto 10mm auto; border-bottom: 3px solid; border-image: linear-gradient(90deg, transparent, #D4AF37, transparent) 1; padding-bottom: 8mm;">
+        <div class="text" style="margin-top: 10mm;">
+          Sistema multiagente multicomponente que transforma tus ideas en oro.
+        </div>
+        <div class="text" style="margin-top: 15mm;">
+          <strong>Autores:</strong><br>
+          Marcos Garcia Estevez<br>
+          Jesus Aceituno Valero
+        </div>
+        <div class="text" style="margin-top: 10mm; text-align: center;">
+          Visita: <a class="link" href="https://midastfm.com" target="_blank">midastfm.com</a>
+        </div>
+      </div>
+      <!-- Panel 1: ¿Qué es MIDAS? -->
+      <div class="section">
+        <div class="subheader">¿Qué es MIDAS?</div>
+        <div class="text" style="margin-top: 5mm;">
+          MIDAS es un sistema multiagente que transforma datos en valor. Combina inteligencia artificial de vanguardia y una arquitectura modular para:
+          <ul>
+            <li>Generar datasets sintéticos variados.</li>
+            <li>Analizar y visualizar datos de forma intuitiva.</li>
+            <li>Convertir información en modelos precisos y eficientes.</li>
+          </ul>
+        </div>
+      </div>
+      <!-- Panel 2: Componentes 1 y 2 -->
+      <div class="section">
+        <div class="subheader">Componentes <span>(I)</span></div>
+        <div class="component">
+          <div class="component-title">
+            <img src="https://placehold.co/64x64" alt="Assistant Logo" class="tool-logo">
+            1) Assistant
+          </div>
+          <div class="text">
+            Un LLM+RAG que integra la información de todos los módulos y sugiere prompts y soluciones.
+          </div>
+          <div class="demo-link">
+            Prueba en: <a class="link" href="https://assistant.midastfm.com" target="_blank">assistant.midastfm.com</a>
+          </div>
+        </div>
+        <div class="component">
+          <div class="component-title">
+            <img src="https://github.com/warc0s/MIDAS/blob/main/Extra/Logos/transparentes/architech_trans.png?raw=true" alt="Architech Logo" class="tool-logo">
+            2) Architech
+          </div>
+          <div class="text">
+            LLM+RAG que te asiste con documentación y frameworks multiagente para desarrollar la arquitectura.
+          </div>
+          <div class="demo-link">
+            Prueba en: <a class="link" href="https://architech.midastfm.com" target="_blank">architech.midastfm.com</a>
+          </div>
+        </div>
+      </div>
+      <!-- Panel 3: Componentes 3 y 4 -->
+      
+    </div>
+  </div>
+  
+  <!-- Página 2: Descripción general y Componentes 5-8 -->
+  <div class="page">
+    <div class="page-wrapper">
+      <div class="section">
+        <div class="subheader">Componentes <span>(II)</span></div>
+        <div class="component">
+          <div class="component-title">
+            <img src="https://placehold.co/64x64" alt="Dataset Logo" class="tool-logo">
+            3) Dataset
+          </div>
+          <div class="text">
+            Genera datasets sintéticos variados a través de múltiples LLMs, proporcionando datos de calidad.
+          </div>
+          <div class="demo-link">
+            Prueba en: <a class="link" href="https://dataset.midastfm.com" target="_blank">dataset.midastfm.com</a>
+          </div>
+        </div>
+        <div class="component">
+          <div class="component-title">
+            <img src="https://github.com/warc0s/MIDAS/blob/main/Extra/Logos/transparentes/plot_trans.png?raw=true" alt="Plot Logo" class="tool-logo">
+            4) Plot
+          </div>
+          <div class="text">
+            Analiza CSVs y genera gráficos y correlaciones atractivas para explorar los datos.
+          </div>
+          <div class="demo-link">
+            Prueba en: <a class="link" href="https://plot.midastfm.com" target="_blank">plot.midastfm.com</a>
+          </div>
+        </div>
+      </div>
+     
+      <!-- Panel 2: Componentes 5 y 6 -->
+      <div class="section">
+        <div class="subheader">Componentes <span>(III)</span></div>
+        <div class="component">
+          <div class="component-title">
+            <img src="https://github.com/warc0s/MIDAS/blob/main/Extra/Logos/transparentes/touch_trans.png?raw=true" alt="Touch Logo" class="tool-logo">
+            5) Touch
+          </div>
+          <div class="text">
+            Sistema de agentes en CrewAI que transforma datos en un joblib preciso y eficiente.
+          </div>
+          <div class="demo-link">
+            Prueba en: <a class="link" href="https://touch.midastfm.com" target="_blank">touch.midastfm.com</a>
+          </div>
+        </div>
+        <div class="component">
+          <div class="component-title">
+            <img src="https://github.com/warc0s/MIDAS/blob/main/Extra/Logos/transparentes/test_trans.png?raw=true" alt="Test Logo" class="tool-logo">
+            6) Test
+          </div>
+          <div class="text">
+            Realiza pruebas automáticas, validación cruzada y genera informes de calidad del modelo.
+          </div>
+          <div class="demo-link">
+            Prueba en: <a class="link" href="https://test.midastfm.com" target="_blank">test.midastfm.com</a>
+          </div>
+        </div>
+      </div>
+      <!-- Panel 3: Componentes 7 y 8 -->
+      <div class="section">
+        <div class="subheader">Componentes <span>(IV)</span></div>
+        <div class="component">
+          <div class="component-title">
+            <img src="https://github.com/warc0s/MIDAS/blob/main/Extra/Logos/transparentes/deploy_trans.png?raw=true" alt="Deploy Logo" class="tool-logo">
+            7) Deploy
+          </div>
+          <div class="text">
+            Genera automáticamente una interfaz Streamlit para desplegar tu modelo.
+          </div>
+          <div class="demo-link">
+            Prueba en: <a class="link" href="https://deploy.midastfm.com" target="_blank">deploy.midastfm.com</a>
+          </div>
+        </div>
+        <div class="component">
+          <div class="component-title">
+            <img src="https://github.com/warc0s/MIDAS/blob/main/Extra/Logos/transparentes/help_trans.png?raw=true" alt="Help Logo" class="tool-logo">
+            8) Help
+          </div>
+          <div class="text">
+            Chatbot LLM+RAG que resuelve dudas sobre el repositorio GitHub y la implementación.
+          </div>
+          <div class="demo-link">
+            Prueba en: <a class="link" href="https://help.midastfm.com" target="_blank">help.midastfm.com</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+
+</body>
+</html>
