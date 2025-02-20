@@ -9,6 +9,7 @@ import os
 
 from pydantic_ai import Agent, ModelRetry, RunContext
 from pydantic_ai.models.gemini import GeminiModel
+#from pydantic_ai.models.openai import OpenAIModel
 from openai import AsyncOpenAI
 from supabase import Client
 from typing import List
@@ -16,7 +17,14 @@ from typing import List
 load_dotenv()
 
 gemini_api_key = os.getenv('GEMINI_API_KEY')
-model = GeminiModel('gemini-1.5-pro', api_key=gemini_api_key)
+model = GeminiModel('gemini-2.0-flash', api_key=gemini_api_key)
+
+#deepinfra_api_key = os.getenv('DEEPINFRA_API_KEY')
+"""model = OpenAIModel(
+    'meta-llama/Llama-3.3-70B-Instruct-Turbo',
+    base_url='https://api.deepinfra.com/v1/openai',
+    api_key=deepinfra_api_key,
+)"""
 
 logfire.configure(send_to_logfire='if-token-present')
 
@@ -24,10 +32,11 @@ logfire.configure(send_to_logfire='if-token-present')
 class PydanticAIDeps:
     supabase: Client
     openai_client: AsyncOpenAI
+    docs_source: str  # Nuevo campo para la fuente de docs
 
 system_prompt = """
-You are an expert at Pydantic AI - a Python AI agent framework that you have access to all the documentation to,
-including examples, an API reference, and other resources to help you build Pydantic AI agents.
+You are an expert at Python and agent frameworks that you have access to all the documentation to,
+including examples, an API reference, and other resources to help you build agents.
 
 Your only job is to assist with this and you don't answer other questions besides describing what you are able to do.
 
@@ -36,7 +45,7 @@ Don't ask the user before taking an action, just do it. Always make sure you loo
 When you first look at the documentation, always start with RAG.
 Then also always check the list of available documentation pages and retrieve the content of page(s) if it'll help.
 
-Always let the user know when you didn't find the answer in the documentation or the right URL - be honest. Respond always in spanish.
+Always let the user know when you didn't find the answer in the documentation or the right URL - be honest. Reply ALWAYS in Spanish.
 """
 
 pydantic_ai_expert = Agent(
@@ -74,13 +83,13 @@ async def retrieve_relevant_documentation(ctx: RunContext[PydanticAIDeps], user_
         # Get the embedding for the query
         query_embedding = await get_embedding(user_query, ctx.deps.openai_client)
         
-        # Query Supabase for relevant documents
+        # Query Supabase for relevant documents usando la fuente dinámica
         result = ctx.deps.supabase.rpc(
             'match_site_pages',
             {
                 'query_embedding': query_embedding,
                 'match_count': 5,
-                'filter': {'source': 'pydantic_ai_docs'}
+                'filter': {'source': ctx.deps.docs_source}  # Usar fuente dinámica
             }
         ).execute()
         
@@ -107,16 +116,16 @@ async def retrieve_relevant_documentation(ctx: RunContext[PydanticAIDeps], user_
 @pydantic_ai_expert.tool
 async def list_documentation_pages(ctx: RunContext[PydanticAIDeps]) -> List[str]:
     """
-    Retrieve a list of all available Pydantic AI documentation pages.
+    Retrieve a list of all available documentation pages.
     
     Returns:
         List[str]: List of unique URLs for all documentation pages
     """
     try:
-        # Query Supabase for unique URLs where source is pydantic_ai_docs
+        # Query Supabase for unique URLs donde la fuente es dinámica
         result = ctx.deps.supabase.from_('site_pages') \
             .select('url') \
-            .eq('metadata->>source', 'pydantic_ai_docs') \
+            .eq('metadata->>source', ctx.deps.docs_source) \
             .execute()
         
         if not result.data:
@@ -143,11 +152,11 @@ async def get_page_content(ctx: RunContext[PydanticAIDeps], url: str) -> str:
         str: The complete page content with all chunks combined in order
     """
     try:
-        # Query Supabase for all chunks of this URL, ordered by chunk_number
+        # Query Supabase for all chunks of this URL usando la fuente dinámica
         result = ctx.deps.supabase.from_('site_pages') \
             .select('title, content, chunk_number') \
             .eq('url', url) \
-            .eq('metadata->>source', 'pydantic_ai_docs') \
+            .eq('metadata->>source', ctx.deps.docs_source) \
             .order('chunk_number') \
             .execute()
         
@@ -155,7 +164,7 @@ async def get_page_content(ctx: RunContext[PydanticAIDeps], url: str) -> str:
             return f"No content found for URL: {url}"
             
         # Format the page with its title and all chunks
-        page_title = result.data[0]['title'].split(' - ')[0]  # Get the main title
+        page_title = result.data[0]['title'].split(' - ')[0]
         formatted_content = [f"# {page_title}\n"]
         
         # Add each chunk's content
