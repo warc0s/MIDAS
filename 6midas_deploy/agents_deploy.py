@@ -1,74 +1,47 @@
-import autogen
+from autogen import ConversableAgent
 import joblib
 import os
 from sklearn.pipeline import Pipeline
 
-config_list = [
-    {
-        "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
-        "base_url": "https://api.deepinfra.com/v1/openai",
-        "api_key": os.getenv("DEEPINFRA_KEY"),
-
-    }
-]
-
-llm_config = {
-    "config_list": config_list,
-    "seed": 42,
-    "temperature": 0.7
+# Configuración del modelo LLM
+llm_config = { 
+    "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+    "base_url": "https://api.deepinfra.com/v1/openai",
+    "api_key": os.getenv("DEEPINFRA_KEY"),
+    "temperature": 0.7,
+    "seed": 42
 }
 
-def create_agent(name, system_message):
-    return autogen.AssistantAgent(
-        name=name,
-        llm_config=llm_config,
-        system_message=system_message
-    )
-
-model_analyzer = create_agent(
-    "model_analyzer",
-    """You are an expert in analyzing machine learning models stored in joblib files. 
-    Your task is to analyze the model and provide a clear, concise summary.
-    When you finish your analysis, explicitly say 'ANALYSIS COMPLETE' and ask the UI Designer to proceed."""
+# Definir agentes en secuencia
+model_analyzer = ConversableAgent(
+    name="Model_Analyzer",
+    llm_config=llm_config,
+    system_message="You analyze machine learning models stored in joblib files and provide a summary.",
+    description="Analyzes ML models and provides a report.",
 )
 
-ui_designer = create_agent(
-    "ui_designer",
-    """You are a UI/UX expert in Streamlit. Your task is to design a user interface based on the model analysis.
-    When you finish your design, explicitly say 'UI DESIGN COMPLETE' and ask the Code Generator to proceed."""
+ui_designer = ConversableAgent(
+    name="UI_Designer",
+    llm_config=llm_config,
+    system_message="You design a Streamlit UI based on the model analysis.",
+    description="Creates a UI design based on model insights.",
 )
 
-code_generator = create_agent(
-    "code_generator",
-    """You are a Python and Streamlit developer. Your task is to implement the UI design into a working application.
-    When you finish generating the code, explicitly say 'CODE GENERATION COMPLETE'."""
+code_generator = ConversableAgent(
+    name="Code_Generator",
+    llm_config=llm_config,
+    system_message="You implement the UI design into a working Streamlit application. When you end you have to say 'CODE GENERATION COMPLETE'.",
+    description="Generates the Streamlit code for the app.",
 )
 
-# Configuración mínima del GroupChat
-groupchat = autogen.GroupChat(
-    agents=[model_analyzer, ui_designer, code_generator],
-    messages=[]
-)
-
-group_manager = autogen.GroupChatManager(
-    groupchat=groupchat,
+# Usuario que orquesta la secuencia
+user_proxy = ConversableAgent(
+    name="User_Proxy",
+    description="Monitors the conversation and ensures sequential execution.",
     llm_config=llm_config
 )
 
-class CustomUserProxyAgent(autogen.UserProxyAgent):
-    def handle_message(self, message):
-        """Monitorea los mensajes y detiene la conversación si se detecta 'CODE GENERATION COMPLETE'."""
-        print(f"\n🔹 {message['name']}: {message['content']}")  # Muestra los mensajes en la terminal
-
-        if "CODE GENERATION COMPLETE" in message["content"]:
-            print("\n✅ Finalizando la conversación: Se ha completado la generación de código.")
-            self.stop_all_agents()  # Detiene la ejecución de los agentes
-
-user_proxy = CustomUserProxyAgent(
-    name="user_proxy",
-    code_execution_config={"work_dir": "coding", "use_docker": False}
-)
-
+# Procesar archivo joblib
 def process_joblib(file_path):
     try:
         model = joblib.load(file_path)
@@ -88,24 +61,37 @@ def process_joblib(file_path):
     except Exception as e:
         return {"error": f"Error loading model: {str(e)}"}
 
+# Flujo de conversación secuencial
 def start_conversation(model_info):
-    initial_message = f"""
-    Let's work together to create a Streamlit app for this ML model. Here's the model information:
-    {model_info}
-    
-    Follow these steps in order:
-    1. Model Analyzer: Please analyze the model structure and requirements.
-    2. UI Designer: Based on the analysis, design the Streamlit interface.
-    3. Code Generator: Create the final Streamlit application.
-    
-    Model Analyzer, please begin.
-    """
-    
-    user_proxy.initiate_chat(
-        group_manager,
-        message=initial_message
+    chat_results = user_proxy.initiate_chats(
+        [
+            {
+                "recipient": model_analyzer,
+                "message": f"Analyze this machine learning model: {model_info}",
+                "max_turns": 1,
+                "summary_method": "last_msg",
+            },
+            {
+                "recipient": ui_designer,
+                "message": "Based on the analysis, design a Streamlit UI.",
+                "max_turns": 1,
+                "summary_method": "last_msg",
+            },
+            {
+                "recipient": code_generator,
+                "message": "Generate the final Streamlit application.",
+                "max_turns": 1,
+                "summary_method": "last_msg",
+            },
+        ]
     )
 
+    # Imprimir resúmenes de cada etapa
+    print("\n\nModel Analysis Summary:\n", chat_results[0].summary)
+    print("\n\nUI Design Summary:\n", chat_results[1].summary)
+    print("\n\nCode Generation Summary:\n", chat_results[2].summary)
+
+# Main
 def main():
     file_path = input("Ingrese la ruta del archivo joblib: ").strip()
 
