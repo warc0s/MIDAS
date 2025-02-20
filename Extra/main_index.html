@@ -136,8 +136,9 @@
         grid-template-columns: repeat(5, 1fr);
       }
       
+      /* Se modifica la tarjeta hub para que ocupe solo un bloque */
       .hub-card {
-        grid-column: span 2;
+        grid-column: span 1;
       }
       
       .cards-container > .card:not(.hub-card) {
@@ -548,7 +549,7 @@
 <body>
   <section class="hero">
     <div class="logo">MIDAS</div>
-    <p class="slogan">Del Dato al Oro</p>
+    <p class="slogan">De la idea al Oro</p>
     
     <div class="cta-buttons">
       <a href="https://github.com/warc0s/MIDAS" class="cta-button">
@@ -559,33 +560,42 @@
       </a>
     </div>
 
-    <!-- Grupo principal de 5 tarjetas -->
+    <!-- Grupo principal de tarjetas -->
     <div class="cards-container">
+      <!-- Midas Assistant: tarjeta diferenciada que ahora ocupa solo un bloque y aparece primero -->
       <div class="card hub-card">
-        <i class="fab fa-hubspot"></i>
-        <h3>Midas Hub</h3>
-        <p>Interfaz unificada para una gestión completa</p>
-        <a href="https://hub.midastfm.com">Unificar →</a>
+        <i class="fas fa-compass"></i>
+        <h3>Midas Assistant</h3>
+        <p>Asistencia experta para navegar el ecosistema MIDAS</p>
+        <a href="https://hub.midastfm.com">Consultar →</a>
+      </div>
+
+      <!-- Nueva tarjeta Midas Dataset, ubicada en el espacio del segundo bloque -->
+      <div class="card">
+        <i class="fas fa-database"></i>
+        <h3>Midas Dataset</h3>
+        <p>Genera dataset sintéticos mediante lenguaje natural</p>
+        <a href="https://dataset.midastfm.com">Generar →</a>
       </div>
 
       <div class="card">
         <i class="fas fa-chart-line"></i>
         <h3>Midas Plot</h3>
-        <p>EDA automatizado: gráficos interactivos y análisis de correlaciones</p>
+        <p>Visualización avanzada de datos impulsada por IA y lenguaje natural</p>
         <a href="https://plot.midastfm.com">Explorar →</a>
       </div>
 
       <div class="card">
         <i class="fas fa-magic"></i>
         <h3>Midas Touch</h3>
-        <p>Pipeline de ML end-to-end: desde preprocesado hasta optimización</p>
+        <p>Transforma cualquier dataset en el mejor modelo de ML</p>
         <a href="https://touch.midastfm.com">Transformar →</a>
       </div>
 
       <div class="card">
         <i class="fas fa-vial"></i>
         <h3>Midas Test</h3>
-        <p>Quality Assurance automático con reportes detallados</p>
+        <p>Obtén un reporte detallado de la calidad de tu modelo de ML</p>
         <a href="https://test.midastfm.com">Validar →</a>
       </div>
 
@@ -602,15 +612,15 @@
       <div class="card">
         <i class="fas fa-drafting-compass"></i>
         <h3>Midas Architect</h3>
-        <p>Diseña tu arquitectura de agentes con asistencia de LLM+RAG</p>
+        <p>Diseña tu arquitectura de agentes con asistencia IA de última generación</p>
         <a href="https://architech.midastfm.com">Acceder →</a>
       </div>
 
       <div class="card">
         <i class="fas fa-robot"></i>
         <h3>Midas Help</h3>
-        <p>Asistente LLM+RAG sobre nuestro TFM: MIDAS</p>
-        <a href="https://help.midastfm.com">Consultar →</a>
+        <p>Asistente virtual que resuelve dudas sobre nuestro TFM: MIDAS</p>
+        <a href="https://help.midastfm.com">Preguntar →</a>
       </div>
     </div>
   </section>
