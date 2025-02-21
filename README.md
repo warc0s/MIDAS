@@ -1,6 +1,12 @@
-# MIDAS - Multi-agent Intelligent Data Automation System 🤖
+<div align="center">
+
+# MIDAS = Multi-agent Intelligent Data Automation System 🤖
 
 <img src="https://github.com/warc0s/MIDAS/blob/main/Extra/logo1.png" alt="Logo" width="50%">
+
+Convierte tus ideas en modelos ML listos para producción.
+
+<br></div>
 
 ## Sección 1: Justificación y descripción del proyecto
 
