@@ -1,28 +1,54 @@
 import os
 import sys
 import threading
+import logging
+import re
+import unicodedata
+import torch
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify, render_template
+from transformers import BertForSequenceClassification, BertTokenizer
 from llama_index.core import SimpleDirectoryReader, VectorStoreIndex, Settings, ChatPromptTemplate
 from llama_index.embeddings.deepinfra import DeepInfraEmbeddingModel
 from llama_index.llms.deepinfra import DeepInfraLLM
-import logging
+from llama_index.postprocessor.flag_embedding_reranker import FlagEmbeddingReranker
 
-# Configuración del logging
+# -------------------------- Integración del BERT para clasificación del prompt --------------------------
+
+def clean_text(text):
+    text = unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode('utf-8', 'ignore')
+    text = re.sub(r'[^\w\s]', '', text)
+    return text.strip()
+
+bert_model = BertForSequenceClassification.from_pretrained("prompt_analysis")
+bert_tokenizer = BertTokenizer.from_pretrained("prompt_analysis")
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+bert_model.to(device)
+
+def clasificar_dificultad(texto):
+    texto_limpio = clean_text(texto)
+    inputs = bert_tokenizer(texto_limpio, return_tensors="pt", truncation=True, padding=True, max_length=512)
+    inputs = {k: v.to(device) for k, v in inputs.items()}
+    with torch.no_grad():
+        outputs = bert_model(**inputs)
+    logits = outputs.logits
+    prediccion = torch.argmax(logits, dim=1).item()
+    return prediccion
+
+# ---------------------------------------------------------------------------------------------------
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Inicialización de la app Flask
 app = Flask(__name__)
 
-# Cargar variables de entorno
 load_dotenv()
 DEEPINFRA_API_KEY = os.getenv("DEEPINFRA_API_KEY")
 if not DEEPINFRA_API_KEY:
     logger.error("DEEPINFRA_API_KEY not configured in environment variables.")
     sys.exit("Server configuration incomplete. Contact administrator.")
 
-# Configuración del modelo de embeddings
 Settings.embed_model = DeepInfraEmbeddingModel(
     model_id="BAAI/bge-m3",
     api_token=DEEPINFRA_API_KEY,
@@ -33,14 +59,12 @@ Settings.embed_model = DeepInfraEmbeddingModel(
 
 Settings.chunk_size = 512
 
-# Configuración del LLM
 Settings.llm = DeepInfraLLM(
     model="meta-llama/Llama-3.3-70B-Instruct-Turbo",
     api_key=DEEPINFRA_API_KEY,
     temperature=0,
 )
 
-# Cargar documentos y crear el índice vectorial
 execution_dir = os.getcwd()
 md_filename = "info_llmstoryteller.md"
 md_path = os.path.join(execution_dir, md_filename)
@@ -62,35 +86,30 @@ logger.info("Index created successfully.")
 
 # --- Configuración de prompts personalizados ---
 
-# Prompt para preguntas (QA)
 qa_prompt_str = (
-    "Estás asistiendo con dudas sobre el TFM 'Midas'. "
-    "Solo responde preguntas relacionadas con este tema. "
-    "Si la consulta no está relacionada, responde: 'Lo siento, solo puedo contestar dudas relacionadas con el TFM Midas'.\n"
+    "Estás asistiendo con dudas y proporcionando respuestas útiles y detalladas. "
+    "Aunque tu área principal de especialización es el TFM 'Midas', puedes abordar consultas que sean algo ambiguas o que tengan un vínculo razonable con el tema. "
+    "Si la consulta es claramente irrelevante (por ejemplo, si se trata de compras u otros temas no vinculados), responde: 'Lo siento, solo puedo contestar dudas relacionadas con el TFM Midas'.\n"
     "Información de contexto:\n"
     "---------------------\n"
     "{context_str}\n"
     "---------------------\n"
-    "Con la información de contexto, responde a la siguiente pregunta: {query_str}\n"
+    "Utilizando el contexto proporcionado, responde a la siguiente pregunta: {query_str}\n"
 )
 
-# Prompt para refinar la respuesta
 refine_prompt_str = (
-    "Tenemos la oportunidad de refinar la respuesta original (solo si es necesario) con más contexto a continuación.\n"
+    "Tenemos la oportunidad de refinar la respuesta original utilizando información adicional.\n"
     "------------\n"
     "{context_msg}\n"
     "------------\n"
-    "Con el nuevo contexto, refina la respuesta original para contestar mejor la pregunta: {query_str}.\n"
-    "Si la pregunta no está relacionada con el TFM Midas, mantén la respuesta original o indica que no puedes contestar.\n"
+    "Basándote en el nuevo contexto, mejora la respuesta original para abordar mejor la pregunta: {query_str}.\n"
     "Respuesta original: {existing_answer}\n"
 )
 
-# Crear las plantillas de prompts utilizando ChatPromptTemplate
 chat_text_qa_msgs = [
     (
         "system",
-        "Responde solo a preguntas relacionadas con el TFM 'Midas'. "
-        "Si la consulta no se relaciona, responde: 'Lo siento, solo puedo contestar dudas relacionadas con el TFM Midas'."
+        "Eres un asistente experto capaz de responder consultas variadas, con un enfoque especial en el TFM 'Midas'. Proporciona respuestas útiles y detalladas, y si la consulta es claramente irrelevante (por ejemplo, relacionada con compras u otros temas no vinculados), indica que solo puedes ayudar con temas relacionados con el TFM 'Midas'."
     ),
     ("user", qa_prompt_str),
 ]
@@ -99,24 +118,36 @@ text_qa_template = ChatPromptTemplate.from_messages(chat_text_qa_msgs)
 chat_refine_msgs = [
     (
         "system",
-        "Responde solo a preguntas relacionadas con el TFM 'Midas'. "
-        "Si la consulta no se relaciona, responde: 'Lo siento, solo puedo contestar dudas relacionadas con el TFM Midas'."
+        "Refina la respuesta original para mejorar su claridad y utilidad. Aunque el enfoque principal es el TFM 'Midas', incorpora cualquier información adicional pertinente para abordar mejor la pregunta."
     ),
     ("user", refine_prompt_str),
 ]
 refine_template = ChatPromptTemplate.from_messages(chat_refine_msgs)
 
-# Crear el query engine pasando los prompts personalizados
+rerank = FlagEmbeddingReranker(model="BAAI/bge-reranker-v2-m3", top_n=5)
+
 query_engine = index.as_query_engine(
     llm=Settings.llm,
     text_qa_template=text_qa_template,
-    refine_template=refine_template
+    refine_template=refine_template,
+    node_postprocessors=[rerank]
 )
 
-# --- Lógica para impedir consultas simultáneas ---
+llm_deepseek = DeepInfraLLM(
+    model="deepseek-ai/DeepSeek-V3",
+    api_key=DEEPINFRA_API_KEY,
+    temperature=0,
+)
+
+query_engine_deepseek = index.as_query_engine(
+    llm=llm_deepseek,
+    text_qa_template=text_qa_template,
+    refine_template=refine_template,
+    node_postprocessors=[rerank]
+)
+
 processing_query = False
 processing_lock = threading.Lock()
-# --------------------------------------------------------
 
 @app.route('/')
 def home():
@@ -128,11 +159,43 @@ def handle_query():
     try:
         data = request.json
         user_input = data.get('message', '').strip()
+        selected_llm = data.get('llm', 'Automatico')
         
         if not user_input:
             return jsonify({'error': 'La consulta no puede estar vacía'}), 400
 
-        # Verifica si ya se está procesando otra consulta
+        # Si se fuerza un LLM, se ignora la clasificación
+        if selected_llm != 'Automatico':
+            if selected_llm == "Llama 3.3 70B":
+                current_engine = query_engine
+                llm_usado = 'Llama 3.3 70B'
+            elif selected_llm == "DeepSeek V3":
+                current_engine = query_engine_deepseek
+                llm_usado = 'DeepSeek V3'
+            else:
+                return jsonify({'error': 'Opción de LLM no reconocida.'}), 400
+            logger.info(f"LLM forzado: {llm_usado}")
+        else:
+            # Flujo automático: clasificar el prompt con BERT
+            dificultad = clasificar_dificultad(user_input)
+            logger.info(f"Prompt classified with difficulty: {dificultad}")
+            
+            if dificultad == 2:
+                return jsonify({
+                    'response': "Lo siento, no puedo responder a eso. Si crees que se trata de un error, por favor, reformula la pregunta.",
+                    'status': 'success',
+                    'llm': 'Bloqueado - PromptAnalysis'
+                })
+            
+            if dificultad == 0:
+                current_engine = query_engine
+                llm_usado = 'Llama 3.3 70B'
+            elif dificultad == 1:
+                current_engine = query_engine_deepseek
+                llm_usado = 'DeepSeek V3'
+            else:
+                return jsonify({'error': 'Clasificación de pregunta desconocida.'}), 400
+
         with processing_lock:
             if processing_query:
                 return jsonify({
@@ -141,18 +204,22 @@ def handle_query():
             processing_query = True
 
         logger.info(f"Processing query: {user_input}")
-        response = query_engine.query(user_input)
+        logger.info("Obteniendo embeddings...")
+        logger.info("Utilizando el reranker...")
+        logger.info("Escribiendo respuesta...")
+        response = current_engine.query(user_input)
+        logger.info("Refinando respuesta...")
         
         return jsonify({
             'response': str(response),
-            'status': 'success'
+            'status': 'success',
+            'llm': llm_usado
         })
         
     except Exception as e:
         logger.error(f"Error processing query: {e}")
         return jsonify({'error': str(e)}), 500
     finally:
-        # Aseguramos liberar el bloqueo, incluso si ocurre un error
         with processing_lock:
             processing_query = False
 

@@ -69,7 +69,7 @@
 
         /* Estilos para el aviso de procesamiento */
         .processing-notice {
-            display: none; /* inicialmente oculto */
+            display: none;
         }
         .processing-notice.visible {
             display: block;
@@ -120,8 +120,7 @@
                 max-width: 1200px;
             }
         }
-
-        /* Ajustes generales responsivos */
+        
         .text-[15px] {
             font-size: clamp(0.875rem, 1.5vw, 0.9375rem);
         }
@@ -156,14 +155,7 @@
             }
         }
         
-        /* ============================
-           Custom Scrollbar Styles
-           ============================
-           Se han añadido estilos para que la "barrita" del scroll
-           combine con la paleta de colores y gradientes de la página.
-        */
-
-        /* Para navegadores WebKit (Chrome, Edge, Safari) */
+        /* Custom Scrollbar Styles */
         #chatContainer::-webkit-scrollbar {
             width: 8px;
         }
@@ -178,10 +170,24 @@
             background: linear-gradient(145deg, #FFE55C, #D4AF37);
         }
 
-        /* Para Firefox */
         #chatContainer {
             scrollbar-width: thin;
             scrollbar-color: #D4AF37 transparent;
+        }
+
+        /* Animación para puntos suspensivos */
+        @keyframes ellipsis {
+            0% { content: '.'; }
+            33% { content: '..'; }
+            66% { content: '...'; }
+            100% { content: '.'; }
+        }
+        .progress-text::after {
+            content: '.'; 
+            animation: ellipsis 1.5s infinite;
+            display: inline-block;
+            width: 20px;
+            text-align: left;
         }
     </style>
 </head>
@@ -203,6 +209,23 @@
                     Limpiar chat
                 </button>
                 <div class="h-px flex-1 bg-gradient-to-r from-[#D4AF3722] via-[#D4AF37aa] to-[#D4AF3722]"></div>
+                <!-- Selector de LLM -->
+                <div class="flex items-center space-x-3 relative group">
+                    <label for="llmSelector" class="text-[#CBD5E0] text-sm font-medium">LLM:</label>
+                    <div class="relative">
+                        <div class="absolute inset-0 bg-gradient-to-r from-[#D4AF37] to-[#FFE55C] opacity-0 blur group-hover:opacity-20 transition-opacity duration-300 rounded-xl pointer-events-none"></div>
+                        <select id="llmSelector" class="appearance-none bg-[#121828] border border-[#2D3748] text-[#FFD700] rounded-xl px-4 py-2 pr-10 focus:outline-none focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] transition-all duration-200 hover:border-[#D4AF37] cursor-pointer shadow-sm hover:shadow-md">
+                            <option value="Automatico" selected>🤖 Automático</option>
+                            <option value="Llama 3.3 70B">🦙 Llama 3.3 70B</option>
+                            <option value="DeepSeek V3">🔍 DeepSeek V3</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                            <svg class="h-4 w-4 text-[#D4AF37]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
             </div>
         </header>
 
@@ -231,12 +254,14 @@
         <!-- Área de Entrada -->
         <div class="pb-8 pt-4 px-4">
             <div class="relative group">
-                <div class="absolute inset-0 bg-gradient-to-r from-[#D4AF37] to-[#FFE55C] blur opacity-10 group-hover:opacity-20 transition duration-500 rounded-2xl"></div>
+                <div class="absolute inset-0 bg-gradient-to-r from-[#D4AF37] to-[#FFE55C] blur opacity-10 group-hover:opacity-20 transition-opacity duration-300 rounded-2xl"></div>
                 <div class="relative flex items-center space-x-4 bg-[#121828] rounded-2xl p-4 border border-[#2D3748] shadow-2xl">
                     <input 
                         id="userInput"
                         type="text" 
                         placeholder="Escribe tu consulta..." 
+                        data-default-placeholder="Escribe tu consulta..."
+                        data-processing-placeholder="Espera a que el chatbot conteste para enviar otro mensaje"
                         class="flex-1 bg-transparent text-[#E2E8F0] placeholder-[#4A5568] focus:outline-none text-[15px]"
                     >
                     <button 
@@ -250,9 +275,9 @@
                     </button>
                 </div>
             </div>
-            <!-- Aviso de procesamiento (fuera del chat) -->
+            <!-- Aviso de procesamiento -->
             <div id="processingNotice" class="processing-notice text-center text-[#CBD5E0] text-sm mt-2">
-                Procesando consulta, por favor espere...
+                <!-- Este aviso se puede utilizar para mostrar algún mensaje extra si se desea -->
             </div>
         </div>
     </div>
@@ -263,13 +288,15 @@
                 this.container = document.getElementById('chatContainer')
                 this.history = JSON.parse(localStorage.getItem('chatHistory')) || []
                 this.loadingMessageId = null
+                this.loadingTimer = null
+                this.loadingStepIndex = 0
+                this.progressSteps = ["Obteniendo embeddings", "Utilizando el reranker", "Escribiendo respuesta", "Refinando respuesta"]
                 this.welcomeMessage = {
                     role: 'assistant',
                     content: '### Midas Help\n\nHola, soy tu asistente de inteligencia artificial sobre el TFM Midas. ¿En qué puedo ayudarte hoy?'
                 }
-                this.processing = false  // Indicador para evitar envíos múltiples
+                this.processing = false
                 
-                // Añadir mensaje de bienvenida si no hay historial
                 if(this.history.length === 0) {
                     this.history.push(this.welcomeMessage)
                     this.saveHistory()
@@ -294,19 +321,19 @@
 
             loadHistory() {
                 this.container.innerHTML = ''
-                this.history.forEach(msg => this.addMessageElement(msg.role, msg.content, false))
+                this.history.forEach(msg => this.addMessageElement(msg.role, msg.content, false, msg.llm))
                 this.scrollToBottom()
             }
 
             async sendMessage() {
-                // Evitar envíos múltiples mientras se procesa una consulta
                 if (this.processing) {
                     return;
                 }
                 this.processing = true;
-                // Mostrar aviso de procesamiento y deshabilitar entrada y botón
                 document.getElementById("processingNotice").classList.add("visible");
-                document.getElementById("userInput").disabled = true;
+                const userInput = document.getElementById("userInput");
+                userInput.disabled = true;
+                userInput.placeholder = userInput.dataset.processingPlaceholder;
                 document.getElementById("sendButton").disabled = true;
                 
                 const input = document.getElementById('userInput')
@@ -314,10 +341,15 @@
                 if (!message) {
                     this.processing = false;
                     document.getElementById("processingNotice").classList.remove("visible");
-                    document.getElementById("userInput").disabled = false;
+                    const userInput = document.getElementById("userInput");
+                    userInput.disabled = false;
+                    userInput.placeholder = userInput.dataset.defaultPlaceholder;
                     document.getElementById("sendButton").disabled = false;
                     return;
                 }
+
+                // Capturamos la opción de LLM seleccionada
+                const llmSelector = document.getElementById("llmSelector").value;
 
                 input.value = ''
                 this.addMessage('user', message)
@@ -327,14 +359,14 @@
                     const response = await fetch('/query', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ message })
+                        body: JSON.stringify({ message, llm: llmSelector })
                     })
 
                     if (!response.ok) throw new Error(await response.text())
                     const data = await response.json()
 
                     this.removeLoading()
-                    this.addMessage('assistant', data.response)
+                    this.addMessage('assistant', data.response, data.llm)
                     this.saveHistory()
                 } catch (error) {
                     this.removeLoading()
@@ -343,18 +375,20 @@
                 } finally {
                     this.processing = false;
                     document.getElementById("processingNotice").classList.remove("visible");
-                    document.getElementById("userInput").disabled = false;
+                    const userInput = document.getElementById("userInput");
+                    userInput.disabled = false;
+                    userInput.placeholder = userInput.dataset.defaultPlaceholder;
                     document.getElementById("sendButton").disabled = false;
                 }
             }
 
-            addMessage(role, content) {
-                this.addMessageElement(role, content)
-                this.history.push({ role, content })
+            addMessage(role, content, llm = null) {
+                this.addMessageElement(role, content, true, llm)
+                this.history.push({ role, content, llm })
                 this.scrollToBottom()
             }
 
-            addMessageElement(role, content, animate = true) {
+            addMessageElement(role, content, animate = true, llm = null) {
                 const isAI = role === 'assistant'
                 const div = document.createElement('div')
                 div.className = `message-entrance mb-6 ${animate ? 'opacity-0' : ''}`
@@ -362,17 +396,17 @@
                 div.innerHTML = `
                     <div class="${isAI ? '' : 'flex justify-end'}">
                         <div class="${isAI ? 
-                            'chatbot-message rounded-[1.75rem] hover:border-[#D4AF3733] transition-all' : 
+                            'chatbot-message rounded-[1.75rem] hover:border-[#D4AF3733] transition-all relative' : 
                             'user-message rounded-[1.25rem] hover:shadow-xl transition-transform'} 
                             p-5 max-w-[85%] transform hover:scale-[1.01]">
                             <div class="flex items-center gap-4 ${isAI ? '' : 'flex-row-reverse'}">
-                                ${isAI ? `
+                                ${isAI ? ` 
                                     <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#D4AF37] to-[#FFE55C] flex items-center justify-center shrink-0">
                                         <svg class="w-5 h-5 text-[#0B0F19]" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                                             <path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z"/>
                                         </svg>
                                     </div>
-                                ` : `
+                                ` : ` 
                                     <div class="w-9 h-9 rounded-xl bg-[#0B0F19]/80 flex items-center justify-center shrink-0 border border-[#D4AF37]/20">
                                         <svg class="w-5 h-5 text-[#FFE55C]" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/>
@@ -381,6 +415,11 @@
                                 `}
                                 <div class="flex-1 ${isAI ? 'text-[#CBD5E0]' : 'text-[#0B0F19]'} prose prose-invert max-w-none text-[15px] leading-snug">
                                     ${marked.parse(content)}
+                                    ${isAI && llm ? `
+                                        <div class="text-[10px] text-[#D4AF37] opacity-70 absolute bottom-2 right-4 italic">
+                                            ${llm}
+                                        </div>
+                                    ` : ''}
                                 </div>
                             </div>
                         </div>
@@ -402,17 +441,32 @@
                             <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#D4AF37] to-[#FFE55C] flex items-center justify-center">
                                 <div class="w-5 h-5 border-2 border-[#0B0F19] border-t-transparent rounded-full animate-spin"></div>
                             </div>
-                            <div class="text-[#CBD5E0] loading-dots text-[15px]">Procesando</div>
+                            <div class="text-[#CBD5E0] text-[15px] progress-text">${this.progressSteps[0]}</div>
                         </div>
                     </div>
                 `
                 this.container.appendChild(div)
                 this.scrollToBottom()
+                this.loadingStepIndex = 0;
+                // Actualiza el mensaje cada 2 segundos, avanzando por los pasos hasta el último
+                this.loadingTimer = setInterval(() => {
+                    if (this.loadingStepIndex < this.progressSteps.length - 1) {
+                        this.loadingStepIndex++;
+                        const progressElement = document.querySelector("#loadingMessage .progress-text");
+                        if (progressElement) {
+                            progressElement.innerText = this.progressSteps[this.loadingStepIndex];
+                        }
+                    }
+                }, 2000);
             }
 
             removeLoading() {
                 const loadingDiv = document.getElementById('loadingMessage')
                 if (loadingDiv) loadingDiv.remove()
+                if (this.loadingTimer) {
+                    clearInterval(this.loadingTimer);
+                    this.loadingTimer = null;
+                }
             }
 
             saveHistory() {
@@ -432,7 +486,6 @@
             }
         }
 
-        // Función global para que el botón invoque el envío del mensaje
         function sendMessage() {
             chatSystem.sendMessage();
         }
