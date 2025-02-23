@@ -1,16 +1,24 @@
 # Componente MIDAS Help
 
 ## Descripción General
-MIDAS Help constituye el componente de asistencia y documentación interactiva del sistema MIDAS. Implementa un chatbot inteligente basado en una arquitectura LLM+RAG que permite a los usuarios resolver dudas sobre el funcionamiento del sistema mediante lenguaje natural. Esta implementación utiliza una aproximación básica de RAG, sin incorporar características avanzadas como "Agentic RAG" o bases de datos vectoriales, y está basado en el framework Llama Index.
+MIDAS Help constituye el componente de asistencia y documentación interactiva del sistema MIDAS. Implementa un chatbot inteligente basado en una arquitectura LLM+RAG+Reranker que permite a los usuarios resolver dudas sobre el funcionamiento del sistema mediante lenguaje natural. Esta implementación utiliza una aproximación RAG mejorada, incorporando un reranker y un selector de LLM inteligente, pero sin llegar a características avanzadas como "Agentic RAG" o bases de datos vectoriales. Todo el flujo está basado en el framework Llama Index.
 
 ## Arquitectura Técnica
 
 ### Backend
 El backend está desarrollado en Python utilizando el framework Flask y se encarga del procesamiento de consultas mediante técnicas RAG. Los componentes principales son:
 
+- **Clasificador de Preguntas (Fine-tuned BERT):** Un modelo BERT afinado que *analiza la pregunta del usuario (prompt)* y la clasifica en una de tres categorías:
+    -   **Pregunta fácil:** Requiere una respuesta sencilla y directa.
+    -   **Pregunta difícil:** Implica una respuesta más compleja y elaborada.
+    -   **Pregunta no relacionada:** No tiene relación con la documentación de MIDAS. *En este caso, el sistema no genera una respuesta.*
 - Framework **Llama Index** para la generación y gestión del índice documental.
-- Modelo de **embeddings BGE-M3** de BAAI para comparación semántica.
-- Modelo de lenguaje **Llama 3.3 70b** para generación de respuestas.
+- Modelo de **embeddings BGE-M3** de BAAI para la representación vectorial de los textos (tanto de la consulta como de los documentos).
+- **Reranker BGE V2 M3:** Este componente reordena los resultados obtenidos por la búsqueda inicial basada en embeddings.  El reranker evalúa la relevancia de cada documento recuperado *con respecto a la consulta específica del usuario*, utilizando un modelo de lenguaje más sofisticado que la simple comparación de embeddings. Esto ayuda a filtrar el ruido y a asegurar que los documentos más relevantes sean presentados al LLM para la generación de la respuesta final.
+- **Selector de LLM:** Permite elegir entre diferentes modelos de lenguaje, o usar el modo automatico para usar un modelo u otro dependiendo de la clasificación del BERT Fine-tuneado:
+    -   **Modo Automático:** Utiliza el clasificador de preguntas (BERT) para seleccionar el LLM óptimo.
+    -   **Llama 3.3 70B:** Un modelo de lenguaje eficiente, ideal para preguntas fáciles.  *(Usado por defecto en el modo automático si la pregunta se clasifica como "fácil").*
+    -   **Deepseek V3:** Un modelo más potente, diseñado para preguntas difíciles que requieren mayor capacidad de razonamiento. *(Usado por defecto en el modo automático si la pregunta se clasifica como "difícil").*
 
 ### Frontend
 La interfaz de usuario está construida con HTML, JavaScript y Tailwind CSS, proporcionando una experiencia moderna y responsive.
@@ -32,6 +40,7 @@ El sistema es accesible a través de [help.midastfm.com](https://help.midastfm.c
 - "¿Qué framework utiliza MIDAS Deploy para generar interfaces Streamlit?"
 
 Las respuestas se presentan y renderizan en formato Markdown para optimizar la legibilidad.
+Mientras el sistema procesa la consulta, se muestra información en tiempo real sobre la etapa actual del proceso (por ejemplo, "Clasificando pregunta...", "Extrayendo embeddings...", "Aplicando reranking...", "Redactando respuesta..."). Se visualiza en todo momento qué LLM fue usado para la respuesta, ya sea si lo escogió automáticamente o si el usuario forzó su uso a través del selector.
 
 ## Referencias y Recursos
 
