@@ -196,7 +196,7 @@ from pydantic_ai.messages import (
     RetryPromptPart,
     ModelMessagesTypeAdapter
 )
-from pydantic_ai_expert import pydantic_ai_expert, PydanticAIDeps
+from definicion_agentes import pydantic_ai_expert, PydanticAIDeps
 
 # Cargar variables de entorno
 from dotenv import load_dotenv
@@ -286,21 +286,22 @@ async def run_agent_with_streaming(user_input: str):
         docs_source=docs_config[st.session_state.selected_docs]["source"]
     )
     
+    # Mostrar spinner animado desde el inicio
+    message_placeholder = st.empty()
+    spinner_placeholder = st.empty()
+    spinner_placeholder.markdown(
+        "<div class='processing-notice visible' style='text-align: center; margin-bottom: 1rem;'>"
+        "<div class='spinner'></div><br><span class='ai-gradient-text'>Pensando</span>"
+        "</div>",
+        unsafe_allow_html=True
+    )
+    
     async with pydantic_ai_expert.run_stream(
         user_input,
         deps=deps,
         message_history=st.session_state.messages[:-1],
     ) as result:
         partial_text = ""
-        message_placeholder = st.empty()
-        spinner_placeholder = st.empty()
-        # Mostrar spinner animado
-        spinner_placeholder.markdown(
-            "<div class='processing-notice visible' style='text-align: center; margin-bottom: 1rem;'>"
-            "<div class='spinner'></div><br><span class='ai-gradient-text'>Pensando</span>"
-            "</div>",
-            unsafe_allow_html=True
-        )
         try:
             async for chunk in safe_stream_text(result):
                 if isinstance(chunk, str):
@@ -355,7 +356,7 @@ async def main():
             unsafe_allow_html=True
         )
         st.markdown("<h2 style='text-align: center; color: #FFD700;'>Midas Architech</h2>", unsafe_allow_html=True)
-        st.markdown("<p style='text-align: center; color: #FFFFFF;'>Construye sistemas multiagente de forma intuitiva</p>", unsafe_allow_html=True)
+        st.markdown("<p style='text-align: center; color: #FFFFFF;'>Resuelve dudas de frameworks multiagente usando lenguaje natural</p>", unsafe_allow_html=True)
         st.markdown("---")
         
         # Detectar si se ha cambiado el framework para borrar el chat
