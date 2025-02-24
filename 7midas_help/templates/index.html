@@ -218,6 +218,7 @@
                             <option value="Automatico" selected>🤖 Automático</option>
                             <option value="Llama 3.3 70B">🦙 Llama 3.3 70B</option>
                             <option value="DeepSeek V3">🔍 DeepSeek V3</option>
+                            <option value="Gemini 2.0 Flash">💫 Gemini 2.0 Flash</option>
                         </select>
                         <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                             <svg class="h-4 w-4 text-[#D4AF37]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -290,7 +291,7 @@
                 this.loadingMessageId = null
                 this.loadingTimer = null
                 this.loadingStepIndex = 0
-                this.progressSteps = ["Obteniendo embeddings", "Utilizando el reranker", "Escribiendo respuesta", "Refinando respuesta"]
+                this.progressSteps = ["Obteniendo embeddings", "Utilizando el reranker", "Escribiendo respuesta"]
                 this.welcomeMessage = {
                     role: 'assistant',
                     content: '### Midas Help\n\nHola, soy tu asistente de inteligencia artificial sobre el TFM Midas. ¿En qué puedo ayudarte hoy?'
