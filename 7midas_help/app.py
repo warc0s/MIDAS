@@ -12,6 +12,7 @@ from llama_index.core import SimpleDirectoryReader, VectorStoreIndex, Settings, 
 from llama_index.embeddings.deepinfra import DeepInfraEmbeddingModel
 from llama_index.llms.deepinfra import DeepInfraLLM
 from llama_index.postprocessor.flag_embedding_reranker import FlagEmbeddingReranker
+from llama_index.llms.gemini import Gemini
 
 # -------------------------- Integración del BERT para clasificación del prompt --------------------------
 
@@ -49,6 +50,11 @@ if not DEEPINFRA_API_KEY:
     logger.error("DEEPINFRA_API_KEY not configured in environment variables.")
     sys.exit("Server configuration incomplete. Contact administrator.")
 
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+if not GOOGLE_API_KEY:
+    logger.error("GOOGLE_API_KEY not configured in environment variables.")
+    sys.exit("Server configuration incomplete. Contact administrator.")
+
 Settings.embed_model = DeepInfraEmbeddingModel(
     model_id="BAAI/bge-m3",
     api_token=DEEPINFRA_API_KEY,
@@ -66,7 +72,7 @@ Settings.llm = DeepInfraLLM(
 )
 
 execution_dir = os.getcwd()
-md_filename = "info_llmstoryteller.md"
+md_filename = "info_midas.md"
 md_path = os.path.join(execution_dir, md_filename)
 
 if not os.path.exists(md_path):
@@ -97,15 +103,6 @@ qa_prompt_str = (
     "Utilizando el contexto proporcionado, responde a la siguiente pregunta: {query_str}\n"
 )
 
-refine_prompt_str = (
-    "Tenemos la oportunidad de refinar la respuesta original utilizando información adicional.\n"
-    "------------\n"
-    "{context_msg}\n"
-    "------------\n"
-    "Basándote en el nuevo contexto, mejora la respuesta original para abordar mejor la pregunta: {query_str}.\n"
-    "Respuesta original: {existing_answer}\n"
-)
-
 chat_text_qa_msgs = [
     (
         "system",
@@ -115,22 +112,13 @@ chat_text_qa_msgs = [
 ]
 text_qa_template = ChatPromptTemplate.from_messages(chat_text_qa_msgs)
 
-chat_refine_msgs = [
-    (
-        "system",
-        "Refina la respuesta original para mejorar su claridad y utilidad. Aunque el enfoque principal es el TFM 'Midas', incorpora cualquier información adicional pertinente para abordar mejor la pregunta."
-    ),
-    ("user", refine_prompt_str),
-]
-refine_template = ChatPromptTemplate.from_messages(chat_refine_msgs)
-
-rerank = FlagEmbeddingReranker(model="BAAI/bge-reranker-v2-m3", top_n=5)
+rerank = FlagEmbeddingReranker(model="BAAI/bge-reranker-v2-m3", top_n=3)
 
 query_engine = index.as_query_engine(
     llm=Settings.llm,
     text_qa_template=text_qa_template,
-    refine_template=refine_template,
-    node_postprocessors=[rerank]
+    node_postprocessors=[rerank],
+    similarity_top_k=5
 )
 
 llm_deepseek = DeepInfraLLM(
@@ -139,11 +127,24 @@ llm_deepseek = DeepInfraLLM(
     temperature=0,
 )
 
+llm_gemini = Gemini(
+    model="models/gemini-2.0-flash",
+    api_key=GOOGLE_API_KEY,
+    temperature=0,
+)
+
 query_engine_deepseek = index.as_query_engine(
     llm=llm_deepseek,
     text_qa_template=text_qa_template,
-    refine_template=refine_template,
-    node_postprocessors=[rerank]
+    node_postprocessors=[rerank],
+    similarity_top_k=5
+)
+
+query_engine_gemini = index.as_query_engine(
+    llm=llm_gemini,
+    text_qa_template=text_qa_template,
+    node_postprocessors=[rerank],
+    similarity_top_k=5
 )
 
 processing_query = False
@@ -172,6 +173,9 @@ def handle_query():
             elif selected_llm == "DeepSeek V3":
                 current_engine = query_engine_deepseek
                 llm_usado = 'DeepSeek V3'
+            elif selected_llm == "Gemini 2.0 Flash":
+                current_engine = query_engine_gemini
+                llm_usado = 'Gemini 2.0 Flash'
             else:
                 return jsonify({'error': 'Opción de LLM no reconocida.'}), 400
             logger.info(f"LLM forzado: {llm_usado}")
@@ -208,7 +212,6 @@ def handle_query():
         logger.info("Utilizando el reranker...")
         logger.info("Escribiendo respuesta...")
         response = current_engine.query(user_input)
-        logger.info("Refinando respuesta...")
         
         return jsonify({
             'response': str(response),
