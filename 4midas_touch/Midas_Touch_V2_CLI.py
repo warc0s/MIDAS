@@ -616,19 +616,51 @@ class IntentAgent:
     
     def _extract_possible_target(self, text: str) -> str:
         """Extrae posible nombre de columna objetivo del texto del usuario"""
-        # Buscar patrones comunes como "predecir X", "clasificar Y", etc.
+        # Patrones más flexibles para capturar la intención del usuario
         patterns = [
-            r"predecir\s+(?:la\s+)?(?:columna\s+)?['\"]*(\w+)['\"]*",
-            r"clasificar\s+(?:la\s+)?(?:columna\s+)?['\"]*(\w+)['\"]*",
-            r"pronosticar\s+(?:la\s+)?(?:columna\s+)?['\"]*(\w+)['\"]*",
-            r"target\s+(?:es\s+)?(?:columna\s+)?['\"]*(\w+)['\"]*",
-            r"objetivo\s+(?:es\s+)?(?:columna\s+)?['\"]*(\w+)['\"]*"
+            # Patrones de predicción directa
+            r"predecir\s+(?:la\s+)?(?:columna\s+)?['\"]?(\w+)['\"]?",
+            r"predecir\s+(?:el\s+)?(?:valor\s+(?:de\s+)?)?['\"]?(\w+)['\"]?",
+            r"predicción\s+(?:de\s+)?['\"]?(\w+)['\"]?",
+            r"prever\s+(?:la\s+)?['\"]?(\w+)['\"]?",
+            
+            # Patrones de clasificación
+            r"clasificar\s+(?:la\s+)?(?:columna\s+)?['\"]?(\w+)['\"]?",
+            r"clasificar\s+(?:por\s+)?['\"]?(\w+)['\"]?",
+            r"clasificación\s+(?:de\s+)?['\"]?(\w+)['\"]?",
+            
+            # Patrones de pronóstico
+            r"pronosticar\s+(?:la\s+)?(?:columna\s+)?['\"]?(\w+)['\"]?",
+            r"pronosticar\s+(?:el\s+)?(?:valor\s+(?:de\s+)?)?['\"]?(\w+)['\"]?",
+            r"pronóstico\s+(?:de\s+)?['\"]?(\w+)['\"]?",
+            
+            # Patrones de target/objetivo
+            r"target\s+(?:es\s+)?(?:columna\s+)?['\"]?(\w+)['\"]?",
+            r"objetivo\s+(?:es\s+)?(?:columna\s+)?['\"]?(\w+)['\"]?",
+            r"variable\s+(?:objetivo|target)\s+(?:es\s+)?['\"]?(\w+)['\"]?",
+            
+            # Patrones generales (buscar términos después de preposiciones comunes)
+            r"(?:modelo|predicción|clasificación)\s+(?:para|de)\s+['\"]?(\w+)['\"]?"
         ]
         
         for pattern in patterns:
             match = re.search(pattern, text, re.IGNORECASE)
             if match:
-                return match.group(1)
+                # Limpiar el resultado de posibles caracteres no deseados
+                possible_target = match.group(1).strip().lower()
+                # Si hay varias palabras, quedarse con la última (generalmente el sustantivo)
+                if ' ' in possible_target:
+                    possible_target = possible_target.split()[-1]
+                return possible_target
+        
+        # Enfoque alternativo: buscar nombres sustantivos en la consulta
+        nouns = re.findall(r'\b(\w+)\b', text.lower())
+        common_targets = ['edad', 'age', 'precio', 'price', 'clase', 'class', 'resultado', 'result', 
+                          'categoria', 'category', 'valor', 'value', 'tipo', 'type', 'target', 'label']
+        
+        for noun in nouns:
+            if noun in common_targets:
+                return noun
         
         # Si no encuentra nada, devolver un valor por defecto
         return "target"
@@ -679,51 +711,100 @@ class DataGuardianAgent(BaseAgent):
         return best_target
 
     def _generate_candidates(self, df: pd.DataFrame, intent: Dict) -> list:
-        """Genera candidatos usando múltiples estrategias."""
+        """Genera candidatos usando múltiples estrategias con priorización mejorada."""
         candidates = []
         
-        # 1. Coincidencia exacta
-        if intent['target_column'] in df.columns:
-            candidates.append(intent['target_column'])
+        # 0. Verificar si hay una columna que claramente sea la objetivo (target, label, etc.)
+        common_target_names = ['target', 'label', 'class', 'output', 'result', 'outcome']
+        exact_targets = [col for col in df.columns if col.lower() in common_target_names]
+        if exact_targets:
+            candidates.extend(exact_targets)
         
-        # 2. Búsqueda difusa
+        # 1. Coincidencia exacta (con variaciones de mayúsculas/minúsculas)
+        target_col = intent['target_column'].lower()
+        exact_matches = [col for col in df.columns if col.lower() == target_col]
+        if exact_matches:
+            candidates.extend(exact_matches)
+        
+        # 2. Traducción de términos comunes (ej: "edad" -> "age")
+        common_translations = {
+            'edad': 'age', 'precio': 'price', 'categoria': 'category', 
+            'clase': 'class', 'resultado': 'result', 'valor': 'value',
+            'tipo': 'type', 'nombre': 'name', 'sexo': 'gender',
+            'ingresos': 'income', 'salario': 'salary', 'ventas': 'sales'
+        }
+        
+        if target_col in common_translations:
+            translated = common_translations[target_col]
+            translated_matches = [col for col in df.columns 
+                                 if col.lower() == translated or translated in col.lower()]
+            candidates.extend(translated_matches)
+        
+        # Y el caso inverso (traducción inglés -> español)
+        reverse_translations = {v: k for k, v in common_translations.items()}
+        if target_col in reverse_translations:
+            translated = reverse_translations[target_col]
+            translated_matches = [col for col in df.columns 
+                                 if col.lower() == translated or translated in col.lower()]
+            candidates.extend(translated_matches)
+        
+        # 3. Búsqueda difusa con umbral más bajo para capturar más variantes
         fuzzy_matches = difflib.get_close_matches(
-            intent['target_column'], df.columns, 
-            n=3, cutoff=0.6
+            target_col, [col.lower() for col in df.columns], 
+            n=3, cutoff=0.5
         )
-        candidates.extend(fuzzy_matches)
         
-        # 3. Búsqueda semántica con IA
+        # Convertir coincidencias difusas a nombres reales de columnas
+        fuzzy_columns = []
+        for fuzzy in fuzzy_matches:
+            for col in df.columns:
+                if col.lower() == fuzzy:
+                    fuzzy_columns.append(col)
+                    break
+        
+        candidates.extend(fuzzy_columns)
+        
+        # 4. Búsqueda semántica con IA (como último recurso pero con mayor peso)
         semantic_matches = self._semantic_search(df.columns, intent)
-        candidates.extend(semantic_matches)
+        
+        # Añadir coincidencias semánticas con mayor prioridad
+        for match in semantic_matches:
+            if match not in candidates:
+                # Insertar al principio para darle mayor prioridad
+                candidates.insert(0, match)
         
         # Eliminar duplicados manteniendo el orden
         return list(dict.fromkeys(candidates))
 
     def _semantic_search(self, columns: list, intent: Dict) -> list:
         """Búsqueda semántica mejorada usando Gemini."""
-        # Crear un prompt más estructurado y claro
+        # Crear un prompt más enfocado en encontrar la coincidencia semántica
         column_list = "\n".join([f"- {col}" for col in columns])
+        user_context = intent['context']
+        target_suggestion = intent['target_column']
         
         prompt = f"""
-        # Contexto
-        Contexto del usuario: {intent['context']}
-        Target sugerido inicialmente: {intent['target_column']}
+        # Instrucción principal
+        Tu tarea es identificar qué columna en un dataset coincide semánticamente con lo que un usuario quiere predecir.
+
+        # Consulta del usuario
+        "{user_context}"
         
-        # Columnas disponibles
+        # Posible variable objetivo identificada en la consulta
+        "{target_suggestion}"
+        
+        # Columnas disponibles en el dataset
         {column_list}
 
-        # Tarea
-        Identifica la columna que es más probable que sea el objetivo para predicción/clasificación.
-        
-        # Criterios
-        1. Prioriza columnas que semánticamente se relacionen con el target sugerido
-        2. Nombres comunes para variables objetivo: target, label, class, category, result, etc.
-        3. En problemas de clasificación, busca columnas categóricas
-        4. En problemas de regresión, busca columnas numéricas
+        # Proceso de análisis
+        1. Analiza si hay alguna columna que coincida exactamente o sea muy similar a "{target_suggestion}"
+        2. Considera sinónimos y traducciones (ej: "edad" y "age" son equivalentes)
+        3. Busca coincidencias semánticas (ej: si quiere predecir "salario", columnas como "income", "wage", "salary" serían relevantes)
+        4. Ignora palabras como "predecir", "clasificar", "target", etc. y concéntrate en el concepto central
         
         # Formato de respuesta
-        Devuelve solo los nombres exactos de las 3 columnas más relevantes, separados por comas.
+        Devuelve SOLO los nombres exactos de hasta 3 columnas más relevantes en orden de relevancia, separados por comas.
+        Si no hay coincidencias claras, devuelve la columna que parezca más importante para predicción.
         """
         
         try:
@@ -734,25 +815,56 @@ class DataGuardianAgent(BaseAgent):
             return []
 
     def _parse_semantic_response(self, text: str, columns: list) -> list:
-        """Parsea la respuesta de la IA de manera más robusta."""
-        # Limpiar la respuesta
+        """Parsea la respuesta de la IA de manera más robusta para extraer nombres de columnas."""
+        # Limpiar la respuesta eliminando bloques de código markdown y espacios en blanco
         clean_text = re.sub(r'```.*?```', '', text, flags=re.DOTALL).strip()
         
-        # Estrategia 1: Buscar columnas directamente
-        matches = []
+        # Lista de coincidencias confirmadas
+        confirmed_matches = []
+        
+        # Primero, intentar extraer columnas explícitamente mencionadas
+        # Estrategia 1: Buscar columnas exactas con delimitadores comunes
         for col in columns:
-            if col in clean_text:
-                matches.append(col)
+            # Buscar el nombre de columna rodeado de delimitadores comunes
+            patterns = [
+                rf'\b{re.escape(col)}\b',  # Palabra completa
+                rf'["\']({re.escape(col)})["\']',  # Entre comillas
+                rf'\(({re.escape(col)})\)'  # Entre paréntesis
+            ]
+            
+            for pattern in patterns:
+                if re.search(pattern, clean_text, re.IGNORECASE):
+                    if col not in confirmed_matches:
+                        confirmed_matches.append(col)
+                    break
         
-        # Estrategia 2: Si no hay coincidencias, dividir por comas o líneas
-        if not matches:
-            potential_matches = re.split(r',|\n', clean_text)
-            for match in potential_matches:
-                clean_match = match.strip().strip('"\'').strip()
-                if clean_match in columns:
-                    matches.append(clean_match)
+        # Si ya tenemos coincidencias confirmadas, las devolvemos
+        if confirmed_matches:
+            return confirmed_matches[:3]
         
-        return matches[:3]  # Retornar hasta 3 coincidencias
+        # Estrategia 2: Dividir por delimitadores comunes y buscar coincidencias
+        potential_matches = []
+        for delimiter in [',', '\n', ';', ' - ', ' ']:
+            parts = clean_text.split(delimiter)
+            for part in parts:
+                clean_part = part.strip().strip('"\'`()[]{}').strip()
+                # Primero buscar coincidencias exactas
+                if clean_part in columns:
+                    potential_matches.append(clean_part)
+                else:
+                    # Luego buscar nombres de columna que puedan estar contenidos
+                    for col in columns:
+                        # Verificar si el nombre de columna está contenido o si la respuesta contiene el nombre
+                        if (col.lower() in clean_part.lower() or clean_part.lower() in col.lower()) and len(clean_part) > 2:
+                            potential_matches.append(col)
+        
+        # Eliminar duplicados manteniendo el orden
+        unique_potential = []
+        for match in potential_matches:
+            if match not in unique_potential:
+                unique_potential.append(match)
+        
+        return unique_potential[:3]
 
     def _validate_candidate(self, df: pd.DataFrame, candidates: list, intent: Dict) -> str:
         """Valida y selecciona la mejor columna candidata."""

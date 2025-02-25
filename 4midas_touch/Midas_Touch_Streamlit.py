@@ -243,16 +243,6 @@ def display_notebook_cell(cell):
         # Mostrar código con scroll horizontal
         st.code(source, language='python')
 
-
-# Función para determinar si se está usando tema oscuro
-def is_dark_theme():
-    try:
-        return st.get_option("theme.base") == "dark"
-    except:
-        # Si no se puede determinar, asumir tema claro
-        return False
-
-
 # Aplicación Streamlit principal
 def main():
     st.set_page_config(
@@ -261,17 +251,14 @@ def main():
         layout="wide",
     )
     
-    # Detectar si estamos en modo oscuro
-    dark_mode = is_dark_theme()
-    
-    # CSS personalizado con soporte para tema oscuro
-    st.markdown(f"""
+    # CSS personalizado con colores universales compatibles con ambos modos
+    st.markdown("""
     <style>
-    /* Estilos del botón de descarga (adaptativo) */
-    .download-button {{
+    /* Estilos del botón de descarga (universal) */
+    .download-button {
         display: inline-block;
         padding: 8px 16px;
-        background-color: {("#1E88E5" if not dark_mode else "#1565C0")};
+        background-color: #3498DB;
         color: white !important;
         text-align: center;
         text-decoration: none;
@@ -279,65 +266,65 @@ def main():
         border-radius: 4px;
         transition: background-color 0.3s;
         margin: 8px 0;
-    }}
-    .download-button:hover {{
-        background-color: {("#0D47A1" if not dark_mode else "#0D47A1")};
+    }
+    .download-button:hover {
+        background-color: #2980B9;
         text-decoration: none;
-    }}
-    
+    }
+
     /* Estilos para el formato del notebook */
-    .notebook-markdown h1 {{
+    .notebook-markdown h1 {
         font-size: 1.5em !important;
-    }}
-    .notebook-markdown h2 {{
+    }
+    .notebook-markdown h2 {
         font-size: 1.3em !important;
-    }}
-    .notebook-markdown h3 {{
+    }
+    .notebook-markdown h3 {
         font-size: 1.1em !important;
-    }}
-    
-    /* Tarjetas de métricas (adaptativo) */
-    .metric-card {{
-        background-color: {("#f8f9fa" if not dark_mode else "#2C3E50")};
+    }
+
+    /* Tarjetas de métricas (universal) */
+    .metric-card {
+        background-color: #48332f;
         border-radius: 8px;
         padding: 10px;
         margin: 5px;
         text-align: center;
-        box-shadow: 0 2px 4px {("rgba(0,0,0,0.1)" if not dark_mode else "rgba(0,0,0,0.2)")};
-    }}
-    .metric-value {{
+        box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    }
+    .metric-value {
         font-size: 1.5em;
         font-weight: bold;
-        color: {("#1E88E5" if not dark_mode else "#3498DB")};
-    }}
-    .metric-label {{
+        color: #3498DB;
+    }
+    .metric-label {
         font-size: 0.9em;
-        color: {("#555" if not dark_mode else "#ECF0F1")};
-    }}
-    
-    /* Tarjetas de descarga (adaptativo) */
-    .download-card {{
-        background-color: {("#ffffff" if not dark_mode else "#34495E")};
+        color: #ECF0F1;
+    }
+
+    /* Tarjetas de descarga (universal) */
+    .download-card {
+        background-color: #2C3E50;
         border-radius: 8px;
         padding: 15px;
-        box-shadow: 0 2px 4px {("rgba(0,0,0,0.05)" if not dark_mode else "rgba(0,0,0,0.2)")};
+        box-shadow: 0 2px 4px rgba(0,0,0,0.15);
         height: 100%;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-    }}
-    .download-title {{
+    }
+    .download-title {
         text-align: center;
         margin-bottom: 10px;
         font-weight: bold;
-        color: {("#333" if not dark_mode else "#ECF0F1")};
-    }}
-    .download-description {{
+        color: #ECF0F1;
+    }
+    .download-description {
         font-size: 0.85em;
-        color: {("#666" if not dark_mode else "#BDC3C7")};
+        color: #BDC3C7;
         margin-bottom: 15px;
         flex-grow: 1;
-    }}
+    }
     </style>
     """, unsafe_allow_html=True)
     
@@ -592,9 +579,9 @@ def main():
             st.markdown("""
             1. **Sube** un archivo CSV con tus datos
             2. **Describe** tu tarea, por ejemplo:
-               - "Predecir el precio de las casas basado en sus características"
-               - "Clasificar clientes según su probabilidad de abandono"
-               - "Determinar si un correo es spam o no"
+               - "Predecir la columna 'precio' de las casas basado en sus características, problema de regresion"
+               - "Clasificar clientes según su probabilidad de abandono, problema de clasificacion"
+               - "Determinar si un correo es spam o no, etiqueta 'spam' problema de clasificacion"
             3. **Inicia** el procesamiento y espera los resultados
             4. **Descarga** el modelo entrenado, notebook y documentación
             """)
