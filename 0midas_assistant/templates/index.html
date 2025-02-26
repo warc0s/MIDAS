@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Midas Assistant | MIDAS System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .message-entrance {
+            animation: messageEntrance 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28) both;
+        }
+
+        @keyframes messageEntrance {
+            0% { opacity: 0; transform: translateY(20px) scale(0.95); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* Colores personalizados para Midas Assistant (diferente de Midas Help) */
+        .chatbot-message {
+            background: linear-gradient(145deg, #121828 0%, #1A2236 100%);
+            box-shadow: 0 8px 32px rgba(18, 24, 40, 0.1);
+            border: 1px solid rgba(74, 144, 226, 0.15);
+        }
+
+        .user-message {
+            background: linear-gradient(45deg, #4A90E2 0%, #6BB3FF 30%, #A1D2FF 100%);
+            box-shadow: 0 8px 24px rgba(74, 144, 226, 0.2);
+        }
+
+        .ai-gradient-text {
+            background: linear-gradient(135deg, #4A90E2 0%, #6BB3FF 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .loading-dots:after {
+            content: '.';
+            animation: dots 1.4s infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60% { content: '...'; }
+            80%, 100% { content: ''; }
+        }
+
+        .prose :where(code):not(:where([class~="not-prose"] *)) {
+            background: rgba(74, 144, 226, 0.15);
+            padding: 0.2em 0.4em;
+            border-radius: 0.25rem;
+        }
+
+        /* Nuevos estilos añadidos */
+        .chatbot-message h3 {
+            color: #4A90E2 !important;
+            font-weight: 600 !important;
+            font-size: clamp(1rem, 2vw, 1.125rem) !important;
+            margin-bottom: 0.5rem !important;
+        }
+
+        /* Estilos para el aviso de procesamiento */
+        .processing-notice {
+            display: none;
+        }
+        .processing-notice.visible {
+            display: block;
+        }
+
+        /* Estilos responsivos */
+        @media (max-width: 640px) {
+            .chat-container {
+                width: 100% !important;
+                padding: 0.5rem;
+            }
+            
+            .chatbot-message, .user-message {
+                padding: 1rem !important;
+            }
+
+            input[type="text"] {
+                font-size: 0.9rem;
+            }
+
+            header h1 {
+                font-size: clamp(1.25rem, 4vw, 1.5rem);
+            }
+
+            #clearChat {
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (min-width: 641px) and (max-width: 768px) {
+            .chat-container {
+                width: 95% !important;
+                margin-left: auto;
+                margin-right: auto;
+            }
+        }
+
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .chat-container {
+                width: 85% !important;
+            }
+        }
+
+        @media (min-width: 1025px) {
+            .chat-container {
+                width: 75% !important;
+                max-width: 1200px;
+            }
+        }
+        
+        .text-[15px] {
+            font-size: clamp(0.875rem, 1.5vw, 0.9375rem);
+        }
+
+        .p-5 {
+            padding: clamp(1rem, 3vw, 1.25rem);
+        }
+
+        .space-x-4 > * + * {
+            margin-left: clamp(0.75rem, 2vw, 1rem);
+        }
+
+        .w-9 {
+            width: clamp(2rem, 4vw, 2.25rem);
+        }
+
+        .h-9 {
+            height: clamp(2rem, 4vw, 2.25rem);
+        }
+
+        @media (min-width: 768px) {
+            .chat-container {
+                max-width: 90% !important;
+                margin-left: auto;
+                margin-right: auto;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .chat-container {
+                max-width: 80% !important;
+            }
+        }
+        
+        /* Custom Scrollbar Styles */
+        #chatContainer::-webkit-scrollbar {
+            width: 8px;
+        }
+        #chatContainer::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        #chatContainer::-webkit-scrollbar-thumb {
+            background: linear-gradient(145deg, #4A90E2, #6BB3FF);
+            border-radius: 4px;
+        }
+        #chatContainer::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(145deg, #6BB3FF, #4A90E2);
+        }
+
+        #chatContainer {
+            scrollbar-width: thin;
+            scrollbar-color: #4A90E2 transparent;
+        }
+
+        /* Animación para puntos suspensivos */
+        @keyframes ellipsis {
+            0% { content: '.'; }
+            33% { content: '..'; }
+            66% { content: '...'; }
+            100% { content: '.'; }
+        }
+        .progress-text::after {
+            content: '.'; 
+            animation: ellipsis 1.5s infinite;
+            display: inline-block;
+            width: 20px;
+            text-align: left;
+        }
+
+        /* Estilos para los componentes - ACTUALIZADO PARA SER MÁS RESPONSIVO */
+        .component-section {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-top: 16px;
+            position: relative;
+        }
+        
+        /* Responsive grid para componentes */
+        @media (max-width: 768px) {
+            .component-section {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .component-section {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            /* Centrar los 2 últimos componentes en pantallas medianas */
+            .component-section > :nth-last-child(-n+2) {
+                grid-column-start: span 1;
+                margin-left: auto;
+                margin-right: auto;
+                width: 90%;
+            }
+        }
+
+        .component-card {
+            background: rgba(74, 144, 226, 0.1);
+            border: 1px solid rgba(74, 144, 226, 0.2);
+            border-radius: 12px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .component-card:hover {
+            transform: translateY(-2px);
+            background: rgba(74, 144, 226, 0.15);
+            border-color: rgba(74, 144, 226, 0.3);
+        }
+
+        /* Botón de cierre para la sección de componentes */
+        .close-components {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 24px;
+            height: 24px;
+            background: #4A90E2;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            z-index: 10;
+            transition: all 0.2s ease;
+        }
+
+        /* Asegurarse de que el contenedor tenga posición relativa */
+        .components-container {
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .close-components:hover {
+            background: #6BB3FF;
+            transform: scale(1.1);
+        }
+
+        /* Estilos específicos para los componentes */
+        .icon-architect { color: #9C27B0; }
+        .icon-dataset { color: #4CAF50; }
+        .icon-plot { color: #2196F3; }
+        .icon-touch { color: #FF9800; }
+        .icon-help { color: #F44336; }
+        .icon-test { color: #607D8B; }
+        .icon-assistant { color: #4A90E2; }
+        .icon-deploy { color: #00BCD4; }
+        
+        /* Animación para fading de la sección componentes */
+        .components-container {
+            transition: all 0.3s ease;
+        }
+        
+        .components-hidden {
+            height: 0;
+            opacity: 0;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body class="h-full bg-[#0B0F19]">
+    <div class="flex flex-col h-full mx-auto chat-container">
+        <!-- Header Premium -->
+        <header class="pt-8 px-4">
+            <div class="flex items-center space-x-4">
+                <div class="relative group">
+                    <div class="absolute inset-0 bg-gradient-to-r from-[#4A90E2] to-[#6BB3FF] rounded-xl blur opacity-30 group-hover:opacity-50 transition duration-500"></div>
+                    <div class="relative bg-[#121828] px-6 py-3 rounded-xl border border-[#2D3748]">
+                        <h1 class="text-2xl font-bold ai-gradient-text">Midas Assistant</h1>
+                    </div>
+                </div>
+                <button id="clearChat" class="px-4 py-2 bg-[#121828] hover:bg-[#1A2236] text-[#4A90E2] rounded-xl border border-[#2D3748] transition-all hover:border-[#4A90E2] flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                    </svg>
+                    Limpiar chat
+                </button>
+                <div class="h-px flex-1 bg-gradient-to-r from-[#4A90E222] via-[#4A90E2aa] to-[#4A90E222]"></div>
+            </div>
+        </header>
+
+        <!-- Chat Container -->
+        <div class="flex-1 overflow-hidden relative mt-4">
+            <div class="h-full overflow-y-auto scrollbar-thin scrollbar-thumb-[#2D3748] scrollbar-track-transparent px-4" id="chatContainer">
+                <!-- Mensaje del Sistema -->
+                <div class="message-entrance mb-6">
+                    <div class="chatbot-message rounded-[1.75rem] p-5 backdrop-blur-lg">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#4A90E2] to-[#6BB3FF] flex items-center justify-center animate-float">
+                                <svg class="w-5 h-5 text-[#0B0F19]" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                                    <path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z"/>
+                                </svg>
+                            </div>
+                            <div class="flex-1 space-y-2.5">
+                                <h3 class="text-[#4A90E2] font-semibold text-lg">Midas Assistant</h3>
+                                <p class="text-[#CBD5E0] leading-relaxed text-[15px]">Bienvenido a Midas Assistant. Puedo ayudarte con información sobre los componentes del sistema MIDAS, recomendaciones de flujos de trabajo, y consejos para utilizar cada herramienta de manera efectiva.</p>
+                            </div>
+                        </div>
+
+                        <!-- Sección de componentes MIDAS -->
+                        <div class="mt-4 border-t border-gray-700 pt-4 components-container" id="componentsSection">
+                            <div class="flex justify-between items-center mb-2">
+                                <p class="text-[#4A90E2] font-medium">Componentes MIDAS disponibles:</p>
+                                <div class="close-components" id="closeComponents">
+                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="component-section">
+                                <!-- MIDAS ARCHITECT -->
+                                <div class="component-card" data-component="MIDAS ARCHITECT">
+                                    <div class="flex items-center mb-2">
+                                        <div class="w-6 h-6 rounded-md bg-[#121828] flex items-center justify-center mr-2 border border-[#9C27B0]/30">
+                                            <svg class="w-4 h-4 icon-architect" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                            </svg>
+                                        </div>
+                                        <span class="text-sm text-[#9C27B0] font-medium">ARCHITECT</span>
+                                    </div>
+                                    <p class="text-xs text-gray-400">Documentación y diseño de agentes</p>
+                                </div>
+
+                                <!-- MIDAS DATASET -->
+                                <div class="component-card" data-component="MIDAS DATASET">
+                                    <div class="flex items-center mb-2">
+                                        <div class="w-6 h-6 rounded-md bg-[#121828] flex items-center justify-center mr-2 border border-[#4CAF50]/30">
+                                            <svg class="w-4 h-4 icon-dataset" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
+                                            </svg>
+                                        </div>
+                                        <span class="text-sm text-[#4CAF50] font-medium">DATASET</span>
+                                    </div>
+                                    <p class="text-xs text-gray-400">Generación de datos sintéticos</p>
+                                </div>
+
+                                <!-- MIDAS PLOT -->
+                                <div class="component-card" data-component="MIDAS PLOT">
+                                    <div class="flex items-center mb-2">
+                                        <div class="w-6 h-6 rounded-md bg-[#121828] flex items-center justify-center mr-2 border border-[#2196F3]/30">
+                                            <svg class="w-4 h-4 icon-plot" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                            </svg>
+                                        </div>
+                                        <span class="text-sm text-[#2196F3] font-medium">PLOT</span>
+                                    </div>
+                                    <p class="text-xs text-gray-400">Visualización de datos</p>
+                                </div>
+
+                                <!-- MIDAS TOUCH -->
+                                <div class="component-card" data-component="MIDAS TOUCH">
+                                    <div class="flex items-center mb-2">
+                                        <div class="w-6 h-6 rounded-md bg-[#121828] flex items-center justify-center mr-2 border border-[#FF9800]/30">
+                                            <svg class="w-4 h-4 icon-touch" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                            </svg>
+                                        </div>
+                                        <span class="text-sm text-[#FF9800] font-medium">TOUCH</span>
+                                    </div>
+                                    <p class="text-xs text-gray-400">Creación de modelos optimizados</p>
+                                </div>
+
+                                <!-- MIDAS HELP -->
+                                <div class="component-card" data-component="MIDAS HELP">
+                                    <div class="flex items-center mb-2">
+                                        <div class="w-6 h-6 rounded-md bg-[#121828] flex items-center justify-center mr-2 border border-[#F44336]/30">
+                                            <svg class="w-4 h-4 icon-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                        </div>
+                                        <span class="text-sm text-[#F44336] font-medium">HELP</span>
+                                    </div>
+                                    <p class="text-xs text-gray-400">Soporte técnico</p>
+                                </div>
+
+                                <!-- MIDAS TEST -->
+                                <div class="component-card" data-component="MIDAS TEST">
+                                    <div class="flex items-center mb-2">
+                                        <div class="w-6 h-6 rounded-md bg-[#121828] flex items-center justify-center mr-2 border border-[#607D8B]/30">
+                                            <svg class="w-4 h-4 icon-test" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                                            </svg>
+                                        </div>
+                                        <span class="text-sm text-[#607D8B] font-medium">TEST</span>
+                                    </div>
+                                    <p class="text-xs text-gray-400">Validación de modelos</p>
+                                </div>
+
+                                <!-- MIDAS ASSISTANT -->
+                                <div class="component-card" data-component="MIDAS ASSISTANT">
+                                    <div class="flex items-center mb-2">
+                                        <div class="w-6 h-6 rounded-md bg-[#121828] flex items-center justify-center mr-2 border border-[#4A90E2]/30">
+                                            <svg class="w-4 h-4 icon-assistant" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                                            </svg>
+                                        </div>
+                                        <span class="text-sm text-[#4A90E2] font-medium">ASSISTANT</span>
+                                    </div>
+                                    <p class="text-xs text-gray-400">Orientación y recomendaciones</p>
+                                </div>
+
+                                <!-- MIDAS DEPLOY -->
+                                <div class="component-card" data-component="MIDAS DEPLOY">
+                                    <div class="flex items-center mb-2">
+                                        <div class="w-6 h-6 rounded-md bg-[#121828] flex items-center justify-center mr-2 border border-[#00BCD4]/30">
+                                            <svg class="w-4 h-4 icon-deploy" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                            </svg>
+                                        </div>
+                                        <span class="text-sm text-[#00BCD4] font-medium">DEPLOY</span>
+                                    </div>
+                                    <p class="text-xs text-gray-400">Interfaces para usuarios finales</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Área de Entrada -->
+        <div class="pb-8 pt-4 px-4">
+            <div class="relative group">
+                <div class="absolute inset-0 bg-gradient-to-r from-[#4A90E2] to-[#6BB3FF] blur opacity-10 group-hover:opacity-20 transition-opacity duration-300 rounded-2xl"></div>
+                <div class="relative flex items-center space-x-4 bg-[#121828] rounded-2xl p-4 border border-[#2D3748] shadow-2xl">
+                    <input 
+                        id="userInput"
+                        type="text" 
+                        placeholder="Escribe tu consulta sobre MIDAS..." 
+                        data-default-placeholder="Escribe tu consulta sobre MIDAS..."
+                        data-processing-placeholder="Espera a que el asistente conteste para enviar otro mensaje"
+                        class="flex-1 bg-transparent text-[#E2E8F0] placeholder-[#4A5568] focus:outline-none text-[15px]"
+                    >
+                    <button 
+                        id="sendButton"
+                        class="p-3 bg-gradient-to-br from-[#4A90E2] to-[#6BB3FF] rounded-xl hover:scale-105 transition-transform duration-200 shadow-lg"
+                    >
+                        <svg class="w-6 h-6 text-[#0B0F19]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <!-- Aviso de procesamiento -->
+            <div id="processingNotice" class="processing-notice text-center text-[#CBD5E0] text-sm mt-2">
+                <span class="text-[#4A90E2] font-medium">Procesando tu consulta...</span> Por favor, espera un momento.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class ChatSystem {
+            constructor() {
+                this.container = document.getElementById('chatContainer')
+                this.history = JSON.parse(localStorage.getItem('midasAssistantChatHistory')) || []
+                this.loadingMessageId = null
+                this.loadingTimer = null
+                this.loadingStepIndex = 0
+                this.progressSteps = ["Analizando consulta", "Procesando información", "Generando respuesta"]
+                this.welcomeMessage = {
+                    role: 'assistant',
+                    content: '### Midas Assistant\n\nBienvenido a Midas Assistant. Puedo ayudarte con información sobre los componentes del sistema MIDAS, recomendaciones de flujos de trabajo, y consejos para utilizar cada herramienta de manera efectiva.'
+                }
+                this.processing = false
+                
+                // Si es la primera vez, mostramos el mensaje de bienvenida 
+                // pero no lo guardamos en el historial para mantener los componentes
+                if(this.history.length === 0) {
+                    // No necesitamos hacer nada aquí, ya que el mensaje de bienvenida
+                    // está incluido en el HTML con los componentes
+                }
+
+                this.setupEventListeners()
+                this.loadHistory()
+            }
+
+            setupEventListeners() {
+                document.getElementById('userInput').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault()
+                        this.sendMessage()
+                    }
+                })
+
+                document.getElementById('sendButton').addEventListener('click', () => {
+                    this.sendMessage()
+                })
+
+                document.getElementById('clearChat').addEventListener('click', () => {
+                    this.clearChat()
+                })
+
+                // Evento para cerrar la sección de componentes
+                document.getElementById('closeComponents').addEventListener('click', () => {
+                    document.getElementById('componentsSection').classList.add('components-hidden');
+                })
+
+                // Eventos para las tarjetas de componentes
+                document.querySelectorAll('.component-card').forEach(card => {
+                    card.addEventListener('click', () => {
+                        const componentName = card.getAttribute('data-component');
+                        document.getElementById('userInput').value = `Cuéntame sobre ${componentName}`;
+                        document.getElementById('userInput').focus();
+                    });
+                });
+            }
+
+            loadHistory() {
+                // Si hay historial, limpiamos el contenedor y lo cargamos
+                if (this.history.length > 0) {
+                    this.container.innerHTML = '';
+                    this.history.forEach(msg => this.addMessageElement(msg.role, msg.content, false));
+                }
+                this.scrollToBottom();
+            }
+
+            async sendMessage() {
+                if (this.processing) {
+                    return;
+                }
+                
+                const input = document.getElementById('userInput');
+                const message = input.value.trim();
+                if (!message) {
+                    return;
+                }
+
+                // Activar estado de procesamiento
+                this.processing = true;
+                document.getElementById("processingNotice").classList.add("visible");
+                input.disabled = true;
+                input.placeholder = input.dataset.processingPlaceholder;
+                document.getElementById("sendButton").disabled = true;
+
+                input.value = '';
+                this.addMessage('user', message);
+                this.showLoading();
+
+                try {
+                    const response = await fetch('/query', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ message })
+                    });
+
+                    if (!response.ok) throw new Error(await response.text());
+                    const data = await response.json();
+
+                    this.removeLoading();
+                    this.addMessage('assistant', data.response);
+                    this.saveHistory();
+                } catch (error) {
+                    this.removeLoading();
+                    this.addMessage('assistant', `**Error:** ${error.message}`);
+                    console.error('API Error:', error);
+                } finally {
+                    // Desactivar estado de procesamiento
+                    this.processing = false;
+                    document.getElementById("processingNotice").classList.remove("visible");
+                    input.disabled = false;
+                    input.placeholder = input.dataset.defaultPlaceholder;
+                    document.getElementById("sendButton").disabled = false;
+                }
+            }
+
+            addMessage(role, content) {
+                this.addMessageElement(role, content, true);
+                this.history.push({ role, content });
+                this.scrollToBottom();
+            }
+
+            addMessageElement(role, content, animate = true) {
+                const isAI = role === 'assistant';
+                const div = document.createElement('div');
+                div.className = `message-entrance mb-6 ${animate ? 'opacity-0' : ''}`;
+
+                div.innerHTML = `
+                    <div class="${isAI ? '' : 'flex justify-end'}">
+                        <div class="${isAI ? 
+                            'chatbot-message rounded-[1.75rem] hover:border-[#4A90E233] transition-all relative' : 
+                            'user-message rounded-[1.25rem] hover:shadow-xl transition-transform'} 
+                            p-5 max-w-[85%] transform hover:scale-[1.01]">
+                            <div class="flex items-center gap-4 ${isAI ? '' : 'flex-row-reverse'}">
+                                ${isAI ? ` 
+                                    <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#4A90E2] to-[#6BB3FF] flex items-center justify-center shrink-0">
+                                        <svg class="w-5 h-5 text-[#0B0F19]" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                                            <path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z"/>
+                                        </svg>
+                                    </div>
+                                ` : ` 
+                                    <div class="w-9 h-9 rounded-xl bg-[#0B0F19]/80 flex items-center justify-center shrink-0 border border-[#4A90E2]/20">
+                                        <svg class="w-5 h-5 text-[#6BB3FF]" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/>
+                                        </svg>
+                                    </div>
+                                `}
+                                <div class="flex-1 ${isAI ? 'text-[#CBD5E0]' : 'text-[#0B0F19]'} prose prose-invert max-w-none text-[15px] leading-snug">
+                                    ${marked.parse(content)}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                if (!animate) div.style.opacity = 1;
+                this.container.appendChild(div);
+                
+                // Animar la entrada del mensaje si es necesario
+                if (animate) {
+                    setTimeout(() => {
+                        div.style.opacity = 1;
+                    }, 10);
+                }
+                
+                return div;
+            }
+
+            showLoading() {
+                const div = document.createElement('div');
+                div.id = 'loadingMessage';
+                div.className = 'message-entrance mb-6';
+                div.innerHTML = `
+                    <div class="chatbot-message rounded-[1.75rem] p-5 backdrop-blur-lg">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#4A90E2] to-[#6BB3FF] flex items-center justify-center">
+                                <div class="w-5 h-5 border-2 border-[#0B0F19] border-t-transparent rounded-full animate-spin"></div>
+                            </div>
+                            <div class="text-[#CBD5E0] text-[15px] progress-text">${this.progressSteps[0]}</div>
+                        </div>
+                    </div>
+                `;
+                this.container.appendChild(div);
+                this.scrollToBottom();
+                this.loadingStepIndex = 0;
+                
+                // Actualiza el mensaje cada 2 segundos, avanzando por los pasos hasta el último
+                this.loadingTimer = setInterval(() => {
+                    if (this.loadingStepIndex < this.progressSteps.length - 1) {
+                        this.loadingStepIndex++;
+                        const progressElement = document.querySelector("#loadingMessage .progress-text");
+                        if (progressElement) {
+                            progressElement.innerText = this.progressSteps[this.loadingStepIndex];
+                        }
+                    }
+                }, 2000);
+            }
+
+            removeLoading() {
+                const loadingDiv = document.getElementById('loadingMessage');
+                if (loadingDiv) loadingDiv.remove();
+                if (this.loadingTimer) {
+                    clearInterval(this.loadingTimer);
+                    this.loadingTimer = null;
+                }
+            }
+
+            saveHistory() {
+                localStorage.setItem('midasAssistantChatHistory', JSON.stringify(this.history));
+            }
+
+            scrollToBottom() {
+                setTimeout(() => {
+                    this.container.scrollTop = this.container.scrollHeight;
+                }, 100);
+            }
+
+            clearChat() {
+                this.history = [];
+                this.saveHistory();
+                window.location.reload(); // Recargar la página para mostrar el mensaje inicial con componentes
+            }
+        }
+
+        // Inicializar el sistema de chat cuando se carga la página
+        document.addEventListener('DOMContentLoaded', () => {
+            window.chatSystem = new ChatSystem();
+        });
+    </script>
+</body>
+</html>

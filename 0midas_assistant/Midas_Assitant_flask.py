@@ -1,27 +1,23 @@
-#!/usr/bin/env python3
-"""
-Midas Assistant - Un chatbot basado en LiteLLM que proporciona información 
-sobre los componentes de MIDAS y recomendaciones sobre su uso.
-"""
-
+from flask import Flask, render_template, request, jsonify
 import os
-import sys
-import time
-from typing import List, Dict
 from dotenv import load_dotenv
 from litellm import completion
-import re
-from colorama import Fore, Style, init
+import logging
 
-# Inicializar colorama para colores en la terminal
-init()
+# Configurar logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Cargar variables de entorno
 load_dotenv()
 API_KEY = os.getenv("API_KEY")
 MODEL = os.getenv("MODEL")
 
-# Definición del system prompt por componentes
+# Crear la aplicación Flask
+app = Flask(__name__)
+app.secret_key = os.urandom(24)
+
+# Definición del system prompt
 SYSTEM_PROMPT = """
 Eres Midas Assistant, un asistente especializado en el sistema MIDAS (Multi-agent Intelligent Data Automation System). Tu objetivo es ayudar a los usuarios a comprender y utilizar eficientemente los componentes del sistema MIDAS.
 
@@ -94,123 +90,94 @@ Eres Midas Assistant, un asistente especializado en el sistema MIDAS (Multi-agen
 Recuerda siempre proporcionar recomendaciones prácticas y basadas en los componentes de MIDAS, evitando respuestas genéricas.
 """
 
-def clear_screen():
-    """Limpia la pantalla de la terminal."""
-    os.system('cls' if os.name == 'nt' else 'clear')
+# Almacenamiento de historial de conversaciones (memoria)
+chat_history = {}  # Diccionario para almacenar historial de mensajes por sesión
 
-def print_welcome():
-    """Imprime un mensaje de bienvenida."""
-    clear_screen()
-    print(f"{Fore.YELLOW}{'='*70}{Style.RESET_ALL}")
-    print(f"{Fore.YELLOW}{'='*20} MIDAS ASSISTANT {'='*20}{Style.RESET_ALL}")
-    print(f"{Fore.YELLOW}{'='*70}{Style.RESET_ALL}")
-    print(f"\n{Fore.CYAN}Bienvenido a Midas Assistant, tu guía para el sistema MIDAS.\n")
-    print(f"Puedes preguntarme sobre cualquier componente del sistema, cómo")
-    print(f"utilizarlos juntos, o consejos sobre prompts efectivos para cada uno.")
-    print(f"\nEscribe '{Fore.GREEN}salir{Style.RESET_ALL}' o '{Fore.GREEN}exit{Style.RESET_ALL}' para terminar.{Style.RESET_ALL}\n")
-    print(f"{Fore.YELLOW}{'='*70}{Style.RESET_ALL}\n")
-
-def format_chunk(text: str) -> str:
-    """Formatea un fragmento de texto para resaltar componentes y elementos clave."""
-    # Resaltar los nombres de los componentes
-    components = ["MIDAS ARCHITECT", "MIDAS DATASET", "MIDAS PLOT", "MIDAS TOUCH", 
-                  "MIDAS HELP", "MIDAS TEST", "MIDAS ASSISTANT", "MIDAS DEPLOY"]
-    
-    for component in components:
-        text = re.sub(f"({component})", f"{Fore.GREEN}\\1{Style.RESET_ALL}", text, flags=re.IGNORECASE)
-    
-    # Resaltar citas o ejemplos de prompts
-    text = re.sub(r'(".*?")', f"{Fore.CYAN}\\1{Style.RESET_ALL}", text)
-    
-    # Resaltar pasos numerados
-    text = re.sub(r'(\d+\.\s)', f"{Fore.YELLOW}\\1{Style.RESET_ALL}", text)
-    
-    return text
-
-def get_streaming_response(prompt: str, chat_history: List[Dict] = None) -> str:
-    """Obtiene una respuesta del modelo de chat con streaming."""
-    if chat_history is None:
-        chat_history = []
-    
-    # Agregar el mensaje del usuario al historial
-    chat_history.append({"role": "user", "content": prompt})
-    
+def get_response(message, session_id="default"):
+    """Obtiene una respuesta del LLM usando litellm con memoria de conversación"""
     try:
-        print(f"\n{Fore.BLUE}Midas Assistant > {Style.RESET_ALL}", end="", flush=True)
+        logger.info(f"Procesando mensaje para sesión {session_id} usando modelo {MODEL}")
         
-        # Iniciar la llamada de streaming
-        response_stream = completion(
+        # Inicializar historial si no existe
+        if session_id not in chat_history:
+            chat_history[session_id] = []
+        
+        # Construir mensajes con historial
+        messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+        
+        # Añadir mensajes anteriores al contexto
+        messages.extend(chat_history[session_id])
+        
+        # Añadir mensaje actual
+        messages.append({"role": "user", "content": message})
+        
+        # Llamar a la API
+        response = completion(
             model=MODEL,
-            messages=[
-                {"role": "system", "content": SYSTEM_PROMPT},
-                *chat_history
-            ],
-            api_key=API_KEY,
-            stream=True
+            messages=messages,
+            api_key=API_KEY
         )
         
-        # Acumular la respuesta completa para guardarla en el historial
-        full_response = ""
+        # Obtener respuesta
+        response_text = response.choices[0].message.content
         
-        # Procesar cada fragmento de la respuesta
-        for chunk in response_stream:
-            content = chunk.choices[0].delta.content or ""
-            if content:
-                formatted_content = format_chunk(content)
-                print(formatted_content, end="", flush=True)
-                full_response += content
-                # Pequeña pausa para simular una respuesta más natural (opcional)
-                # time.sleep(0.01)
+        # Actualizar historial
+        chat_history[session_id].append({"role": "user", "content": message})
+        chat_history[session_id].append({"role": "assistant", "content": response_text})
         
-        print("\n")  # Añadir una línea nueva al final
+        # Limitar el tamaño del historial (opcional, para evitar tokens excesivos)
+        if len(chat_history[session_id]) > 20:  # Mantener últimos 10 pares pregunta-respuesta
+            chat_history[session_id] = chat_history[session_id][-20:]
         
-        # Agregar la respuesta completa al historial
-        chat_history.append({"role": "assistant", "content": full_response})
-        
-        return full_response
-        
+        return response_text
+    
     except Exception as e:
-        error_msg = f"Error al comunicarse con el modelo: {str(e)}"
-        print(f"{Fore.RED}{error_msg}{Style.RESET_ALL}")
-        return error_msg
+        logger.error(f"Error al obtener respuesta: {str(e)}")
+        return f"Lo siento, ocurrió un error al procesar tu solicitud: {str(e)}"
 
-def main():
-    """Función principal para el CLI."""
-    print_welcome()
-    
-    if not API_KEY:
-        print(f"{Fore.RED}Error: API_KEY no encontrada en el archivo .env{Style.RESET_ALL}")
-        print("Por favor, crea un archivo .env con el siguiente contenido:")
-        print("API_KEY=tu_clave_api_aquí")
-        print("MODEL=nombre_completo_del_modelo")
-        print("\nEjemplo para usar Gemini 2.0 Flash:")
-        print("API_KEY=AIzaSyDF7tzmLrfr45Y6-45NitTkz5W0k")
-        print("MODEL=gemini/gemini-2.0-flash")
-        sys.exit(1)
-        
-    if not MODEL:
-        print(f"{Fore.RED}Error: MODEL no encontrado en el archivo .env{Style.RESET_ALL}")
-        print("Por favor, especifica el modelo completo en el archivo .env:")
-        print("MODEL=nombre_completo_del_modelo")
-        print("\nEjemplo para usar Gemini 2.0 Flash:")
-        print("MODEL=gemini/gemini-2.0-flash")
-        sys.exit(1)
-    
-    print(f"{Fore.CYAN}Usando modelo: {MODEL}{Style.RESET_ALL}\n")
-    
-    chat_history = []
-    
-    while True:
-        user_input = input(f"{Fore.GREEN}Tú > {Style.RESET_ALL}")
-        
-        if user_input.lower() in ["exit", "salir", "quit"]:
-            print(f"\n{Fore.YELLOW}¡Gracias por usar Midas Assistant! ¡Hasta pronto!{Style.RESET_ALL}")
-            break
-        
-        if not user_input.strip():
-            continue
-        
-        get_streaming_response(user_input, chat_history)
+def clear_session_history(session_id="default"):
+    """Limpia el historial de una sesión específica"""
+    if session_id in chat_history:
+        chat_history[session_id] = []
+        logger.info(f"Historial de la sesión {session_id} eliminado")
+    return True
 
-if __name__ == "__main__":
-    main()
+@app.route('/')
+def index():
+    """Renderiza la página principal"""
+    return render_template('index.html')
+
+@app.route('/query', methods=['POST'])
+def query():
+    """Procesa consultas y devuelve respuestas"""
+    data = request.json
+    user_message = data.get('message', '')
+    session_id = data.get('session_id', 'default')  # Usar ID de sesión si está disponible
+    
+    if not user_message:
+        return jsonify({"error": "No se proporcionó un mensaje"}), 400
+    
+    try:
+        response_text = get_response(user_message, session_id)
+        
+        # Mantener compatibilidad con el frontend anterior
+        return jsonify({
+            "response": response_text
+        })
+    
+    except Exception as e:
+        logger.error(f"Error en el endpoint /query: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/clear_history', methods=['POST'])
+def clear_history():
+    """Endpoint para limpiar el historial de chat"""
+    data = request.json
+    session_id = data.get('session_id', 'default')
+    
+    success = clear_session_history(session_id)
+    
+    return jsonify({"success": success})
+
+if __name__ == '__main__':
+    app.run(debug=True)
