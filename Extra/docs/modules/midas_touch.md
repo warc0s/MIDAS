@@ -183,3 +183,5 @@ Durante el proceso, se ofrece información en tiempo real sobre:
 - **Preprocesamiento especializado**: Algunas transformaciones de dominio específico (como procesamiento de texto, embeddings, o series temporales) no están implementadas.
 - **Optimización de hiperparámetros**: Actualmente usa configuraciones predeterminadas para los modelos, sin búsqueda de hiperparámetros.
 - **Explicabilidad de modelos**: No incluye herramientas avanzadas de interpretabilidad como SHAP o LIME.
+- **Consultar con usuario**: Nos hubiese gustado implementar un modo "semi-manual" donde Midas Touch te preguntase en ciertas decisiones clave qué quieres hacer. EJ: Tratamiento con outliers, sobre eliminar/aplicar media en ciertas columnas... Sin embargo, no pudimos implementarlo por falta de tiempo.
+- **Graficas**: Actualmente en el cuaderno ipynb no se muestran graficas que podrian ser relevantes, como la importancia de caracteristicas o matriz de correlación. 
