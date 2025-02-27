@@ -1,8 +1,7 @@
 {
   "model_type": "RandomForestRegressor",
-  "target_column": "rating",
+  "target_column": "calories",
   "features": [
-    "num__calories",
     "num__protein",
     "num__fat",
     "num__sodium",
@@ -14,6 +13,7 @@
     "num__shelf",
     "num__weight",
     "num__cups",
+    "num__rating",
     "cat__name_100% Bran",
     "cat__name_100% Natural Bran",
     "cat__name_All-Bran",
@@ -101,24 +101,24 @@
     "cat__type_C",
     "cat__type_H"
   ],
-  "creation_time": 1740481821.714982,
+  "creation_time": 1740689452.4093564,
   "performance_metrics": {
-    "r2": 0.8272544922361549,
-    "mse": 37.94446150270675,
-    "rmse": 6.15990758881225,
-    "cv_r2_mean": 0.7496235808437788,
-    "cv_r2_std": 0.04490488955235189
+    "r2": 0.610764397905759,
+    "mse": 116.16250000000005,
+    "rmse": 10.777870847249936,
+    "cv_r2_mean": 0.22234972543694118,
+    "cv_r2_std": 0.38555356336541763
   },
   "data_statistics": {
-    "target_column": "rating",
+    "target_column": "calories",
     "n_samples": 77,
     "missing_values": 0,
     "missing_ratio": 0.0,
-    "min": 18.042851,
-    "max": 93.704912,
-    "mean": 42.66570498701299,
-    "median": 40.400208,
-    "std": 14.04728874373522,
+    "min": 50.0,
+    "max": 160.0,
+    "mean": 106.88311688311688,
+    "median": 110.0,
+    "std": 19.484119056820845,
     "data_type": "numeric",
     "shape": [
       77,
@@ -189,5 +189,6 @@
   "pipeline_steps": [
     "feature_engineering"
   ],
+  "class_mapping": {},
   "version": "1.0.0"
 }

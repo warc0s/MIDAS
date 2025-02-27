@@ -1,0 +1,13 @@
+# Reporte de Modelo: 20250227_215052
+
+Columna objetivo: calories
+Tipo de problema: regression
+Tipo de modelo: RandomForestRegressor
+
+## Métricas de rendimiento
+
+r2: 0.6108
+mse: 116.1625
+rmse: 10.7779
+cv_r2_mean: 0.2223
+cv_r2_std: 0.3856
