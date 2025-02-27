@@ -6,6 +6,7 @@
     <title>Midas Assistant | MIDAS System</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
     <style>
         @keyframes float {
             0% { transform: translateY(0px); }
@@ -286,6 +287,98 @@
             padding: 0;
             overflow: hidden;
         }
+
+        /* Estilos mejorados para elementos markdown */
+        .prose ul {
+            list-style-type: disc !important;
+            padding-left: 1.5em !important;
+            margin: 0.75em 0 !important;
+        }
+
+        .prose ol {
+            list-style-type: decimal !important;
+            padding-left: 1.5em !important;
+            margin: 0.75em 0 !important;
+        }
+
+        .prose li {
+            margin: 0.4em 0 !important;
+            display: list-item !important;
+        }
+
+        .prose li::marker {
+            color: rgba(74, 144, 226, 0.8) !important;
+        }
+
+        .prose p {
+            margin: 0.75em 0 !important;
+        }
+
+        .prose p + p {
+            margin-top: 1em !important;
+        }
+
+        .prose blockquote {
+            border-left: 3px solid rgba(74, 144, 226, 0.5);
+            padding-left: 1em;
+            margin: 1em 0;
+            color: #CBD5E0;
+            font-style: italic;
+        }
+
+        .prose code {
+            background-color: rgba(74, 144, 226, 0.15);
+            border-radius: 0.25rem;
+            padding: 0.2em 0.4em;
+            font-family: monospace;
+        }
+
+        .prose pre {
+            background-color: rgba(18, 24, 40, 0.8);
+            border-radius: 0.5rem;
+            padding: 1em;
+            margin: 1em 0;
+            overflow-x: auto;
+            border: 1px solid rgba(74, 144, 226, 0.2);
+        }
+
+        .prose pre code {
+            background-color: transparent;
+            padding: 0;
+            border-radius: 0;
+            color: #CBD5E0;
+        }
+
+        .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+            color: #4A90E2 !important;
+            margin-top: 1.5em !important;
+            margin-bottom: 0.75em !important;
+            font-weight: 600 !important;
+        }
+
+        .prose table {
+            border-collapse: collapse;
+            margin: 1em 0;
+            width: 100%;
+        }
+
+        .prose th, .prose td {
+            border: 1px solid rgba(74, 144, 226, 0.2);
+            padding: 0.5em;
+            text-align: left;
+        }
+
+        .prose th {
+            background-color: rgba(74, 144, 226, 0.1);
+        }
+
+        /* Espacio entre párrafos */
+        .prose br + br {
+            display: block;
+            content: "";
+            margin-top: 1em;
+        }
+
     </style>
 </head>
 <body class="h-full bg-[#0B0F19]">
@@ -479,6 +572,17 @@
     </div>
 
     <script>
+
+        marked.setOptions({
+            breaks: true,       // Interpreta los saltos de línea
+            gfm: true,          // GitHub Flavored Markdown
+            headerIds: false,   // No añadir IDs a los headers
+            mangle: false,      // No codificar caracteres especiales en enlaces de correo
+            smartLists: true,   // Mejor detección de listas
+            smartypants: false, // No usar puntuación "elegante"
+            xhtml: false        // No cierra etiquetas para XHTML
+        });
+        
         class ChatSystem {
             constructor() {
                 this.container = document.getElementById('chatContainer')
