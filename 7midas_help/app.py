@@ -257,7 +257,7 @@ def create_enhanced_query_engine(llm_model, similarity_top_k=30):
         llm=llm_model,
         text_qa_template=text_qa_template,
         node_postprocessors=[rerank],
-        similarity_top_k=similarity_top_k  # Aumentado de 5 a 10
+        similarity_top_k=similarity_top_k
     )
 
 # Crear los query engines mejorados
