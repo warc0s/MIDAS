@@ -4,6 +4,7 @@ import os
 import time
 import numpy as np
 import psutil
+import datetime
 from sklearn.pipeline import Pipeline
 from sklearn.base import BaseEstimator
 from sklearn.utils.validation import check_is_fitted
@@ -21,7 +22,7 @@ llm_config = {
 model_analyzer = ConversableAgent(
     name="Model Analyzer",
     llm_config=llm_config,
-    system_message="You analyze machine learning models stored in joblib files and provide a summary.",
+    system_message="You analyze machine learning models stored in joblib files and provide a summary. Don't write code",
     description="Analyzes ML models and provides a report.",
     is_termination_msg= lambda msg: "See you soon!" in (msg.get("content") or "")
 )
@@ -29,14 +30,14 @@ model_analyzer = ConversableAgent(
 performance_tester = ConversableAgent(
     name="Performance Tester",
     llm_config=llm_config,
-    system_message="You test the performance of ML models, including latency, memory usage, and CPU usage.",
+    system_message="You test the performance of ML models, including latency, memory usage, and CPU usage. Don't write code.",
     description="Measures latency, memory, and CPU usage."
 )
 
 robustness_checker = ConversableAgent(
     name="Robustness Checker",
     llm_config=llm_config,
-    system_message="You evaluate how robust an ML model is against null values, incorrect types, and extreme values.",
+    system_message="You evaluate how robust an ML model is against null values, incorrect types, and extreme values. Don't write code.",
     description="Checks model robustness against various inputs."
 )
 
@@ -62,22 +63,28 @@ group_manager = GroupChatManager(
 )
 
 def load_model(file_path):
+    """Carga el modelo joblib y mide el tiempo de carga."""
+    if not file_path.endswith(".joblib") or not os.path.isfile(file_path):
+        return None, None, None
     start_time = time.time()
     try:
         model = joblib.load(file_path)
         load_time = time.time() - start_time
         size_on_disk = os.path.getsize(file_path) / (1024 * 1024)
         return model, load_time, size_on_disk
-    except Exception as e:
+    except Exception:
         return None, None, None
-
+    
 def check_model_validity(model):
+    """Verifica si el modelo es un estimador de Scikit-Learn."""
     return isinstance(model, (Pipeline, BaseEstimator))
 
+
 def measure_latency(model, X_sample, batch_sizes=[1, 100, 1000, 10000]):
+    """Mide la latencia en diferentes tamaños de batch."""
     latencies = {}
     for batch in batch_sizes:
-        X_batch = np.tile(X_sample, (batch, 1))
+        X_batch = np.repeat(X_sample, batch, axis=0) if X_sample.ndim == 2 else np.tile(X_sample, (batch, 1))
         start_time = time.time()
         model.predict(X_batch)
         latencies[batch] = (time.time() - start_time) * 1000 / batch
@@ -165,6 +172,66 @@ def process_joblib(file_path):
         "final_recommendation": "APTO" if validity and robustness["consistent_predictions"] else "NO APTO"
     }
 
+
+
+import datetime
+
+def generate_markdown_report(messages):
+    """Extrae la información de los mensajes y la guarda en un archivo Markdown, eliminando secciones vacías."""
+    analysis_results = {
+        "overview": "",
+        "performance": "",
+        "latency": "",
+        "validity": "",
+        "robustness": "",
+        "recommendation": "",
+        "improvements": "",
+    }
+
+    for message in messages:
+        content = message["content"]
+        if "Model Overview" in content:
+            analysis_results["overview"] = content
+        elif "Performance Metrics" in content:
+            analysis_results["performance"] = content
+        elif "Latency Analysis" in content:
+            analysis_results["latency"] = content
+        elif "Predictions Validity" in content:
+            analysis_results["validity"] = content
+        elif "Robustness Tests" in content:
+            analysis_results["robustness"] = content
+        elif "Final Recommendation" in content:
+            analysis_results["recommendation"] = content
+        elif "Recommendations for Improvement" in content:
+            analysis_results["improvements"] = content
+
+    sections = [
+        ("## 🔍 Model Overview", analysis_results["overview"]),
+        ("## ⚙️ Performance Metrics", analysis_results["performance"]),
+        ("## ⏳ Latency Analysis", analysis_results["latency"]),
+        ("## ✅ Predictions Validity", analysis_results["validity"]),
+        ("## 🛡️ Robustness Tests", analysis_results["robustness"]),
+        ("## 📌 Final Recommendation", f"**{analysis_results['recommendation']}**" if analysis_results["recommendation"] else ""),
+        ("## 🔧 Suggested Improvements", analysis_results["improvements"])
+    ]
+
+    markdown_content = f"# 📊 Model Analysis Report\n"
+    markdown_content += f"**Generated on:** {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+    markdown_content += "---\n\n"
+
+    # Agregar solo las secciones que no están vacías
+    for title, content in sections:
+        if content.strip():  # Verifica que la sección no esté vacía
+            markdown_content += f"{title}\n{content}\n\n"
+
+    file_name = "model_analysis_report.md"
+    with open(file_name, "w", encoding="utf-8") as f:
+        f.write(markdown_content.strip())  # Elimina espacios extra al final
+
+    print(f"📄 Report saved as: {file_name}")
+    return "Report saved!"
+
+
 def main():
     file_path = input("Ingrese la ruta del archivo joblib: ").strip()
     if not os.path.exists(file_path):
@@ -176,12 +243,23 @@ def main():
         print(model_info["error"])
         return
 
-    # Iniciar conversación con el GroupChatManager
+    print("⏳ Ejecutando análisis del modelo...")
+
+    # Iniciar conversación con los agentes (máximo una ronda por agente)
     group_manager.initiate_chat(
-        recipient=group_manager,  # CORREGIDO: Se añade el recipient
-        max_turns=1,
-        message=f"Analyze the following ML model: {model_info}"
-    )
+        recipient=group_manager,
+        max_turns=len(groupchat.agents),  # Se asegura de que cada agente hable solo una vez
+        message=f"Analyze the following ML model: {model_info} and generate a Markdown report.",
+        )
+
+    print("✅ Todos los agentes han respondido. Finalizando ejecución...")
+
+    # Generar el reporte si hay mensajes
+    if groupchat.messages:
+        generate_markdown_report(groupchat.messages)
+        print("📄 Reporte generado exitosamente.")
+    else:
+        print("⚠️ No hay mensajes en el chat de grupo. No se generó reporte.")
 
 if __name__ == "__main__":
     main()
