@@ -189,6 +189,98 @@
             width: 20px;
             text-align: left;
         }
+
+        /* Estilos mejorados para elementos markdown */
+        .prose ul {
+            list-style-type: disc !important;
+            padding-left: 1.5em !important;
+            margin: 0.75em 0 !important;
+        }
+
+        .prose ol {
+            list-style-type: decimal !important;
+            padding-left: 1.5em !important;
+            margin: 0.75em 0 !important;
+        }
+
+        .prose li {
+            margin: 0.4em 0 !important;
+            display: list-item !important;
+        }
+
+        .prose li::marker {
+            color: rgba(212, 175, 55, 0.8) !important;
+        }
+
+        .prose p {
+            margin: 0.75em 0 !important;
+        }
+
+        .prose p + p {
+            margin-top: 1em !important;
+        }
+
+        .prose blockquote {
+            border-left: 3px solid rgba(212, 175, 55, 0.5);
+            padding-left: 1em;
+            margin: 1em 0;
+            color: #CBD5E0;
+            font-style: italic;
+        }
+
+        .prose code {
+            background-color: rgba(212, 175, 55, 0.15);
+            border-radius: 0.25rem;
+            padding: 0.2em 0.4em;
+            font-family: monospace;
+        }
+
+        .prose pre {
+            background-color: rgba(18, 24, 40, 0.8);
+            border-radius: 0.5rem;
+            padding: 1em;
+            margin: 1em 0;
+            overflow-x: auto;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+        }
+
+        .prose pre code {
+            background-color: transparent;
+            padding: 0;
+            border-radius: 0;
+            color: #CBD5E0;
+        }
+
+        .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+            color: #FFD700 !important;
+            margin-top: 1.5em !important;
+            margin-bottom: 0.75em !important;
+            font-weight: 600 !important;
+        }
+
+        .prose table {
+            border-collapse: collapse;
+            margin: 1em 0;
+            width: 100%;
+        }
+
+        .prose th, .prose td {
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            padding: 0.5em;
+            text-align: left;
+        }
+
+        .prose th {
+            background-color: rgba(212, 175, 55, 0.1);
+        }
+
+        /* Espacio entre párrafos */
+        .prose br + br {
+            display: block;
+            content: "";
+            margin-top: 1em;
+        }
+        
     </style>
 </head>
 <body class="h-full bg-[#0B0F19]">
@@ -298,6 +390,11 @@
                 }
                 this.processing = false
                 
+                // Inicializar la sesión si no existe
+                if (!localStorage.getItem('chat_session_id')) {
+                    localStorage.setItem('chat_session_id', '');
+                }
+                
                 if(this.history.length === 0) {
                     this.history.push(this.welcomeMessage)
                     this.saveHistory()
@@ -305,6 +402,8 @@
 
                 this.setupEventListeners()
                 this.loadHistory()
+                
+                console.log('Chat inicializado. ID de sesión:', localStorage.getItem('chat_session_id'));
             }
 
             setupEventListeners() {
@@ -351,7 +450,10 @@
 
                 // Capturamos la opción de LLM seleccionada
                 const llmSelector = document.getElementById("llmSelector").value;
-
+                
+                // Obtenemos el session_id almacenado
+                const session_id = localStorage.getItem('chat_session_id') || '';
+                
                 input.value = ''
                 this.addMessage('user', message)
                 this.showLoading()
@@ -360,11 +462,21 @@
                     const response = await fetch('/query', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ message, llm: llmSelector })
+                        body: JSON.stringify({ 
+                            message: message, 
+                            llm: llmSelector,
+                            session_id: session_id
+                        })
                     })
 
                     if (!response.ok) throw new Error(await response.text())
                     const data = await response.json()
+                    
+                    // Guardar el session_id devuelto por el servidor
+                    if (data.session_id) {
+                        localStorage.setItem('chat_session_id', data.session_id);
+                        console.log('Session ID actualizado:', data.session_id);
+                    }
 
                     this.removeLoading()
                     this.addMessage('assistant', data.response, data.llm)
@@ -481,15 +593,44 @@
             }
 
             clearChat() {
-                this.history = [this.welcomeMessage]
-                this.saveHistory()
-                this.loadHistory()
+                // Obtener el session_id actual
+                const session_id = localStorage.getItem('chat_session_id') || '';
+                
+                // Limpiar el historial en el servidor
+                fetch('/clear_history', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ session_id: session_id })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.session_id) {
+                        localStorage.setItem('chat_session_id', data.session_id);
+                        console.log('Historia borrada en el servidor, nuevo session_id:', data.session_id);
+                    }
+                })
+                .catch(error => console.error('Error al borrar historial:', error));
+                
+                // Borrar historial local
+                this.history = [this.welcomeMessage];
+                this.saveHistory();
+                this.loadHistory();
             }
         }
 
         function sendMessage() {
             chatSystem.sendMessage();
         }
+
+        marked.setOptions({
+            breaks: true,
+            gfm: true,
+            headerIds: false,
+            mangle: false,
+            smartLists: true,
+            smartypants: false,
+            xhtml: false
+        });
 
         const chatSystem = new ChatSystem()
     </script>

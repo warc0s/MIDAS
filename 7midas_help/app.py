@@ -5,10 +5,20 @@ import logging
 import re
 import unicodedata
 import torch
+import uuid
+from datetime import datetime
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify, render_template
 from transformers import BertForSequenceClassification, BertTokenizer
-from llama_index.core import SimpleDirectoryReader, VectorStoreIndex, Settings, ChatPromptTemplate
+from llama_index.core import (
+    SimpleDirectoryReader, 
+    VectorStoreIndex, 
+    Settings, 
+    ChatPromptTemplate,
+    StorageContext,
+    load_index_from_storage
+)
+from llama_index.core.node_parser import SentenceSplitter
 from llama_index.embeddings.deepinfra import DeepInfraEmbeddingModel
 from llama_index.llms.deepinfra import DeepInfraLLM
 from llama_index.postprocessor.flag_embedding_reranker import FlagEmbeddingReranker
@@ -39,6 +49,66 @@ def clasificar_dificultad(texto):
 
 # ---------------------------------------------------------------------------------------------------
 
+# ------------- Sistema de memoria para conversaciones -------------
+conversation_history = {}  # {session_id: [lista de mensajes]}
+
+def get_conversation_history(session_id):
+    """Obtiene o crea un historial de conversación para el ID de sesión dado"""
+    if not session_id:
+        session_id = str(uuid.uuid4())
+    
+    if session_id not in conversation_history:
+        conversation_history[session_id] = []
+        logger.info(f"Creada nueva sesión con ID: {session_id}")
+    
+    return session_id, conversation_history[session_id]
+
+def add_to_history(session_id, role, content):
+    """Añade un mensaje al historial de conversación"""
+    if session_id in conversation_history:
+        conversation_history[session_id].append({
+            'role': role,
+            'content': content,
+            'timestamp': datetime.now().isoformat()
+        })
+        logger.info(f"Añadido mensaje de {role} a sesión {session_id}")
+    
+def format_conversation_history(history, max_messages=5):
+    """Formatea el historial de conversación para incluirlo en el prompt"""
+    if not history:
+        return ""
+        
+    # Limitar a los últimos N mensajes para no sobrecargar el contexto
+    recent_history = history[-max_messages:] if len(history) > max_messages else history
+    formatted_history = ""
+    
+    for message in recent_history:
+        role = "Usuario" if message['role'] == 'user' else "Asistente"
+        formatted_history += f"{role}: {message['content']}\n\n"
+    
+    return formatted_history
+
+def modify_query_with_history(history, query_str):
+    """Modifica la consulta para incluir el historial de conversación relevante"""
+    if not history:
+        return query_str
+    
+    # Formatear el historial de conversación
+    formatted_history = format_conversation_history(history)
+    
+    # Construir la consulta mejorada que incluye el historial
+    enhanced_query = (
+        f"HISTORIAL DE CONVERSACIÓN RELEVANTE:\n"
+        f"{formatted_history}\n"
+        f"CONSULTA ACTUAL: {query_str}\n\n"
+        f"Responde a la CONSULTA ACTUAL teniendo en cuenta el HISTORIAL DE CONVERSACIÓN RELEVANTE. "
+        f"Si la consulta hace referencia a elementos mencionados anteriormente en la conversación, "
+        f"asegúrate de contextualizar tu respuesta correctamente."
+    )
+    
+    return enhanced_query
+# -------------------------------------------------------------------
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -55,6 +125,7 @@ if not GOOGLE_API_KEY:
     logger.error("GOOGLE_API_KEY not configured in environment variables.")
     sys.exit("Server configuration incomplete. Contact administrator.")
 
+# Configuración del modelo de embeddings
 Settings.embed_model = DeepInfraEmbeddingModel(
     model_id="BAAI/bge-m3",
     api_token=DEEPINFRA_API_KEY,
@@ -63,14 +134,37 @@ Settings.embed_model = DeepInfraEmbeddingModel(
     query_prefix="query: ",
 )
 
-Settings.chunk_size = 512
+# Directorio para almacenar datos de índice
+INDEX_STORAGE_PATH = os.path.join(os.getcwd(), "index_storage")
 
+# Mejorado: chunking más inteligente con solapamiento
+node_parser = SentenceSplitter(
+    chunk_size=512,
+    chunk_overlap=100,  # Overlap del 20%
+    paragraph_separator="\n\n",
+    secondary_chunking_regex="(?<=\. )"  # Divide por oraciones como respaldo
+)
+
+# Configuramos LLMs
 Settings.llm = DeepInfraLLM(
     model="meta-llama/Llama-3.3-70B-Instruct-Turbo",
     api_key=DEEPINFRA_API_KEY,
-    temperature=0,
+    temperature=0.3
 )
 
+llm_deepseek = DeepInfraLLM(
+    model="deepseek-ai/DeepSeek-V3",
+    api_key=DEEPINFRA_API_KEY,
+    temperature=0.3
+)
+
+llm_gemini = Gemini(
+    model="models/gemini-2.0-flash",
+    api_key=GOOGLE_API_KEY,
+    temperature=0.3
+)
+
+# Verificación de documentos
 execution_dir = os.getcwd()
 md_filename = "info_midas.md"
 md_path = os.path.join(execution_dir, md_filename)
@@ -79,74 +173,99 @@ if not os.path.exists(md_path):
     logger.error(f"{md_filename} not found in execution directory: {execution_dir}")
     sys.exit("Information file not found. Contact administrator.")
 
-documents = SimpleDirectoryReader(execution_dir).load_data()
-documents = [doc for doc in documents if doc.metadata.get('file_name') == md_filename]
+# Función para crear o cargar índice
+def get_or_create_index():
+    # Intentar cargar el índice desde almacenamiento
+    if os.path.exists(INDEX_STORAGE_PATH):
+        try:
+            logger.info("Loading index from storage...")
+            storage_context = StorageContext.from_defaults(persist_dir=INDEX_STORAGE_PATH)
+            index = load_index_from_storage(storage_context=storage_context)
+            logger.info("Index loaded successfully.")
+            return index
+        except Exception as e:
+            logger.warning(f"Error loading index: {e}. Creating new index...")
+    
+    # Si no existe o hay error, crear nuevo índice
+    logger.info("Creating new vector index...")
+    documents = SimpleDirectoryReader(execution_dir).load_data()
+    documents = [doc for doc in documents if doc.metadata.get('file_name') == md_filename]
+    
+    if not documents:
+        logger.error(f"No documents found with name {md_filename}.")
+        sys.exit("No valid documents found. Contact administrator.")
+    
+    # Usar el node_parser mejorado
+    index = VectorStoreIndex.from_documents(
+        documents, 
+        embed_model=Settings.embed_model,
+        transformations=[node_parser]
+    )
+    
+    # Persistir el índice
+    index.storage_context.persist(persist_dir=INDEX_STORAGE_PATH)
+    logger.info("Index created and persisted successfully.")
+    return index
 
-if not documents:
-    logger.error(f"No documents found with name {md_filename}.")
-    sys.exit("No valid documents found. Contact administrator.")
+# Obtener o crear índice
+index = get_or_create_index()
 
-logger.info("Creating vector index...")
-index = VectorStoreIndex.from_documents(documents, embed_model=Settings.embed_model)
-logger.info("Index created successfully.")
-
-# --- Configuración de prompts personalizados ---
+# --- Configuración de prompts personalizados mejorados ---
 
 qa_prompt_str = (
-    "Estás asistiendo con dudas y proporcionando respuestas útiles y detalladas. "
-    "Aunque tu área principal de especialización es el TFM 'Midas', puedes abordar consultas que sean algo ambiguas o que tengan un vínculo razonable con el tema. "
-    "Si la consulta es claramente irrelevante (por ejemplo, si se trata de compras u otros temas no vinculados), responde: 'Lo siento, solo puedo contestar dudas relacionadas con el TFM Midas'.\n"
+    "Eres un asistente de IA especializado en el TFM (trabajo de fun de master) llamado 'Midas'. Tu tarea es proporcionar respuestas precisas, útiles y detalladas.\n\n"
+    "INSTRUCCIONES DE SÍNTESIS:\n"
+    "1. Analiza cuidadosamente todo el contexto proporcionado.\n"
+    "2. Identifica las piezas de información más relevantes para la consulta específica.\n"
+    "3. Integra coherentemente la información, evitando repeticiones innecesarias.\n"
+    "4. Si la información en el contexto es insuficiente, indícalo claramente.\n"
+    "5. Si hay información contradictoria, menciona las diferentes perspectivas.\n"
+    "6. Organiza tu respuesta de forma lógica, empezando con los puntos más importantes.\n\n"
+    "RESPUESTA:\n"
+    "- Responde de manera clara y directa.\n"
+    "- Incluye detalles específicos del TFM Midas cuando sea relevante.\n"
+    "- Si la consulta es ambigua pero relacionable con el tema, intenta interpretar la intención del usuario.\n"
     "Información de contexto:\n"
     "---------------------\n"
     "{context_str}\n"
     "---------------------\n"
-    "Utilizando el contexto proporcionado, responde a la siguiente pregunta: {query_str}\n"
+    "Consulta: {query_str}\n\n"
 )
 
 chat_text_qa_msgs = [
     (
         "system",
-        "Eres un asistente experto capaz de responder consultas variadas, con un enfoque especial en el TFM 'Midas'. Proporciona respuestas útiles y detalladas, y si la consulta es claramente irrelevante (por ejemplo, relacionada con compras u otros temas no vinculados), indica que solo puedes ayudar con temas relacionados con el TFM 'Midas'."
+        "Eres un asistente experto especializado en el TFM 'Midas'. Tu objetivo es proporcionar respuestas precisas, "
+        "informativas y bien estructuradas basadas en la información disponible. Utiliza solo los datos proporcionados "
+        "en el contexto para responder, evitando invenciones o suposiciones no respaldadas. Si la información es insuficiente, "
+        "indícalo claramente en lugar de elaborar respuestas imprecisas. Si la consulta es completamente irrelevante con el sistema 'Midas', "
+        "indica amablemente que solo puedes responder sobre ese tema específico. Pero ante la duda, opta por contestar la consulta."
     ),
     ("user", qa_prompt_str),
 ]
 text_qa_template = ChatPromptTemplate.from_messages(chat_text_qa_msgs)
 
-rerank = FlagEmbeddingReranker(model="BAAI/bge-reranker-v2-m3", top_n=3)
-
-query_engine = index.as_query_engine(
-    llm=Settings.llm,
-    text_qa_template=text_qa_template,
-    node_postprocessors=[rerank],
-    similarity_top_k=5
+# Mejorado: reranker para mejor selección de contexto relevante
+rerank = FlagEmbeddingReranker(
+    model="BAAI/bge-reranker-v2-m3", 
+    top_n=10  
 )
 
-llm_deepseek = DeepInfraLLM(
-    model="deepseek-ai/DeepSeek-V3",
-    api_key=DEEPINFRA_API_KEY,
-    temperature=0,
-)
+# Crear query engines con mejoras
+def create_enhanced_query_engine(llm_model, similarity_top_k=30):
+    return index.as_query_engine(
+        llm=llm_model,
+        text_qa_template=text_qa_template,
+        node_postprocessors=[rerank],
+        similarity_top_k=similarity_top_k  # Aumentado de 5 a 10
+    )
 
-llm_gemini = Gemini(
-    model="models/gemini-2.0-flash",
-    api_key=GOOGLE_API_KEY,
-    temperature=0,
-)
+# Crear los query engines mejorados
+query_engine = create_enhanced_query_engine(Settings.llm)
+query_engine_deepseek = create_enhanced_query_engine(llm_deepseek)
+query_engine_gemini = create_enhanced_query_engine(llm_gemini)
 
-query_engine_deepseek = index.as_query_engine(
-    llm=llm_deepseek,
-    text_qa_template=text_qa_template,
-    node_postprocessors=[rerank],
-    similarity_top_k=5
-)
-
-query_engine_gemini = index.as_query_engine(
-    llm=llm_gemini,
-    text_qa_template=text_qa_template,
-    node_postprocessors=[rerank],
-    similarity_top_k=5
-)
-
+# Sistema de concurrencia original
 processing_query = False
 processing_lock = threading.Lock()
 
@@ -161,11 +280,19 @@ def handle_query():
         data = request.json
         user_input = data.get('message', '').strip()
         selected_llm = data.get('llm', 'Automatico')
+        session_id = data.get('session_id', '')
         
         if not user_input:
             return jsonify({'error': 'La consulta no puede estar vacía'}), 400
 
-        # Si se fuerza un LLM, se ignora la clasificación
+        # Obtener o crear historial de conversación
+        session_id, history = get_conversation_history(session_id)
+        
+        # Añadir la consulta actual al historial
+        add_to_history(session_id, 'user', user_input)
+        logger.info(f"Consulta registrada. Sesión {session_id} tiene {len(history)} mensajes")
+
+        # Selección de LLM basada en la entrada del usuario
         if selected_llm != 'Automatico':
             if selected_llm == "Llama 3.3 70B":
                 current_engine = query_engine
@@ -185,11 +312,17 @@ def handle_query():
             logger.info(f"Prompt classified with difficulty: {dificultad}")
             
             if dificultad == 2:
-                return jsonify({
-                    'response': "Lo siento, no puedo responder a eso. Si crees que se trata de un error, por favor, reformula la pregunta.",
+                response_text = "Lo siento, no puedo responder a eso. Si crees que se trata de un error, por favor, reformula la pregunta."
+                # Añadir la respuesta al historial
+                add_to_history(session_id, 'assistant', response_text)
+                
+                response_data = {
+                    'response': response_text,
                     'status': 'success',
-                    'llm': 'Bloqueado - PromptAnalysis'
-                })
+                    'llm': 'Bloqueado - PromptAnalysis',
+                    'session_id': session_id
+                }
+                return jsonify(response_data)
             
             if dificultad == 0:
                 current_engine = query_engine
@@ -200,6 +333,7 @@ def handle_query():
             else:
                 return jsonify({'error': 'Clasificación de pregunta desconocida.'}), 400
 
+        # Usar el bloqueo original
         with processing_lock:
             if processing_query:
                 return jsonify({
@@ -207,24 +341,63 @@ def handle_query():
                 }), 429
             processing_query = True
 
-        logger.info(f"Processing query: {user_input}")
-        logger.info("Obteniendo embeddings...")
-        logger.info("Utilizando el reranker...")
-        logger.info("Escribiendo respuesta...")
-        response = current_engine.query(user_input)
-        
-        return jsonify({
-            'response': str(response),
-            'status': 'success',
-            'llm': llm_usado
-        })
+        try:
+            logger.info(f"Procesando consulta con contexto. Sesión: {session_id}")
+            
+            # Obtener historial previo (excluyendo la consulta actual recién añadida)
+            previous_history = history[:-1] if len(history) > 1 else []
+            
+            # Modificar la consulta para incluir el historial relevante
+            enhanced_query = modify_query_with_history(previous_history, user_input)
+            logger.info(f"Consulta mejorada creada con contexto. Longitud historia: {len(previous_history)}")
+            
+            # Realizar la consulta con el contexto mejorado
+            response = current_engine.query(enhanced_query)
+            response_text = str(response)
+            
+            # Añadir la respuesta al historial
+            add_to_history(session_id, 'assistant', response_text)
+            logger.info(f"Respuesta añadida. Ahora la sesión tiene {len(history)} mensajes")
+            
+            response_data = {
+                'response': response_text,
+                'status': 'success',
+                'llm': llm_usado,
+                'session_id': session_id
+            }
+            
+            return jsonify(response_data)
+            
+        finally:
+            with processing_lock:
+                processing_query = False
         
     except Exception as e:
-        logger.error(f"Error processing query: {e}")
+        logger.error(f"Error procesando consulta: {e}")
         return jsonify({'error': str(e)}), 500
-    finally:
-        with processing_lock:
-            processing_query = False
+
+@app.route('/clear_history', methods=['POST'])
+def clear_conversation_history():
+    try:
+        data = request.json
+        session_id = data.get('session_id', '')
+        
+        if session_id and session_id in conversation_history:
+            conversation_history[session_id] = []
+            logger.info(f"Historial borrado para sesión {session_id}")
+            return jsonify({
+                'status': 'success', 
+                'message': 'Historial de conversación borrado',
+                'session_id': session_id
+            })
+        return jsonify({
+            'status': 'success', 
+            'message': 'No hay historial para borrar',
+            'session_id': session_id if session_id else str(uuid.uuid4())
+        })
+    except Exception as e:
+        logger.error(f"Error borrando historial: {e}")
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
