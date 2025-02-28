@@ -1,0 +1,47 @@
+site_name: MIDAS Docs
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.indexes
+    - content.tabs
+  palette:
+    - scheme: default
+      primary: amber
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - scheme: slate
+      primary: deep orange
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+
+repo_url: https://github.com/warc0s/MIDAS
+repo_name: GitHub
+
+markdown_extensions:
+  - admonition
+  - codehilite
+  - attr_list
+  - md_in_html
+  - pymdownx.details
+  - pymdownx.superfences
+
+plugins:
+  - search
+
+nav:
+  - Inicio:
+      - Página Principal: index.md
+      - Arquitectura: architecture.md
+  - Componentes MIDAS:
+      - Architect: modules/midas_architect.md
+      - Plot: modules/midas_plot.md
+      - Touch: modules/midas_touch.md
+      - Help: modules/midas_help.md
+      - Test: modules/midas_test.md
+      - Deploy: modules/midas_deploy.md
+      - Hub: modules/midas_hub.md
+  - FAQ: faq.md
+  - Changelog: changelog.md

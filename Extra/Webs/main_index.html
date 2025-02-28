@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MIDAS - De la idea al Oro</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    /* Sticky footer: se define altura total y se usa flex */
+    html, body {
+      min-height: 100vh;
+      width: 100%;
+      overflow-x: hidden;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow-y: auto;
+    }
+    /* La sección principal ocupa el espacio disponible */
+    .hero {
+      flex: 1;
+      padding: 2rem 1rem;
+      min-height: auto;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+    }
+
+    .cta-button.doc-button {
+      border: 1px solid rgba(255,215,0,0.2);
+      background: rgba(255,215,0,0.05);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-button.doc-button::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #ffd700, transparent);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .cta-button.doc-button:hover {
+      background: rgba(255,215,0,0.1);
+      border-color: rgba(255,215,0,0.4);
+    }
+
+    .cta-button.doc-button:hover::after {
+      opacity: 1;
+    }
+
+    @media (max-width: 480px) {
+      .cta-buttons {
+        flex-direction: column;
+        width: 100%;
+      }
+      
+      .cta-button {
+        width: 100%;
+        text-align: center;
+      }
+    }
+
+    .cards-container {
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      max-width: 1400px;
+      margin: 2rem auto;
+    }
+
+    .cards-secondary-group {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+      padding: 0 2rem 2rem;
+      max-width: 800px;
+      margin: 0 auto;
+      opacity: 0.9;
+    }
+
+    .cards-last-row {
+      max-width: 600px;
+      margin-top: 2rem;
+    }
+
+    .card {
+      background: linear-gradient(145deg, rgba(40,40,40,0.8), rgba(30,30,30,0.6));
+      border: 1px solid rgba(255,215,0,0.15);
+      position: relative;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border-radius: 15px;
+      background: linear-gradient(45deg, transparent 50%, rgba(255,215,0,0.03));
+      pointer-events: none;
+    }
+
+    .hub-card {
+      border: 2px solid rgba(255,215,0,0.4);
+      background: linear-gradient(145deg, rgba(50,50,50,0.9), rgba(40,40,40,0.7));
+      box-shadow: 0 0 25px rgba(255,215,0,0.1);
+    }
+
+    .hub-card i {
+      color: #ffd700;
+      text-shadow: 0 0 15px rgba(255,215,0,0.3);
+    }
+
+    .cards-secondary-group .card {
+      background: rgba(30,30,30,0.5);
+      border-style: dashed;
+      border-color: rgba(255,215,0,0.1);
+      opacity: 0.9;
+    }
+
+    .cards-secondary-group .card:hover {
+      transform: translateY(-5px);
+    }
+
+    @media (min-width: 1024px) {
+      .cards-container {
+        grid-template-columns: repeat(5, 1fr);
+      }
+      
+      /* Se modifica la tarjeta hub para que ocupe solo un bloque */
+      .hub-card {
+        grid-column: span 1;
+      }
+      
+      .cards-container > .card:not(.hub-card) {
+        grid-column: span 1;
+      }
+    }
+
+    @media (max-width: 1023px) and (min-width: 768px) {
+      .cards-container {
+        grid-template-columns: repeat(3, 1fr);
+      }
+      
+      .hub-card {
+        grid-column: span 3;
+      }
+    }
+
+    @media (max-width: 767px) {
+      .cards-container {
+        grid-template-columns: 1fr;
+      }
+      
+      .hub-card {
+        order: -1;
+      }
+    }
+
+    .card:hover {
+      z-index: 2;
+    }
+
+    .card h3 {
+      position: relative;
+      display: inline-block;
+      padding-bottom: 0.5rem;
+    }
+
+    .card h3::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 30%;
+      height: 1px;
+      background: rgba(255,215,0,0.3);
+      transition: width 0.3s ease;
+    }
+
+    .card:hover h3::after {
+      width: 60%;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
+      background: radial-gradient(circle at center, #0f0f0f 0%, #1a1a1a 100%);
+      color: #fff;
+      /* Se elimina min-height ya que se usa flex */
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: repeating-linear-gradient(
+        0deg,
+        rgba(255, 215, 0, 0.03) 0px,
+        rgba(255, 215, 0, 0.03) 1px,
+        transparent 1px,
+        transparent 4px
+      );
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .logo {
+      font-size: clamp(3rem, 8vw, 6rem);
+      margin-top: 2rem;
+      background: linear-gradient(45deg, #ffd700, #daa520, #ffd700);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: glow 2s ease-in-out infinite alternate;
+      position: relative;
+      z-index: 2;
+      font-weight: 700;
+      letter-spacing: -2px;
+    }
+
+    @keyframes glow {
+      0% { text-shadow: 0 0 10px rgba(255,215,0,0.5); }
+      100% { text-shadow: 0 0 25px rgba(218,165,32,0.8), 0 0 15px rgba(255,215,0,0.6); }
+    }
+
+    .slogan {
+      font-size: 1.5rem;
+      margin-bottom: 3rem;
+      color: #aaa;
+      font-weight: 300;
+      letter-spacing: 1px;
+      position: relative;
+      z-index: 1;
+      opacity: 0;
+      animation: fadeInUp 1s 0.5s forwards;
+    }
+
+    .cta-buttons {
+      display: flex;
+      gap: 1.5rem;
+      margin-bottom: 4rem;
+      justify-content: center;
+      position: relative;
+      z-index: 1;
+      opacity: 0;
+      animation: fadeInUp 1s 0.8s forwards;
+    }
+
+    .cta-button {
+      padding: 1.2rem 2.5rem;
+      border: 2px solid rgba(255,215,0,0.5);
+      border-radius: 50px;
+      text-decoration: none;
+      color: #ffd700;
+      transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+      background: rgba(0,0,0,0.3);
+      backdrop-filter: blur(5px);
+      position: relative;
+      overflow: hidden;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+    }
+
+    .cta-button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        120deg,
+        transparent,
+        rgba(255,215,0,0.1),
+        transparent
+      );
+      transition: 0.6s;
+    }
+
+    .cta-button:hover {
+      background: rgba(255,215,0,0.1);
+      border-color: #ffd700;
+      transform: translateY(-3px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+    }
+
+    .cta-button:hover::before {
+      left: 100%;
+    }
+
+    .cards-container,
+    .cards-last-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      padding: 0 2rem 4rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .card {
+      background: rgba(30,30,30,0.6);
+      border-radius: 15px;
+      padding: 2rem;
+      text-align: center;
+      transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+      border: 1px solid rgba(255,215,0,0.1);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      backdrop-filter: blur(10px);
+      opacity: 0;
+      transform: translateY(20px);
+      animation: cardEntry 0.6s forwards;
+    }
+
+    .card:nth-child(1) { animation-delay: 0.3s; }
+    .card:nth-child(2) { animation-delay: 0.4s; }
+    .card:nth-child(3) { animation-delay: 0.5s; }
+    .card:nth-child(4) { animation-delay: 0.6s; }
+    .card:nth-child(5) { animation-delay: 0.7s; }
+    .card:nth-child(6) { animation-delay: 0.8s; }
+    .card:nth-child(7) { animation-delay: 0.9s; }
+    .card:nth-child(8) { animation-delay: 1s; }
+
+    @keyframes cardEntry {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .card:hover {
+      transform: translateY(-10px);
+      border-color: #ffd700;
+      background: rgba(40,40,40,0.7);
+      box-shadow: 0 15px 30px rgba(0,0,0,0.4);
+    }
+
+    .card i {
+      font-size: 2.8rem;
+      color: #ffd700;
+      margin-bottom: 1.5rem;
+      transition: transform 0.3s ease;
+    }
+
+    .card:hover i {
+      transform: scale(1.2) rotate(-5deg);
+    }
+
+    .card h3 {
+      margin-bottom: 1rem;
+      color: #ffd700;
+      font-size: 1.4rem;
+      font-weight: 600;
+    }
+
+    .card p {
+      color: #aaa;
+      margin-bottom: 1.5rem;
+      line-height: 1.6;
+      font-weight: 300;
+    }
+
+    .card a {
+      text-decoration: none;
+      color: #ffd700;
+      font-weight: 500;
+      margin-top: auto;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: color 0.3s ease;
+      position: relative;
+    }
+
+    .card a::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0;
+      height: 1px;
+      background: #ffd700;
+      transition: width 0.3s ease;
+    }
+
+    .card a:hover::after {
+      width: 100%;
+    }
+
+    /* Footer: se elimina el margin externo (especialmente el margin-top) para que el footer esté pegado al final */
+    footer {
+      background: rgba(0, 0, 0, 0.4);
+      padding: 1rem 0;
+      text-align: center;
+      border-top: 1px solid rgba(255,215,0,0.1);
+      position: relative;
+      backdrop-filter: blur(5px);
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .credits {
+      color: #666;
+      font-size: 0.9rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    .credits a {
+      color: #ffd700;
+      text-decoration: none;
+      transition: color 0.3s ease;
+      position: relative;
+      white-space: nowrap;
+      margin: 0 0.5rem;
+    }
+
+    .credits a::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0;
+      height: 1px;
+      background: #ffd700;
+      transition: width 0.3s ease;
+    }
+
+    .credits a:hover::after {
+      width: 100%;
+    }
+
+    /* Responsividad */
+    @media (max-width: 768px) {
+      .hero {
+        padding: 1rem;
+      }
+      
+      .cards-container {
+        padding: 1rem;
+        gap: 1rem;
+      }
+      
+      .cards-secondary-group {
+        padding: 0 1rem 1rem;
+        gap: 1rem;
+      }
+      
+      .card {
+        margin-bottom: 1rem;
+      }
+      
+      footer {
+        padding: 1.5rem 0.5rem;
+      }
+      
+      .credits {
+        font-size: 0.85rem;
+        line-height: 1.5;
+      }
+      
+      .credits a {
+        white-space: normal;
+        margin: 0 0.3rem;
+        display: inline-block;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .logo {
+        margin-top: 1rem;
+      }
+      
+      .slogan {
+        font-size: 1.2rem;
+        margin: 0.5rem 0;
+      }
+      
+      .cta-buttons {
+        flex-direction: column;
+        width: 100%;
+        gap: 0.5rem;
+      }
+      
+      .credits {
+        font-size: 0.8rem;
+      }
+      
+      .credits a {
+        margin: 0 0.2rem;
+      }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .logo {
+        font-size: 3.5rem;
+      }
+
+      .cards-container, .cards-last-row {
+        grid-template-columns: 1fr;
+        padding: 0 1rem 4rem;
+      }
+
+      .cta-button {
+        padding: 1rem 2rem;
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <section class="hero">
+    <div class="logo">MIDAS</div>
+    <p class="slogan">De la idea al Oro</p>
+    
+    <div class="cta-buttons">
+      <a href="https://github.com/warc0s/MIDAS" class="cta-button">
+        <i class="fab fa-github"></i> Ver en GitHub
+      </a>
+      <a href="https://docs.midastfm.com" class="cta-button doc-button">
+        <i class="fas fa-book-open"></i> Documentación
+      </a>
+    </div>
+
+    <!-- Grupo principal de tarjetas -->
+    <div class="cards-container">
+      <!-- Midas Assistant: tarjeta diferenciada que ahora ocupa solo un bloque y aparece primero -->
+      <div class="card hub-card">
+        <i class="fas fa-compass"></i>
+        <h3>Midas Assistant</h3>
+        <p>Asistencia experta para navegar el ecosistema MIDAS</p>
+        <a href="https://hub.midastfm.com">Consultar →</a>
+      </div>
+
+      <!-- Nueva tarjeta Midas Dataset, ubicada en el espacio del segundo bloque -->
+      <div class="card">
+        <i class="fas fa-database"></i>
+        <h3>Midas Dataset</h3>
+        <p>Genera dataset sintéticos mediante lenguaje natural</p>
+        <a href="https://dataset.midastfm.com">Generar →</a>
+      </div>
+
+      <div class="card">
+        <i class="fas fa-chart-line"></i>
+        <h3>Midas Plot</h3>
+        <p>Visualización avanzada de datos impulsada por IA y lenguaje natural</p>
+        <a href="https://plot.midastfm.com">Explorar →</a>
+      </div>
+
+      <div class="card">
+        <i class="fas fa-magic"></i>
+        <h3>Midas Touch</h3>
+        <p>Transforma cualquier dataset en el mejor modelo de ML</p>
+        <a href="https://touch.midastfm.com">Transformar →</a>
+      </div>
+
+      <div class="card">
+        <i class="fas fa-vial"></i>
+        <h3>Midas Test</h3>
+        <p>Obtén un reporte detallado de la calidad de tu modelo de ML</p>
+        <a href="https://test.midastfm.com">Validar →</a>
+      </div>
+
+      <div class="card">
+        <i class="fas fa-rocket"></i>
+        <h3>Midas Deploy</h3>
+        <p>Genera tu interfaz Streamlit a partir de un joblib en segundos</p>
+        <a href="https://deploy.midastfm.com">Desplegar →</a>
+      </div>
+    </div>
+
+    <!-- Grupo secundario -->
+    <div class="cards-secondary-group">
+      <div class="card">
+        <i class="fas fa-drafting-compass"></i>
+        <h3>Midas Architect</h3>
+        <p>Diseña tu arquitectura de agentes con asistencia IA de última generación</p>
+        <a href="https://architech.midastfm.com">Acceder →</a>
+      </div>
+
+      <div class="card">
+        <i class="fas fa-robot"></i>
+        <h3>Midas Help</h3>
+        <p>Asistente virtual que resuelve dudas sobre nuestro TFM: MIDAS</p>
+        <a href="https://help.midastfm.com">Preguntar →</a>
+      </div>
+    </div>
+  </section>
+  
+  <footer>
+    <div class="credits">
+      Desarrollado con amor por <a href="https://warcos.dev">Marcos García Estévez</a> 
+      y <a href="https://www.linkedin.com/in/jesus-aceituno-valero/">Jesús Aceituno Valero</a>
+    </div>
+  </footer>
+  
+</body>
+</html>

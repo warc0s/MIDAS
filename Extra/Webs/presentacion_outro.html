@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MIDAS - Conclusiones</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Variables CSS */
+        :root {
+            --gold-primary: #ffd700;
+            --gold-secondary: #daa520;
+            --gold-light: rgba(255, 215, 0, 0.5);
+            --gold-lighter: rgba(255, 215, 0, 0.3);
+            --gold-faint: rgba(255, 215, 0, 0.1);
+            --gold-ultra-faint: rgba(255, 215, 0, 0.05);
+            --bg-dark: #0f0f0f;
+            --bg-darker: #1a1a1a;
+            --text-light: #fff;
+            --text-muted: #aaa;
+            --text-dimmed: #666;
+            --transition-smooth: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            --transition-bounce: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* Reset y ajustes básicos */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Montserrat', 'Segoe UI', sans-serif;
+            background: radial-gradient(ellipse at center, var(--bg-dark) 0%, var(--bg-darker) 100%);
+            color: var(--text-light);
+            min-height: 100vh;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Efectos de fondo */
+        .background-effects {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        .grid-pattern {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                repeating-linear-gradient(
+                    0deg,
+                    var(--gold-faint) 0px,
+                    var(--gold-faint) 1px,
+                    transparent 1px,
+                    transparent 4px
+                );
+            opacity: 0.3;
+        }
+
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .particle {
+            position: absolute;
+            background: var(--gold-primary);
+            border-radius: 50%;
+            opacity: 0;
+            animation: float 15s infinite;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) translateX(0);
+                opacity: 0;
+            }
+            25% {
+                opacity: 0.3;
+            }
+            50% {
+                opacity: 0.1;
+            }
+            75% {
+                opacity: 0.2;
+            }
+        }
+
+        /* Navegación de diapositivas */
+        .slide-navigation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            backdrop-filter: blur(8px);
+            background: rgba(15, 15, 15, 0.6);
+            padding: 8px;
+            border-bottom: 1px solid var(--gold-faint);
+        }
+
+        .nav-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .nav-button {
+            background: transparent;
+            border: 1px solid var(--gold-light);
+            color: var(--gold-primary);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition-smooth);
+        }
+
+        .nav-button:hover {
+            background: var(--gold-faint);
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .slide-indicators {
+            display: flex;
+            gap: 8px;
+            margin: 0 20px;
+        }
+
+        .slide-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--text-dimmed);
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        .slide-indicator.active {
+            background: var(--gold-primary);
+            transform: scale(1.2);
+            box-shadow: 0 0 10px var(--gold-light);
+        }
+
+        .slide-title {
+            color: var(--text-light);
+            font-size: 14px;
+            font-weight: 500;
+            margin-left: 15px;
+        }
+
+        /* Logo fijo */
+        .fixed-logo {
+            position: fixed;
+            top: 12px;
+            right: 15px;
+            z-index: 11;
+            height: 30px;
+            opacity: 0.8;
+            transition: var(--transition-smooth);
+        }
+
+        .fixed-logo:hover {
+            opacity: 1;
+            transform: scale(1.05);
+        }
+
+        /* Contenedor de diapositivas */
+        .slides-container {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+        }
+
+        .slide {
+            min-width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            padding: 100px 40px 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--gold-light) transparent;
+        }
+
+        .slide::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .slide::-webkit-scrollbar-thumb {
+            background-color: var(--gold-light);
+            border-radius: 4px;
+        }
+
+        .slide::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .slide.active {
+            opacity: 1;
+            z-index: 1;
+        }
+
+        .slide-content {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 20px;
+            animation: fadeInUp 0.8s ease-out forwards;
+            opacity: 0;
+        }
+
+        .active .slide-content {
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Estilos de diapositivas */
+        .slide-header {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .slide-title-main {
+            font-size: clamp(2.5rem, 5vw, 3.5rem);
+            background: linear-gradient(45deg, var(--gold-primary), var(--gold-secondary), var(--gold-primary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-weight: 700;
+            letter-spacing: -1px;
+            margin-bottom: 15px;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+            position: relative;
+            display: inline-block;
+        }
+
+        .slide-subtitle {
+            font-size: clamp(1.2rem, 2.5vw, 1.6rem);
+            color: var(--text-muted);
+            font-weight: 300;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .slide-body {
+            margin: 20px 0;
+            line-height: 1.6;
+        }
+
+        .slide-body p {
+            font-size: clamp(1rem, 1.5vw, 1.2rem);
+            margin-bottom: 15px;
+            color: var(--text-light);
+            text-align: center;
+        }
+
+        .highlight {
+            color: var(--gold-primary);
+            font-weight: 500;
+        }
+
+        /* Puntos clave */
+        .key-points {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin: 30px auto;
+            max-width: 800px; /* Ancho fijo para los puntos clave */
+        }
+
+        .key-point {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            padding: 15px;
+            border-radius: 15px;
+            transition: var(--transition-smooth);
+            background: rgba(30, 30, 30, 0.2);
+            width: 100%; /* Ancho completo del contenedor */
+            text-align: left;
+        }
+
+        .key-point:hover {
+            background: rgba(30, 30, 30, 0.5);
+            transform: translateX(5px);
+        }
+
+        .key-point i {
+            color: var(--gold-primary);
+            font-size: 1.2rem;
+            margin-top: 3px;
+            flex-shrink: 0; /* Evita que el icono se encoja */
+        }
+
+        .key-point-text {
+            font-size: clamp(1rem, 1.5vw, 1.2rem);
+            color: var(--text-light);
+            flex-grow: 1; /* Permite que el texto ocupe el espacio disponible */
+        }
+
+        /* Efecto de brillo para logos */
+        .logo-container {
+            display: inline-block;
+            text-align: center;
+        }
+
+        .logo-container img {
+            max-width: 200px;
+            filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.3));
+            animation: logoGlow 3s infinite;
+        }
+
+        .logo-container.sm img {
+            max-width: 150px;
+        }
+
+        @keyframes logoGlow {
+            0%, 100% {
+                filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.3));
+            }
+            50% {
+                filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.7));
+            }
+        }
+
+        /* Footer */
+        footer {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 10px 0;
+            text-align: center;
+            border-top: 1px solid rgba(255, 215, 0, 0.1);
+            backdrop-filter: blur(5px);
+            width: 100%;
+            z-index: 1;
+            position: relative;
+        }
+
+        .credits {
+            color: var(--text-dimmed);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        /* Responsividad */
+        @media (max-width: 768px) {
+            .slide {
+                padding: 80px 20px 40px;
+            }
+            
+            .key-points {
+                max-width: 90%;
+            }
+            
+            .nav-controls {
+                gap: 10px;
+            }
+            
+            .slide-title {
+                display: none;
+            }
+            
+            .fixed-logo {
+                height: 25px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .slide {
+                padding: 70px 15px 30px;
+            }
+            
+            .nav-button {
+                width: 32px;
+                height: 32px;
+            }
+            
+            .slide-navigation {
+                padding: 6px;
+            }
+            
+            .slide-indicators {
+                margin: 0 10px;
+            }
+            
+            .fixed-logo {
+                height: 22px;
+                top: 8px;
+                right: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Efectos de fondo -->
+    <div class="background-effects">
+        <div class="grid-pattern"></div>
+        <div class="particles" id="particles"></div>
+    </div>
+
+    <!-- Logo fijo -->
+    <img src="https://github.com/warc0s/MIDAS/blob/main/Extra/Logos/transparentes/midas_main_trans_lite.png?raw=true" alt="MIDAS Logo" class="fixed-logo">
+
+    <!-- Navegación de diapositivas -->
+    <div class="slide-navigation">
+        <div class="nav-controls">
+            <button class="nav-button" id="prevSlide">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <div class="slide-indicators" id="slideIndicators"></div>
+            <button class="nav-button" id="nextSlide">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+            <div class="slide-title" id="currentSlideTitle"></div>
+        </div>
+    </div>
+
+    <!-- Contenedor de diapositivas -->
+    <div class="slides-container" id="slidesContainer">
+        <!-- Diapositiva 1: Evolución y Aprendizajes -->
+        <div class="slide" data-title="Evolución y Aprendizajes">
+            <div class="slide-content">
+                <div class="slide-header">
+                    <h1 class="slide-title-main">Evolución y Aprendizajes</h1>
+                    <h2 class="slide-subtitle">Del concepto a la implementación</h2>
+                </div>
+                <div class="slide-body">
+                    <div class="key-points">
+                        <div class="key-point">
+                            <i class="fas fa-road"></i>
+                            <div class="key-point-text">
+                                <span class="highlight">Inicialmente:</span> Planteamos construir todo con AutoGen
+                            </div>
+                        </div>
+                        <div class="key-point">
+                            <i class="fas fa-exchange-alt"></i>
+                            <div class="key-point-text">
+                                <span class="highlight">Evolución:</span> Consideramos migrar a CrewAI por su simplicidad
+                            </div>
+                        </div>
+                        <div class="key-point">
+                            <i class="fas fa-lightbulb"></i>
+                            <div class="key-point-text">
+                                <span class="highlight">Descubrimiento:</span> Cada framework tiene fortalezas específicas
+                            </div>
+                        </div>
+                        <div class="key-point">
+                            <i class="fas fa-puzzle-piece"></i>
+                            <div class="key-point-text">
+                                <span class="highlight">Resultado:</span> AG2 para conversaciones, CrewAI para flujos lineales, implementación personalizada para mayor control, LlamaIndex para RAG en Help
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Diapositiva 2: Mirando al Futuro -->
+        <div class="slide" data-title="Mirando al Futuro">
+            <div class="slide-content">
+                <div class="slide-header">
+                    <h1 class="slide-title-main">Mirando al Futuro</h1>
+                    <h2 class="slide-subtitle">El camino por recorrer</h2>
+                </div>
+                <div class="slide-body">
+                    <div class="key-points">
+                        <div class="key-point">
+                            <i class="fas fa-cogs"></i>
+                            <div class="key-point-text">
+                                <span class="highlight">Integración profunda:</span> Un sistema más cohesionado entre componentes
+                            </div>
+                        </div>
+                        <div class="key-point">
+                            <i class="fas fa-robot"></i>
+                            <div class="key-point-text">
+                                <span class="highlight">Orquestación:</span> Assistant como Hub central con acceso a la api de todos los componentes
+                            </div>
+                        </div>
+                        <div class="key-point">
+                            <i class="fas fa-star"></i>
+                            <div class="key-point-text">
+                                <span class="highlight">Lección clave:</span> El éxito en sistemas multiagente está en seleccionar la herramienta correcta para cada desarrollo específico
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: center; margin: 30px 0;">
+                        <div class="logo-container sm">
+                            <img src="https://github.com/warc0s/MIDAS/blob/main/Extra/Logos/transparentes/midas_main_trans_lite.png?raw=true" alt="MIDAS Logo">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="credits">
+            Midas TFM &copy; <span id="current-year">2025</span> | Todos los derechos reservados
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        // Variables para control de diapositivas
+        let currentSlideIndex = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        const slideIndicatorsContainer = document.getElementById('slideIndicators');
+        const slideTitleElement = document.getElementById('currentSlideTitle');
+        const prevButton = document.getElementById('prevSlide');
+        const nextButton = document.getElementById('nextSlide');
+        
+        // Inicializar diapositivas e indicadores
+        function initSlides() {
+            // Crear indicadores
+            for (let i = 0; i < totalSlides; i++) {
+                const indicator = document.createElement('div');
+                indicator.classList.add('slide-indicator');
+                indicator.setAttribute('data-index', i);
+                indicator.addEventListener('click', () => goToSlide(i));
+                slideIndicatorsContainer.appendChild(indicator);
+            }
+            
+            // Mostrar primera diapositiva
+            goToSlide(0);
+        }
+        
+        // Ir a una diapositiva específica
+        function goToSlide(index) {
+            if (index < 0) index = 0;
+            if (index >= totalSlides) index = totalSlides - 1;
+            
+            // Actualizar diapositivas
+            slides.forEach((slide, i) => {
+                slide.classList.toggle('active', i === index);
+            });
+            
+            // Actualizar indicadores
+            const indicators = slideIndicatorsContainer.querySelectorAll('.slide-indicator');
+            indicators.forEach((indicator, i) => {
+                indicator.classList.toggle('active', i === index);
+            });
+            
+            // Actualizar título actual
+            const currentSlide = slides[index];
+            slideTitleElement.textContent = currentSlide.dataset.title || `Diapositiva ${index + 1}`;
+            
+            currentSlideIndex = index;
+            
+            // Actualizar estado de botones
+            prevButton.disabled = index === 0;
+            nextButton.disabled = index === totalSlides - 1;
+        }
+        
+        // Navegación con botones
+        prevButton.addEventListener('click', () => {
+            goToSlide(currentSlideIndex - 1);
+        });
+        
+        nextButton.addEventListener('click', () => {
+            goToSlide(currentSlideIndex + 1);
+        });
+        
+        // Navegación con teclado
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') {
+                goToSlide(currentSlideIndex - 1);
+            } else if (e.key === 'ArrowRight') {
+                goToSlide(currentSlideIndex + 1);
+            }
+        });
+        
+        // Crear partículas de fondo
+        function createParticles() {
+            const particles = document.getElementById('particles');
+            const particleCount = 20;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                // Tamaño aleatorio
+                const size = Math.random() * 5 + 2;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                
+                // Posición aleatoria
+                const posX = Math.random() * 100;
+                const posY = Math.random() * 100;
+                particle.style.left = `${posX}%`;
+                particle.style.top = `${posY}%`;
+                
+                // Duración y retraso aleatorio para la animación
+                const duration = Math.random() * 10 + 10;
+                const delay = Math.random() * 5;
+                particle.style.animationDuration = `${duration}s`;
+                particle.style.animationDelay = `${delay}s`;
+                
+                // Movimiento aleatorio
+                const moveX = Math.random() * 30 - 15;
+                const moveY = Math.random() * 30 - 15;
+                particle.style.animationName = 'float';
+                particle.style.transform = `translate(${moveX}px, ${moveY}px)`;
+                
+                particles.appendChild(particle);
+            }
+        }
+        
+        // Actualizar año en el footer
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+        
+        // Inicializar al cargar la página
+        window.addEventListener('load', () => {
+            createParticles();
+            initSlides();
+        });
+    </script>
+</body>
+</html>
