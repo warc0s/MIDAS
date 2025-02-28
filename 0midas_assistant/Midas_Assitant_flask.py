@@ -147,12 +147,6 @@ def index():
    """Renderiza la página principal"""
    return render_template('index.html')
 
-@app.route('/favicon.ico')
-def favicon():
-   """Redirige al favicon en GitHub"""
-   # Esta redirección enviará al cliente a buscar el favicon en GitHub directamente
-   return '', 301, {'Location': 'https://github.com/warc0s/MIDAS/blob/main/Extra/Logos/transparentes/assistant_trans.png?raw=true'}
-
 @app.route('/query', methods=['POST'])
 def query():
    """Procesa consultas y devuelve respuestas"""
