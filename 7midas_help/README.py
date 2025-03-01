@@ -1,0 +1,1 @@
+Midas Help usa flask como backend y el index.html de la carpeta templates como front. Para ejecutarlo haz simplemente "python app.py".
