@@ -1,4 +1,4 @@
-# Componente Midas Touch
+# Midas Touch
 
 ## Descripción General
 
