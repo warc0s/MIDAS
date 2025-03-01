@@ -20,11 +20,11 @@ Este sistema implementa un enfoque de RAG asistido por agentes, permitiendo nave
     - *Bloques de código*: Detecta marcadores "```" después del 30% del chunk.
     - *Párrafos*: Identifica saltos de línea dobles "\n\n" después del 30% del chunk.
     - *Oraciones*: Localiza finales de oración ". " después del 30% del chunk.
-  - Esta estrategia garantiza chunks de tamaño óptimo para el procesamiento por LLMs.
+  - Esta estrategia garantiza chunks de tamaño óptimo para el procesamiento por LLMs (entre 375 tokens (30%) y 1250 tokens (máximo)).
 
 - **Sistema de Embeddings**:
   - Utiliza el modelo *text-embedding-3-small* de OpenAI (1536 dimensiones) para generar representaciones vectoriales del texto.
-  - Implementa el modelo *gpt-4o-mini* para la generación automática de títulos y resúmenes de cada chunk.
+  - Implementa el modelo *gpt-4o-mini* para la generación automática de títulos y resúmenes de cada chunk. La finalidad es ayudar al agente a razonar sobre la relevancia de dicho chunk.
 
 - **Base de Datos Vectorial**:
   - *Supabase* como infraestructura para almacenar embeddings y metadatos.
@@ -47,7 +47,7 @@ Este sistema implementa un enfoque de RAG asistido por agentes, permitiendo nave
 
 - Proporciona respuestas precisas a consultas técnicas sobre los frameworks Pydantic AI, LlamaIndex, CrewAI y AG2.
 - Ofrece capacidad de comprensión y contextualización profunda de la documentación técnica.
-- Permite consultar documentación completa a nivel de páginas individuales.
+- Permite la recuperación selectiva e inteligente de información relevante mediante enfoque agéntico.
 - Facilita el acceso a información técnica compleja sin necesidad de navegar manualmente por la documentación.
 - Responde en español a pesar de que la documentación original está en inglés.
 - Dirigido principalmente a desarrolladores que trabajan con estos frameworks y buscan resolver dudas técnicas de forma rápida.
@@ -79,11 +79,11 @@ Para interactuar con Midas Architect:
   - [LlamaIndex](https://docs.llamaindex.ai/)
   - [CrewAI](https://docs.crewai.com/)
   - [AG2](https://docs.ag2.ai/docs/user-guide/basic-concepts/installing-ag2)
-- Librería de crawling: [Crawl4AI](https://github.com/mlabonne/crawl4ai)
+- Librería de crawling: [Crawl4AI](https://github.com/unclecode/crawl4ai)
 
 ## Limitaciones Actuales
 
-- La documentación de LlamaIndex está potencialmente incompleta debido a su extensión, lo que puede afectar a la calidad de algunas respuestas sobre este framework.
-- No se ha implementado un sistema de citas de fuentes para las respuestas, por lo que no se muestran referencias a páginas específicas.
+- La documentación de LlamaIndex está incompleta debido a su extensión (más de 1650 páginas), lo que puede afectar a la capacidad del sistema para responder algunas consultas específicas sobre este framework.
+- No se ha implementado un sistema de citas de fuentes para las respuestas. Los intentos de incluir fuentes mediante prompting resultaron en la generación de URLs inexistentes (alucinadas).
 - El modelo Gemini 2.0 Flash puede tener limitaciones en el procesamiento de consultas muy específicas o complejas.
 - Sistema diseñado para consultas en español únicamente a pesar de que la documentación original está en inglés.
