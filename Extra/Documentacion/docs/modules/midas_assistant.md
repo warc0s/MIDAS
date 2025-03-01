@@ -1,4 +1,4 @@
-# MIDAS ASSISTANT
+# Midas Assistant
 
 ## Descripción General
 MIDAS Assistant es un componente especializado dentro del sistema MIDAS (Multi-agent Intelligent Data Automation System) que proporciona orientación, recomendaciones y soporte informativo sobre todos los componentes del ecosistema MIDAS. Actúa como un chatbot inteligente utilizando tecnología LLM (Large Language Model) para responder consultas relacionadas con el sistema MIDAS, sus componentes individuales y flujos de trabajo óptimos.
