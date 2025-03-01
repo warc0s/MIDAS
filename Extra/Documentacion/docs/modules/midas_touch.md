@@ -16,12 +16,12 @@ El backend de Midas Touch está implementado en Python y utiliza un diseño modu
 
 - **Framework central**: 
   - `AICortex`: *Clase principal* que coordina el flujo de trabajo completo.
-  - `OperationalContext`: *Memoria compartida y centro de coordinación* que muestra el estado global del workflow y permite a los agentes acceder y modificar información que será utilizada por otros agentes en etapas posteriores.
+  - `OperationalContext`: *Memoria compartida y centro de coordinación* que mantiene el estado global del workflow y permite a los agentes acceder y modificar información que será utilizada por otros agentes en etapas posteriores.
 
 - **Agentes especializados**:
   - `IntentAgent`: *Analiza la descripción del usuario* utilizando un LLM para determinar el objetivo del análisis y el tipo de problema (clasificación/regresión).
   - `DataGuardianAgent`: *Analiza el dataset* e identifica la columna objetivo mencionada explícitamente en el prompt del usuario.
-  - `DataAlchemistAgent`: *Realiza la limpieza y transformación de datos* adaptándose al tipo de problema.
+  - `DataAlchemistAgent`: *Realiza la limpieza y transformación de datos* adaptándose al tipo de problema y características de los datos.
   - `ModelShamanAgent`: *Selecciona, entrena y evalúa modelos* automáticamente, con soporte completo para problemas multiclase.
   - `OracleAgent`: *Valida la calidad* del flujo completo y los resultados.
   - `NotebookScribeAgent`: *Documenta todo el proceso* en formato Jupyter Notebook.
@@ -35,11 +35,12 @@ El backend de Midas Touch está implementado en Python y utiliza un diseño modu
 
 - **Flujo de datos**:
   1. El usuario proporciona un dataset y una descripción del objetivo.
-  2. El sistema extrae directamente la columna objetivo y el tipo de problema (clasificación/regresión) del prompt.
-  3. Se preprocesan los datos mediante pipelines adaptativas.
-  4. Se entrena y valida un modelo optimizado para el tipo de problema, con soporte para clasificación multiclase.
-  5. El modelo se serializa junto con metadatos que incluyen el mapeo de clases para problemas de clasificación.
-  6. Se generan documentación detallada y métricas de rendimiento.
+  2. IntentAgent extrae directamente la columna objetivo y el tipo de problema (clasificación/regresión) del prompt a través de una consulta al LLM.
+  3. DataGuardianAgent identifica y selecciona la columna objetivo mencionada en el dataset.
+  4. DataAlchemistAgent preprocesa los datos mediante pipelines adaptativas según el tipo de datos (tratando numéricas y categóricas de forma diferente).
+  5. ModelShamanAgent selecciona entre RandomForest o GradientBoosting (según el tipo de problema y características del dataset), lo entrena y valida.
+  6. El modelo se serializa junto con metadatos que incluyen el mapeo de clases para problemas de clasificación.
+  7. NotebookScribeAgent genera documentación detallada y OracleAgent valida las métricas de rendimiento.
 
 ### Frontend:
 
@@ -65,18 +66,21 @@ Midas Touch ofrece las siguientes capacidades principales:
   - Validación de calidad de datos y estrategias de mitigación.
 
 - **Preprocesamiento adaptativo**:
-  - Manejo automático de valores faltantes según el tipo de datos.
-  - Detección y procesamiento de fechas, extrayendo componentes útiles.
-  - Codificación de variables categóricas y escalado de variables numéricas.
+  - Manejo automático de valores faltantes según el tipo de datos (mediana para numéricas, moda para categóricas).
+  - Eliminación de columnas con más del 70% de valores faltantes.
+  - Detección y procesamiento de fechas, extrayendo componentes útiles (año, mes, día, día de la semana).
+  - Codificación de variables categóricas (OneHotEncoder) y escalado de variables numéricas (StandardScaler).
   - Construcción de pipelines de transformación reproducibles.
 
 - **Selección y entrenamiento inteligente de modelos**:
   - Utilización del tipo de problema especificado en el prompt (clasificación/regresión).
-  - Soporte robusto para problemas de clasificación multiclase.
-  - Selección del algoritmo óptimo según las características del dataset.
-  - Entrenamiento con validación cruzada para estimaciones robustas.
+  - Soporte robusto para problemas de clasificación multiclase con mapeo automático de etiquetas.
+  - Selección entre RandomForest y GradientBoosting según las características del dataset:
+    - RandomForest: Para datasets pequeños (<1000 muestras) o con muchas características (>50)
+    - GradientBoosting: Para datasets más grandes con pocas características
+  - Entrenamiento con validación cruzada (5-fold) para estimaciones robustas.
   - Cálculo de métricas de rendimiento adecuadas para cada tipo de problema.
-  - Manejo de clases con pocos ejemplos durante la validación.
+  - Estratificación automática cuando es posible (para problemas de clasificación).
 
 - **Documentación y explicabilidad**:
   - Generación de un notebook Jupyter detallando todo el proceso.
@@ -87,7 +91,10 @@ Midas Touch ofrece las siguientes capacidades principales:
 
 - **Recuperación ante fallos**:
   - Sistema resiliente con recuperación automática en diferentes etapas.
-  - Estrategias de respaldo para casos donde el proceso óptimo falla.
+  - Estrategias específicas según el tipo de error detectado:
+    - Errores en DataGuardianAgent: Selección de columna alternativa
+    - Errores en DataAlchemist: Simplificación del preprocesamiento
+    - Errores en ModelShaman: Utilización de modelos fallback más simples
   - Logging detallado para diagnóstico y depuración.
   - Supresión inteligente de advertencias irrelevantes para mejorar la experiencia del usuario.
 
@@ -96,7 +103,7 @@ Midas Touch ofrece las siguientes capacidades principales:
 ### Uso desde la interfaz Streamlit:
 
 1. **Inicio de la aplicación**:
-   streamlit run Midas_Touch_Streamlit.py
+   *streamlit run Midas_Touch_Streamlit.py*
 
 2. **Carga de datos**:
    - En el panel lateral, haz clic en "Cargar archivo de datos".
@@ -105,7 +112,7 @@ Midas Touch ofrece las siguientes capacidades principales:
 
 3. **Descripción de la tarea**:
    - En el campo "Describir tarea de ML", escribe una descripción clara de lo que deseas predecir.
-   - Especifica explícitamente la columna objetivo y el tipo de problema.
+   - **Importante**: Especifica explícitamente la columna objetivo y el tipo de problema.
    - Ejemplos:
      - "Predecir la columna precio de las casas, problema de regresión"
      - "Clasificar clientes según la columna abandono, problema de clasificación"
@@ -135,7 +142,7 @@ Midas Touch ofrece las siguientes capacidades principales:
 
 También puedes utilizar Midas Touch directamente desde la línea de comandos:
 
-python Midas_Touch_V2_CLI.py
+*python Midas_Touch_V2_CLI.py*
 
 El sistema te pedirá una descripción de la tarea de ML y procesará el archivo de datos configurado en `CONFIG['DATA_FILE']`.
 
@@ -163,7 +170,7 @@ Durante el proceso, se ofrece información en tiempo real sobre:
   - [Midas_Touch_V2_CLI.py](https://github.com/warc0s/MIDAS/blob/main/4midas_touch/Midas_Touch_V2_CLI.py) - Implementación principal
   - [Midas_Touch_Streamlit.py](https://github.com/warc0s/MIDAS/blob/main/4midas_touch/Midas_Touch_Streamlit.py) - Interfaz web
 
-- **Tecnologias principales utilizadas**:
+- **Tecnologías principales utilizadas**:
   - [Google Generative AI (Gemini)](https://ai.google.dev/docs) - Para las llamadas a Gemini Flash
   - [scikit-learn](https://scikit-learn.org/) - Para trabajar con los modelos de machine learning
   - [pandas](https://pandas.pydata.org/) - Para la manipulación de datos
@@ -176,12 +183,11 @@ Durante el proceso, se ofrece información en tiempo real sobre:
 
 ## Limitaciones Actuales
 
-- **Soporte de modelos ML**: Actualmente solo se implementan modelos de scikit-learn, específicamente RandomForest y GradientBoosting.
-- **Soporte de modelos LLM**: Ahora mismo usa exclusivamente Gemini 2.0 Flash. En un futuro, podria usarse LiteLLM y definir el modelo + api_key en el .env
+- **Soporte de modelos ML**: Actualmente solo implementa modelos de scikit-learn, específicamente RandomForest y GradientBoosting (no usa búsqueda de hiperparámetros).
+- **Soporte de modelos LLM**: Ahora mismo usa exclusivamente Gemini 2.0 Flash. En un futuro, podría usarse LiteLLM y definir el modelo + api_key en el .env.
 - **Tamaño de datasets**: Está optimizado para datasets de tamaño pequeño a mediano (recomendable hasta ~25K filas). Datasets muy grandes pueden causar problemas de rendimiento.
-- **Complejidad de intención**: Aunque el sistema ahora extrae directamente la columna objetivo y el tipo de problema del prompt, descripciones ambiguas pueden requerir interpretación adicional.
-- **Preprocesamiento especializado**: Algunas transformaciones de dominio específico (como procesamiento de texto, embeddings, o series temporales) no están implementadas.
-- **Optimización de hiperparámetros**: Actualmente usa configuraciones predeterminadas para los modelos, sin búsqueda de hiperparámetros.
+- **Complejidad de intención**: Aunque el sistema extrae directamente la columna objetivo y el tipo de problema del prompt, descripciones ambiguas pueden llevar a interpretaciones incorrectas.
+- **Preprocesamiento especializado**: Algunas transformaciones de dominio específico (como procesamiento avanzado de texto, embeddings, o series temporales) no están implementadas.
 - **Explicabilidad de modelos**: No incluye herramientas avanzadas de interpretabilidad como SHAP o LIME.
-- **Consultar con usuario**: Nos hubiese gustado implementar un modo "semi-manual" donde Midas Touch te preguntase en ciertas decisiones clave qué quieres hacer. EJ: Tratamiento con outliers, sobre eliminar/aplicar media en ciertas columnas... Sin embargo, no pudimos implementarlo por falta de tiempo.
-- **Graficas**: Actualmente en el cuaderno ipynb no se muestran graficas que podrian ser relevantes, como la importancia de caracteristicas o matriz de correlación. 
+- **Modo interactivo**: No implementa un modo "semi-manual" donde el sistema consulte al usuario sobre decisiones clave (ej: tratamiento de outliers, imputación de valores).
+- **Visualizaciones**: En el notebook generado no se incluyen gráficas que podrían ser relevantes (importancia de características, matriz de correlación, etc.).
