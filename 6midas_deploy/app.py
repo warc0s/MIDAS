@@ -100,6 +100,7 @@ def main():
                 st.success("Para desplegar, guarda el código en un archivo y ejecuta: `streamlit run generated_interface.py`")
         else:
             st.error("⚠️ El código aún no ha sido generado. Inténtalo de nuevo después de la generación.")
+    os.remove(file_path)  # Limpieza del archivo temporal
     
 if __name__ == "__main__":
     main()
