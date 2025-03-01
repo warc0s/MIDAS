@@ -2,7 +2,7 @@ import streamlit as st
 import os
 from agents_test import process_joblib, generate_markdown_report, group_manager, groupchat
 
-st.title("🔍 Machine Learning Model Evaluator")
+st.title("MIDAS TEST: Análisis de Modelos de Machine Learning")
 
 uploaded_file = st.file_uploader("📂 Carga un archivo .joblib", type=["joblib"])
 
@@ -54,8 +54,8 @@ if uploaded_file:
 
                 st.subheader("📄 Reporte Generado")
                 report = generate_markdown_report(groupchat.messages)
-                with open("model_analysis_report.md", "r", encoding="utf-8") as f:
-                    st.download_button("⬇️ Descargar Reporte", f, "model_analysis_report.md", "text/markdown")
+                with open("informe_analisis_modelo.md", "r", encoding="utf-8") as f:
+                    st.download_button("⬇️ Descargar Reporte", f, "informe_analisis_modelo.md", "text/markdown")
             else:
                 st.warning("⚠️ No hay mensajes en el chat de grupo. No se generó reporte.")
 

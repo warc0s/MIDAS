@@ -5,6 +5,7 @@ import time
 import numpy as np
 import psutil
 import datetime
+from deep_translator import GoogleTranslator
 from sklearn.pipeline import Pipeline
 from sklearn.base import BaseEstimator
 from sklearn.utils.validation import check_is_fitted
@@ -174,10 +175,11 @@ def process_joblib(file_path):
 
 
 
-import datetime
+def translate_to_spanish(text):
+    return GoogleTranslator(source="en", target="es").translate(text)
 
 def generate_markdown_report(messages):
-    """Extrae la información de los mensajes y la guarda en un archivo Markdown, eliminando secciones vacías."""
+    """Extrae la información de los mensajes, los clasifica antes de traducir y genera un informe en español."""
     analysis_results = {
         "overview": "",
         "performance": "",
@@ -188,6 +190,7 @@ def generate_markdown_report(messages):
         "improvements": "",
     }
 
+    # Primero clasificamos los mensajes en inglés
     for message in messages:
         content = message["content"]
         if "Model Overview" in content:
@@ -205,31 +208,36 @@ def generate_markdown_report(messages):
         elif "Recommendations for Improvement" in content:
             analysis_results["improvements"] = content
 
+    # Ahora traducimos cada sección
+    for key in analysis_results:
+        if analysis_results[key]:
+            analysis_results[key] = translate_to_spanish(analysis_results[key])
+
+    # Generar el informe en español
     sections = [
-        ("## 🔍 Model Overview", analysis_results["overview"]),
-        ("## ⚙️ Performance Metrics", analysis_results["performance"]),
-        ("## ⏳ Latency Analysis", analysis_results["latency"]),
-        ("## ✅ Predictions Validity", analysis_results["validity"]),
-        ("## 🛡️ Robustness Tests", analysis_results["robustness"]),
-        ("## 📌 Final Recommendation", f"**{analysis_results['recommendation']}**" if analysis_results["recommendation"] else ""),
-        ("## 🔧 Suggested Improvements", analysis_results["improvements"])
+        ("## 🔍 Resumen del Modelo", analysis_results["overview"]),
+        ("## ⚙️ Métricas de Rendimiento", analysis_results["performance"]),
+        ("## ⏳ Análisis de Latencia", analysis_results["latency"]),
+        ("## ✅ Validez de Predicciones", analysis_results["validity"]),
+        ("## 🛡️ Pruebas de Robustez", analysis_results["robustness"]),
+        ("## 📌 Recomendación Final", f"**{analysis_results['recommendation']}**" if analysis_results["recommendation"] else ""),
+        ("## 🔧 Sugerencias de Mejora", analysis_results["improvements"])
     ]
 
-    markdown_content = f"# 📊 Model Analysis Report\n"
-    markdown_content += f"**Generated on:** {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+    markdown_content = f"# 📊 Informe de Análisis del Modelo\n"
+    markdown_content += f"**Generado el:** {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
     markdown_content += "---\n\n"
 
-    # Agregar solo las secciones que no están vacías
     for title, content in sections:
-        if content.strip():  # Verifica que la sección no esté vacía
+        if content.strip():
             markdown_content += f"{title}\n{content}\n\n"
 
-    file_name = "model_analysis_report.md"
+    file_name = "informe_analisis_modelo.md"
     with open(file_name, "w", encoding="utf-8") as f:
-        f.write(markdown_content.strip())  # Elimina espacios extra al final
+        f.write(markdown_content.strip())
 
-    print(f"📄 Report saved as: {file_name}")
-    return "Report saved!"
+    print(f"📄 Informe guardado como: {file_name}")
+    return "¡Informe guardado!"
 
 
 def main():
