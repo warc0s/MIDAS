@@ -14,7 +14,7 @@ from dotenv import load_dotenv
 # --------------------------------------------------------------------------------
 st.set_page_config(
     page_title="Midas Plot",
-    page_icon="📊",
+    page_icon="https://github.com/warc0s/MIDAS/blob/main/Extra/Logos/transparentes/plot_trans.png?raw=true",
     layout="wide",
     initial_sidebar_state="expanded"
 )
