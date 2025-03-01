@@ -1,4 +1,4 @@
-# Componente Midas Test
+# Midas Test
 
 ## Descripción General
 
