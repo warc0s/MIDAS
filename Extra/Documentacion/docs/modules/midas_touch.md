@@ -127,7 +127,6 @@ Midas Touch ofrece las siguientes capacidades principales:
    - Una vez completado el proceso, se mostrarán las métricas de rendimiento del modelo.
    - Para problemas de clasificación, se mostrará el mapeo entre valores numéricos y etiquetas originales.
    - Navega por las pestañas para ver:
-     - **Notebook**: Documentación detallada del proceso en formato Jupyter.
      - **Descargas**: Opciones para descargar el modelo, notebook y reportes.
      - **Logs**: Registro detallado de todas las operaciones realizadas.
 
