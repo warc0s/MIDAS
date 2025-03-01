@@ -85,7 +85,7 @@ Este sistema aprovecha la biblioteca Faker para generar datos realistas en espa�
 
 | Formato | Compatibilidad | Características |
 |---------|----------------|----------------|
-| **CSV** | Todos los componentes | Formato principal, universalmente soportado |
+| **CSV** | Midas Touch & Plot | Formato principal, universalmente soportado |
 | **Excel** | Midas Touch | Facilita integración con herramientas empresariales |
 | **Parquet** | Midas Touch | Formato columnar optimizado para análisis |
 | **JSON** | Midas Touch | Para estructuras de datos más complejas |
@@ -203,15 +203,11 @@ La exploración y visualización de datos constituye una fase fundamental para c
 
 **Midas Plot** implementa un enfoque innovador que permite a los usuarios solicitar visualizaciones complejas utilizando simplemente lenguaje natural:
 
-<div align="center">
-<img src="https://github.com/warc0s/MIDAS/blob/main/Extra/plot_example.png" alt="Plot Example" width="60%">
-</div>
-
-- 🔤 **Interpretación semántica:** Transforma descripciones textuales en código ejecutable de matplotlib
-- 🔄 **Flexibilidad expresiva:** Permite especificar desde simples histogramas hasta complejos gráficos multivariados
+- 🔤 **Interpretación semántica:** Transforma descripciones textuales en una gráfica real, en segundos
+- 🔄 **Flexibilidad expresiva:** Permite especificar desde simples histogramas hasta gráficos complejos multivariados
 - 🚀 **Abstracción de complejidad técnica:** Elimina la necesidad de conocer detalles de implementación en Python
 
-Este enfoque democratiza la creación de visualizaciones, haciéndolas accesibles tanto a data scientists experimentados como a analistas de negocio con conocimientos técnicos limitados.
+Este enfoque democratiza la creación de visualizaciones, haciéndolas accesibles tanto a cientificos de datos experimentados como a analistas de negocio con conocimientos técnicos limitados.
 
 ### 4.2 Arquitectura basada en CrewAI Flow ⚙️
 
@@ -236,33 +232,16 @@ Esta arquitectura garantiza tanto la flexibilidad como la seguridad del proceso 
 | **Temporales** | Evolución cronológica | Series temporales, descomposiciones estacionales |
 | **Categóricas** | Relaciones entre categorías | Diagramas de Sankey, gráficos de radar, diagramas aluviales |
 
-El sistema optimiza automáticamente aspectos como paletas de colores, escalas, leyendas y anotaciones para maximizar la legibilidad y el impacto visual.
+Básicamente, cualquier gráfica que matplotlib soporte, Midas Plot lo soporta.
+Además, el sistema optimiza automáticamente aspectos como paletas de colores, escalas, leyendas y anotaciones para maximizar la legibilidad y el impacto visual.
 
-### 4.4 Análisis automático de correlaciones 🔄
-
-Además de las visualizaciones explícitamente solicitadas, **Midas Plot** puede identificar y representar correlaciones significativas entre variables:
-
-> 📈 **Matrices de correlación:** Visualización de coeficientes de Pearson, Spearman o Kendall  
-> 🔍 **Destacado de relaciones fuertes:** Énfasis visual en correlaciones estadísticamente significativas  
-> 📊 **Análisis no lineales:** Detección de relaciones polinómicas o logarítmicas no capturadas por correlaciones simples
-
-### 4.5 Detección y visualización de valores atípicos 🔎
-
-**El componente Midas Plot** incluye capacidades específicas para identificar y visualizar outliers:
-
-| Tipo de visualización | Propósito |
-|----------------------|-----------|
-| 📊 **Diagramas de caja con whiskers** | Identificación univariante de valores extremos |
-| 📈 **Gráficos de dispersión con elipses** | Detección de anomalías bivariantes |
-| 📉 **Visualizaciones de densidad con umbrales** | Identificación de regiones de baja probabilidad |
-
-### 4.6 Integración en el flujo de trabajo 🔄
+### 4.4 Integración en el flujo de trabajo 🔄
 
 Las visualizaciones generadas por **Midas Plot** se integran perfectamente en el flujo de trabajo más amplio de MIDAS:
 
 - 📥 **Exportación en formato PNG:** Permite incorporar las visualizaciones en informes o presentaciones
-- 📓 **Integración con notebooks:** Complementa la documentación generada por Midas Touch
-- 🔄 **Retroalimentación para modelos:** Proporciona insights visuales que pueden informar decisiones de modelado
+- 📓 **Integración con notebooks:** Una vez generada tu gráfica, puedes añadirla a cualquier cuaderno jupyter para completarlo
+- 🔄 **Retroalimentación para modelos:** Proporciona información visual sobre tu dataset, para así comprenderlo mejor y decidir el siguiente paso en tu entrenamiento del modelo
 
 Esta integración asegura que las visualizaciones no sean un fin en sí mismas, sino herramientas valiosas para mejorar la comprensión de los datos y la calidad de los modelos resultantes.
 
@@ -479,7 +458,7 @@ Modelos Generativos Principales:
 
 ### 7.5 Generación automática de código 💻
 
-Múltiples componentes de **MIDAS** implementan generación de código mediante NLP:
+Por último, múltiples componentes de **MIDAS** implementan generación de código mediante NLP (prompt redactado por el usuario):
 
 <table>
   <tr>
@@ -495,7 +474,7 @@ Múltiples componentes de **MIDAS** implementan generación de código mediante 
   <tr>
     <td><strong>Midas Deploy</strong></td>
     <td>Interfaces Streamlit</td>
-    <td>AG2 multiagente</td>
+    <td>AG2 Multiagente</td>
   </tr>
   <tr>
     <td><strong>Midas Touch</strong></td>
@@ -503,27 +482,6 @@ Múltiples componentes de **MIDAS** implementan generación de código mediante 
     <td>Agentes Python vanilla</td>
   </tr>
 </table>
-
-### 7.6 Transformación texto-a-consulta 🔄
-
-**Los componentes Midas Touch y Plot** implementan técnicas para convertir lenguaje natural en operaciones estructuradas:
-
-- 🧠 **Interpretación semántica:** Conversión de descripciones textuales en operaciones de datos
-- 🔄 **Mapeo de conceptos dominio-específicos:** Traducción de términos de negocio a operaciones técnicas
-- 🔍 **Resolución de ambigüedades:** Clarificación de expresiones imprecisas mediante contexto
-
-### 7.7 Arquitectura de agentes conversacionales 🤖
-
-**MIDAS** implementa múltiples frameworks de agentes para facilitar el diálogo técnico:
-
-<div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; border-left: 5px solid #e83e8c;">
-<b>Frameworks de Agentes:</b><br>
-- <b>AG2:</b> Framework avanzado utilizado en Midas Dataset, Deploy y Test<br>
-- <b>CrewAI:</b> Implementado en Midas Plot para gestión de flujo<br>
-- <b>Python "vanilla":</b> Sistema personalizado en Midas Touch
-</div>
-
-Esta infraestructura NLP constituye la columna vertebral de MIDAS, permitiendo transformar interacciones en lenguaje natural en operaciones técnicas complejas, democratizando así el acceso a capacidades avanzadas de machine learning.
 
 ---
 
@@ -545,23 +503,23 @@ El sistema adopta un enfoque modular en el desarrollo de interfaces, con impleme
 <table>
   <tr>
     <th>Componente</th>
-    <th>Framework UI</th>
+    <th>Framework Web</th>
     <th>Características Principales</th>
   </tr>
   <tr>
     <td><strong>Midas Dataset</strong></td>
     <td>Streamlit</td>
-    <td>Configuración de parámetros, previsualización</td>
+    <td>Generación de datos sinteticos</td>
   </tr>
   <tr>
     <td><strong>Midas Touch</strong></td>
     <td>Streamlit</td>
-    <td>Carga de datos, visualización de métricas</td>
+    <td>Carga de datos, creación de modelos ML</td>
   </tr>
   <tr>
     <td><strong>Midas Plot</strong></td>
     <td>Streamlit</td>
-    <td>Generación de visualizaciones por texto</td>
+    <td>Generación de visualizaciones mediante texto</td>
   </tr>
   <tr>
     <td><strong>Midas Test</strong></td>
@@ -652,8 +610,8 @@ El proceso de diseño e implementación de **MIDAS** ha revelado reflexiones val
 A pesar de sus logros, **MIDAS** presenta limitaciones que deben reconocerse:
 
 - 🔌 **Dependencia de servicios externos** de LLM
-- 🔄 **Diversidad de frameworks** que aumenta complejidad
-- 📊 **Optimización para datasets** de tamaño medio (<25K)
+- 🔄 **Diversidad de frameworks** que aumenta complejidad de mantenimiento
+- 📊 **No tan óptimo** en datasets de gran tamaño (+25K filas)
 - 🧮 **Soporte limitado** de algoritmos ML
 - 🔄 **Ausencia de un orquestador central** completo
 
