@@ -22,7 +22,7 @@ El backend se organiza mediante un **CrewAI Flow** que gestiona el proceso compl
   - **Atributos:**
     - `api_input`: Entrada opcional desde API.
     - `_custom_state`: Diccionario que almacena información a lo largo del flujo (prompt, código generado, código limpio, etc.).
-    - `model`: Modelo LLM (por ejemplo, `"gemini/gemini-2.0-flash"`) usado para la generación del código.
+    - `model`: Modelo LLM (en este caso, `"gemini/gemini-2.0-flash"`) usado para la generación del código.
 
 - **Pasos del Flujo:**
   1. **Inicio (`inicio`):**
@@ -41,7 +41,7 @@ El backend se organiza mediante un **CrewAI Flow** que gestiona el proceso compl
     - Uso obligatorio de matplotlib y pandas (si se requiere).
     - La necesidad de codificar la imagen como base64.
     - La impresión exclusiva del string base64 en la salida.
-  - **`_extraer_base64`:** Analiza la salida del sandbox para identificar y extraer el string base64 correspondiente a la imagen (se asume que comienza con `iVBORw0KGgo`).
+  - **`_extraer_base64`:** Analiza la salida del sandbox para identificar y extraer el string base64 correspondiente a la imagen (se asume que comienza con `iVBORw0KGgo` - así comienza el base64 de cualquier png).
 
 ### 2.2 Frontend – `flow_gui.py`
 
@@ -72,7 +72,7 @@ El backend se organiza mediante un **CrewAI Flow** que gestiona el proceso compl
 
 ## 5. Referencias y Recursos
 
-- **[CrewAI](https://www.crewai.com):** Framework utilizado para orquestar el flujo de generación y ejecución del código.
+- **[CrewAI](https://www.crewai.com) (En su version Flow):** Framework utilizado para orquestar el flujo de generación y ejecución del código.
 - **[Streamlit](https://streamlit.io):** Framework para la creación de la interfaz web interactiva.
 - **[E2B Sandbox](https://e2b.dev):** Entorno de ejecución seguro para la ejecución del código generado.
 
