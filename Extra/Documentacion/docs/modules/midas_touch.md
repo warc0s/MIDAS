@@ -2,7 +2,7 @@
 
 ## Descripción General
 
-Midas Touch es el componente central de MIDAS, el cual automatiza el proceso completo desde la carga de datos hasta el entrenamiento del modelo. El sistema toma como entrada un dataset y una descripción en lenguaje natural de lo que se desea predecir, y genera automáticamente un modelo entrenado, documentación detallada y métricas de rendimiento.
+Midas Touch es el componente que automatiza el proceso completo desde la carga de datos hasta el entrenamiento de modelos. El sistema toma como entrada un dataset y una descripción en lenguaje natural de lo que se desea predecir, y genera automáticamente un modelo entrenado, documentación detallada y métricas de rendimiento.
 
 Este componente utiliza tecnologías de IA, específicamente agentes y modelos de lenguaje grande (LLM) de Gemini (Gemini 2.0 Flash) para interpretar la intención del usuario y guiar el proceso de análisis. Implementa un enfoque basado en múltiples agentes especializados que colaboran para realizar todas las etapas del flujo de trabajo de machine learning.
 
@@ -26,6 +26,12 @@ El backend de Midas Touch está implementado en Python y utiliza un diseño modu
   - `OracleAgent`: *Valida la calidad* del flujo completo y los resultados.
   - `NotebookScribeAgent`: *Documenta todo el proceso* en formato Jupyter Notebook.
   - `PhoenixAgent`: *Implementa recuperación ante fallos* con estrategias adaptativas.
+
+- **Sistema de enumeraciones y tipos de datos**:
+  - `WorkflowStage`: Enumera las etapas del workflow (DATA_LOADING, DATA_VALIDATION, FEATURE_ENGINEERING, MODEL_TRAINING, MODEL_VALIDATION, DEPLOYMENT, ERROR_HANDLING).
+  - `ErrorSeverity`: Define los niveles de gravedad de errores (INFO, WARNING, CRITICAL, FATAL).
+  - `ErrorLogEntry`: Estructura de datos para registrar errores con timestamp, agente, mensaje, nivel, operación, intentos y traceback.
+  - `ModelMetadata`: Estructura para metadatos del modelo con información sobre tipo, columna objetivo, características, métricas, estadísticas, transformaciones y mapeo de clases.
 
 - **Tecnologías clave**:
   - Google Generative AI (Gemini): Usado para interpretación semántica y análisis de intención. Usa el LLM Gemini-2.0-Flash.
@@ -52,8 +58,13 @@ El backend de Midas Touch está implementado en Python y utiliza un diseño modu
   - *Visor de dataset*: Muestra una vista previa de los datos cargados.
   - *Panel de métricas*: Visualiza el rendimiento del modelo entrenado.
   - *Visualización de mapeo de clases*: Muestra la correspondencia entre valores numéricos y etiquetas originales.
-  - *Sistema de pestañas*: Para navegar entre notebook, descargas y logs.
+  - *Sistema de pestañas*: Para navegar entre descargas y logs.
   - *Interfaz de descarga*: Para obtener el modelo, documentación y reportes.
+
+- **Personalización de interfaz**:
+  - CSS personalizado para mejorar la experiencia visual.
+  - Tarjetas interactivas para métricas y descargas.
+  - Estilos universales compatibles con modos claro y oscuro de Streamlit.
 
 ## Funcionalidad
 
@@ -64,13 +75,16 @@ Midas Touch ofrece las siguientes capacidades principales:
   - Identificación directa de la columna objetivo mencionada en la descripción del usuario.
   - Detección explícita del tipo de problema (clasificación/regresión) desde el prompt.
   - Validación de calidad de datos y estrategias de mitigación.
+  - Análisis de tipos de datos, valores únicos, y valores faltantes por columna.
+  - Detección de columnas categóricas con alta cardinalidad (>100 valores únicos).
 
 - **Preprocesamiento adaptativo**:
   - Manejo automático de valores faltantes según el tipo de datos (mediana para numéricas, moda para categóricas).
   - Eliminación de columnas con más del 70% de valores faltantes.
   - Detección y procesamiento de fechas, extrayendo componentes útiles (año, mes, día, día de la semana).
   - Codificación de variables categóricas (OneHotEncoder) y escalado de variables numéricas (StandardScaler).
-  - Construcción de pipelines de transformación reproducibles.
+  - Construcción de pipelines de transformación reproducibles con sklearn.
+  - Manejo especial para columnas con formato de fecha detectadas automáticamente.
 
 - **Selección y entrenamiento inteligente de modelos**:
   - Utilización del tipo de problema especificado en el prompt (clasificación/regresión).
@@ -79,8 +93,12 @@ Midas Touch ofrece las siguientes capacidades principales:
     - RandomForest: Para datasets pequeños (<1000 muestras) o con muchas características (>50)
     - GradientBoosting: Para datasets más grandes con pocas características
   - Entrenamiento con validación cruzada (5-fold) para estimaciones robustas.
-  - Cálculo de métricas de rendimiento adecuadas para cada tipo de problema.
+  - Cálculo de métricas específicas para cada tipo de problema:
+    - Clasificación: accuracy, f1 (weighted), precision, recall
+    - Regresión: r2, MSE, RMSE
   - Estratificación automática cuando es posible (para problemas de clasificación).
+  - Manejo adecuado de clases minoritarias durante la validación.
+  - Modelos fallback (DummyClassifier/DummyRegressor) en caso de problemas graves.
 
 - **Documentación y explicabilidad**:
   - Generación de un notebook Jupyter detallando todo el proceso.
@@ -88,15 +106,35 @@ Midas Touch ofrece las siguientes capacidades principales:
   - Inclusión de código reproducible para todas las operaciones.
   - Visualización de métricas y resultados del modelo.
   - Documentación explícita del mapeo entre valores numéricos y etiquetas originales en problemas de clasificación.
+  - Organización del notebook por secciones lógicas (carga, exploración, preprocesamiento, entrenamiento, evaluación).
+  - Cada etapa incluye tanto explicaciones en markdown como el código Python correspondiente.
 
 - **Recuperación ante fallos**:
   - Sistema resiliente con recuperación automática en diferentes etapas.
+  - Decorador `resilient_agent` para funciones con reintentos automáticos y backoff exponencial.
   - Estrategias específicas según el tipo de error detectado:
-    - Errores en DataGuardianAgent: Selección de columna alternativa
+    - Errores en DataGuardianAgent: Selección de columna alternativa (última columna del dataset)
     - Errores en DataAlchemist: Simplificación del preprocesamiento
     - Errores en ModelShaman: Utilización de modelos fallback más simples
   - Logging detallado para diagnóstico y depuración.
-  - Supresión inteligente de advertencias irrelevantes para mejorar la experiencia del usuario.
+  - Supresión inteligente de advertencias irrelevantes (como UndefinedMetricWarning).
+  - Captura y manejo de excepciones en cada etapa crítica.
+
+- **Sistema de logging y seguimiento**:
+  - Registro detallado de cada paso del proceso.
+  - Estructura multinivel de logging (DEBUG, INFO, WARNING, ERROR, CRITICAL).
+  - Captura de stacktraces para errores críticos.
+  - Registro temporal de cada operación con timestamps.
+  - Guardado de logs tanto en archivo como en UI (interfaz Streamlit).
+  - Registro enriquecido con contexto sobre el agente y la operación.
+
+- **Serialización y persistencia**:
+  - Guardado del modelo entrenado en formato .joblib.
+  - Serialización de metadatos complejos a JSON, con manejo especial para tipos de datos NumPy.
+  - Función `convert_to_serializable` para transformar objetos NumPy y otros tipos no serializables.
+  - Creación de informes de rendimiento en formato texto.
+  - Generación de archivos ZIP con todos los resultados para facilitar la descarga.
+  - Versionado de modelos con timestamps.
 
 ## Guía de Uso
 
@@ -109,6 +147,7 @@ Midas Touch ofrece las siguientes capacidades principales:
    - En el panel lateral, haz clic en "Cargar archivo de datos".
    - Selecciona un archivo en formato CSV, Excel, Parquet o JSON.
    - Se mostrará una vista previa del dataset en el panel principal.
+   - También verás un resumen de información sobre las columnas (tipos, valores únicos, valores faltantes).
 
 3. **Descripción de la tarea**:
    - En el campo "Describir tarea de ML", escribe una descripción clara de lo que deseas predecir.
@@ -143,7 +182,26 @@ También puedes utilizar Midas Touch directamente desde la línea de comandos:
 
 *python Midas_Touch_V2_CLI.py*
 
-El sistema te pedirá una descripción de la tarea de ML y procesará el archivo de datos configurado en `CONFIG['DATA_FILE']`.
+El sistema te pedirá una descripción de la tarea de ML y procesará el archivo de datos configurado en `CONFIG['DATA_FILE']`. Al finalizar, mostrará un resumen en la consola y guardará todos los archivos generados en las ubicaciones especificadas en CONFIG.
+
+### Configuración del sistema:
+
+El sistema incluye un diccionario `CONFIG` con los siguientes parámetros ajustables:
+
+- `API_KEY_ENV_VAR`: Nombre de la variable de entorno para la API key de Google.
+- `MODEL_NAME`: Modelo de Gemini a utilizar (por defecto, 'gemini-2.0-flash').
+- `LOG_FILE`: Ruta del archivo de log.
+- `LOG_LEVEL`: Nivel de logging (INFO, DEBUG, etc.).
+- `DATA_FILE`: Archivo de datos predeterminado.
+- `MODEL_DIR`: Directorio para guardar modelos.
+- `NOTEBOOK_FILE`: Ruta del notebook generado.
+- `RETRIES`: Número de reintentos para diferentes operaciones.
+- `MIN_ROWS`: Mínimo de filas recomendado para el dataset.
+- `MAX_MISSING_RATIO`: Ratio máximo permitido de valores faltantes.
+- `MIN_FEATURE_VARIANCE`: Varianza mínima requerida para características.
+- `DEFAULT_TEST_SIZE`: Tamaño predeterminado del conjunto de prueba.
+- `RANDOM_SEED`: Semilla para reproducibilidad.
+- `PERFORMANCE_THRESHOLDS`: Umbrales mínimos de rendimiento para modelos.
 
 ### Ejemplos de entrada/salida:
 
@@ -157,6 +215,7 @@ El sistema te pedirá una descripción de la tarea de ML y procesará el archivo
 - Notebook con documentación detallada del proceso
 - Métricas como accuracy, precision, recall y F1-score (weighted para multiclase)
 - Reportes en formato texto y JSON con detalles del modelo
+- Archivo ZIP con todos los resultados
 
 Durante el proceso, se ofrece información en tiempo real sobre:
 - Etapa actual del workflow
@@ -174,11 +233,13 @@ Durante el proceso, se ofrece información en tiempo real sobre:
   - [scikit-learn](https://scikit-learn.org/) - Para trabajar con los modelos de machine learning
   - [pandas](https://pandas.pydata.org/) - Para la manipulación de datos
   - [Streamlit](https://streamlit.io/) - Para la interfaz web
+  - [joblib](https://joblib.readthedocs.io/) - Para serialización de modelos
 
 - **Documentación relacionada**:
   - [Sklearn Pipeline](https://scikit-learn.org/stable/modules/generated/sklearn.pipeline.Pipeline.html)
   - [Pandas DataFrame](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html)
   - [Jupyter Notebook Format](https://nbformat.readthedocs.io/en/latest/)
+  - [Streamlit Components](https://docs.streamlit.io/library/components)
 
 ## Limitaciones Actuales
 
@@ -190,3 +251,6 @@ Durante el proceso, se ofrece información en tiempo real sobre:
 - **Explicabilidad de modelos**: No incluye herramientas avanzadas de interpretabilidad como SHAP o LIME.
 - **Modo interactivo**: No implementa un modo "semi-manual" donde el sistema consulte al usuario sobre decisiones clave (ej: tratamiento de outliers, imputación de valores).
 - **Visualizaciones**: En el notebook generado no se incluyen gráficas que podrían ser relevantes (importancia de características, matriz de correlación, etc.).
+- **Umbrales predeterminados**: Los umbrales de rendimiento y otros parámetros están codificados en CONFIG y no son ajustables dinámicamente desde la interfaz streamlit.
+- **Validación de entrada**: No hay validación avanzada del texto introducido por el usuario, lo que puede afectar la interpretación si no se sigue el formato recomendado.
+- **Limitaciones de robustez**: Puede tener dificultades con estructuras de datos muy complejas o tipos de datos no estándar.
