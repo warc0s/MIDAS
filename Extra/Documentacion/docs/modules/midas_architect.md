@@ -20,7 +20,7 @@ Este sistema implementa un enfoque de RAG asistido por agentes, permitiendo nave
     - *Bloques de código*: Detecta marcadores "```" después del 30% del chunk.
     - *Párrafos*: Identifica saltos de línea dobles "\n\n" después del 30% del chunk.
     - *Oraciones*: Localiza finales de oración ". " después del 30% del chunk.
-  - Esta estrategia garantiza chunks de tamaño óptimo para el procesamiento por LLMs (entre 375 tokens (30%) y 1250 tokens (máximo)).
+  - Esta estrategia garantiza chunks de tamaño óptimo para el procesamiento por LLMs.
 
 - **Sistema de Embeddings**:
   - Utiliza el modelo *text-embedding-3-small* de OpenAI (1536 dimensiones) para generar representaciones vectoriales del texto.
