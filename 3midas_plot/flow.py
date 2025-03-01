@@ -19,7 +19,7 @@ class FlowPlotV1(Flow):
             'raw_code': '',
             'clean_code': ''
         }
-        # Define el modelo a usar en litellm (ajusta según tu configuración)
+        # Define el modelo a usar en litellm
         self.model = "gemini/gemini-2.0-flash"
 
     @start()

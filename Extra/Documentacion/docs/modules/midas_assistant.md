@@ -1,9 +1,9 @@
-# MIDAS ASSISTANT
+# Midas Assistant
 
 ## Descripción General
-MIDAS Assistant es un componente especializado dentro del sistema MIDAS (Multi-agent Intelligent Data Automation System) que proporciona orientación, recomendaciones y soporte informativo sobre todos los componentes del ecosistema MIDAS. Actúa como un chatbot inteligente utilizando tecnología LLM (Large Language Model) para responder consultas relacionadas con el sistema MIDAS, sus componentes individuales y flujos de trabajo óptimos.
+MIDAS Assistant es el componente del sistema MIDAS que proporciona orientación, recomendaciones y soporte informativo sobre todos los componentes del ecosistema MIDAS. Actúa como un chatbot inteligente utilizando tecnología LLM para responder consultas relacionadas con el sistema MIDAS, sus componentes individuales y flujos de trabajo óptimos.
 
-Este componente se basa en LiteLLM como framework de abstracción, permitiendo la integración con diferentes modelos de lenguaje como Gemini, dependiendo de la configuración del usuario.
+Este componente se basa en LiteLLM como framework de abstracción, permitiendo la integración con diferentes modelos de lenguaje como Gemini, dependiendo de la configuración del usuario. Básicamente, a grandes rasgos, es un LLM con un gran system prompt con información acerca de cada componente Midas para así resolver dudas sobre el mismo.
 
 ## Arquitectura Técnica
 
@@ -21,9 +21,8 @@ Este componente se basa en LiteLLM como framework de abstracción, permitiendo l
 
 - **Flujo de procesamiento:**
  1. Recepción de la consulta del usuario
- 2. Enriquecimiento con el contexto del sistema MIDAS y el historial de conversación
- 3. Consulta al LLM configurado vía LiteLLM
- 4. Formateo y entrega de la respuesta al usuario
+ 2. Consulta al LLM configurado vía LiteLLM
+ 3. Formateo y entrega de la respuesta al usuario
 
 ### Frontend
 - **Versión CLI:**
@@ -39,7 +38,7 @@ Este componente se basa en LiteLLM como framework de abstracción, permitiendo l
 - Proporciona información completa sobre los ocho componentes del sistema MIDAS
 - Genera recomendaciones de flujos de trabajo adaptados a las necesidades del usuario
 - Sugiere prompts efectivos para interactuar con cada componente específico
-- Direcciona consultas técnicas específicas hacia Midas Help
+- Direcciona consultas técnicas específicas hacia Midas Help - Dado que la idea es sugerir usos de los componentes Midas, no responder dudas sobre el TFM.
 - Mantiene un tono profesional y conciso, enfocado en proporcionar valor práctico
 - Presenta la información en formato Markdown para una mejor legibilidad
 
@@ -70,7 +69,7 @@ Este componente se basa en LiteLLM como framework de abstracción, permitiendo l
 
 ## Limitaciones Actuales
 - El componente está optimizado para responder sobre el ecosistema MIDAS, rechazando educadamente consultas fuera de este ámbito
-- La calidad de respuesta depende del modelo LLM configurado
+- La calidad de respuesta depende del modelo LLM configurado, siendo gemini-2.0-flash el mejor calidad/precio de todos los que hemos probado
 - La versión CLI no conserva el historial de conversación entre sesiones (aunque la versión web sí lo hace)
 - No existe integración directa con otros componentes MIDAS, es puramente informativo
 - La idea original era implementarlo como un agente que tuviera como herramientas cada componente MIDAS, de forma que con un prompt simple como "hazme un modelo ML que prediga X" fuera capaz de invocar automáticamente estas herramientas con los mejores prompts posibles que el agente conoce y devolviera exactamente lo que el usuario necesita. Sin embargo, debido a limitaciones de tiempo, esta funcionalidad no pudo ser implementada.

@@ -1,4 +1,4 @@
-# Componente Midas Deploy
+# Midas Deploy
 
 ## Descripción General
 MIDAS Deploy es un sistema automatizado que genera interfaces de usuario personalizadas para modelos de aprendizaje automático. Utilizando tecnologías de IA, específicamente LLMs (Large Language Models), MIDAS Deploy analiza modelos guardados en formato joblib y crea aplicaciones Streamlit que permiten a los usuarios interactuar con estos modelos sin necesidad de programación adicional.

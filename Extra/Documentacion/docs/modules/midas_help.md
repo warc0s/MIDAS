@@ -1,12 +1,14 @@
-# Componente MIDAS Help
+# Midas Help
 
 ## Descripción General
-MIDAS Help constituye el componente de asistencia y documentación interactiva del sistema MIDAS. Implementa un chatbot inteligente basado en una arquitectura LLM+RAG+Reranker que permite a los usuarios resolver dudas sobre el funcionamiento del sistema mediante lenguaje natural. Esta implementación utiliza una aproximación RAG mejorada, incorporando un reranker y un selector de LLM inteligente, pero sin llegar a características avanzadas como "Agentic RAG" o bases de datos vectoriales. Todo el flujo está basado en el framework Llama Index.
+MIDAS Help constituye el componente de asistencia y documentación interactiva del sistema MIDAS, más a nivel de implementación. Se trata de un chatbot inteligente basado en una arquitectura LLM+RAG+Reranker que permite a los usuarios resolver dudas sobre la implementación del sistema MIDAS mediante lenguaje natural. 
+
+Esta arquitectura utiliza una aproximación RAG mejorada, gracias a incorporar un reranker y un selector de LLM inteligente, pero sin llegar a características avanzadas como "Agentic RAG" o bases de datos vectoriales. Todo el flujo está basado en el framework Llama-Index.
 
 ## Arquitectura Técnica
 
 ### Backend
-El backend está desarrollado en Python utilizando el framework Flask y se encarga del procesamiento de consultas mediante técnicas RAG. Los componentes principales son:
+El backend está desarrollado en Python utilizando el framework Flask y se encarga de procesas las consultas de los usuarios. Los componentes principales son:
 
 - **Clasificador de Preguntas (Fine-tuned BERT):** Un modelo BERT afinado que *analiza la pregunta del usuario (prompt)* y la clasifica en una de tres categorías:
     -   **Pregunta fácil:** Requiere una respuesta sencilla y directa.
@@ -14,9 +16,9 @@ El backend está desarrollado en Python utilizando el framework Flask y se encar
     -   **Pregunta no relacionada:** No tiene relación con la documentación de MIDAS. *En este caso, el sistema no genera una respuesta.*
 - Framework **Llama Index** para la generación y gestión del índice documental.
 - Modelo de **embeddings BGE-M3** de BAAI para la representación vectorial de los textos (tanto de la consulta como de los documentos). Para cada consulta, se seleccionan los 30 chunks mas relevantes según su similitud vectorial.
-- **Reranker BGE V2 M3:** Este componente reordena los resultados obtenidos por la búsqueda inicial basada en embeddings.  El reranker evalúa la relevancia de cada documento recuperado *con respecto a la consulta específica del usuario*, utilizando un modelo de lenguaje más sofisticado que la simple comparación de embeddings. Esto ayuda a filtrar el ruido y a asegurar que los documentos más relevantes sean presentados al LLM para la generación de la respuesta final. Toma los 5 chunks que salen del proceso de embedding, y los "filtra" para pasarle al LLM solo los 10 realmente mas relevantes.
+- **Reranker BGE V2 M3:** Este componente reordena los resultados obtenidos por la búsqueda inicial basada en embeddings.  El reranker evalúa la relevancia de cada documento recuperado *con respecto a la consulta específica del usuario*, utilizando un modelo de lenguaje más sofisticado que la simple comparación de embeddings. Esto ayuda a filtrar el ruido y a asegurar que los documentos más relevantes sean presentados al LLM para la generación de la respuesta final. Toma los 30 chunks que salen del proceso de embedding, y los "filtra" para pasarle al LLM solo los 10 realmente mas relevantes.
 - **Selector de LLM:** Permite elegir entre diferentes modelos de lenguaje, o usar el modo automatico para usar un modelo u otro dependiendo de la clasificación del BERT Fine-tuneado:
-    -   **Modo Automático:** Utiliza el clasificador de preguntas (BERT) para seleccionar el LLM óptimo.
+    -   **Modo Automático:** Utiliza el clasificador de preguntas (BERT) para seleccionar el LLM óptimo (Llama o Deepseek).
     -   **Llama 3.3 70B:** Un modelo de lenguaje eficiente, ideal para preguntas fáciles.  *(Usado por defecto en el modo automático si la pregunta se clasifica como "fácil").*
     -   **Deepseek V3:** Un modelo más potente, diseñado para preguntas difíciles que requieren mayor capacidad de razonamiento. *(Usado por defecto en el modo automático si la pregunta se clasifica como "difícil").*
     -   **Gemini 2.0 Flash:** El modelo que recomendamos, rápido e inteligente. *(No se usa por defecto, debes forzarlo en el selector).*
