@@ -2,7 +2,7 @@
 
 ## 1. Descripción General
 
-**MIDAS Plot** es el componente MIDAS que genera visualizaciones de datos a partir de descripciones en lenguaje natural. Este sistema utiliza un flujo basado en CrewAI Flow para gestionar todo el proceso, el cual se compone de los pasos: 
+**MIDAS Plot** es el componente MIDAS que genera visualizaciones de datos a partir de un CSV y descripciones en lenguaje natural. Este sistema utiliza un flujo basado en CrewAI Flow para gestionar todo el proceso, el cual se compone de los pasos: 
 
 1. Recolectar el CSV que sube el usuario.
 2. El agente genera el codigo matplotlib a partir del prompt de usuario, la petición de su gráfica.
@@ -26,14 +26,14 @@ El backend se organiza mediante un **CrewAI Flow** que gestiona el proceso compl
 
 - **Pasos del Flujo:**
   1. **Inicio (`inicio`):**
-     - Recibe el prompt y, si existe, el contenido CSV.
+     - Recibe el prompt y el contenido CSV.
      - Prepara el estado con la solicitud del usuario y datos adicionales (como el año actual).
-     - Llama al modelo LLM (a través de `litellm.completion`) para generar el código Python (**raw_code**) basado en la descripción del usuario.
+     - Llama al modelo LLM usando LiteLLM (a través de `litellm.completion`) para generar el código Python (**raw_code**) basado en la descripción del usuario.
   2. **Limpieza de Código (`limpiar_codigo`):**
      - Elimina caracteres o backticks adicionales generados por el LLM, dejando el código listo para ejecución.
   3. **Ejecución del Código (`ejecutar_codigo`):**
      - Ejecuta el código limpio dentro de un entorno sandbox (usando `e2b_code_interpreter.Sandbox`).
-     - Si se ha proporcionado un CSV, se escribe en el sandbox para ser utilizado en la ejecución.
+     - Se escribe en el sandbox que el CSV sea utilizado en la ejecución.
      - Captura la salida estándar y extrae la imagen en formato base64 (se espera que sea la única salida impresa).
 
 - **Funciones Auxiliares:**
@@ -55,11 +55,8 @@ El backend se organiza mediante un **CrewAI Flow** que gestiona el proceso compl
 ## 3. Funcionalidades Clave
 
 - **Generación Automática de Código Python:** Transforma descripciones en lenguaje natural en código para generar gráficos mediante matplotlib.
-  
 - **Ejecución Segura en Sandbox:** El código generado se ejecuta en un entorno aislado, previniendo riesgos de seguridad.
-  
 - **Soporte para Datos CSV:** Permite cargar y utilizar datasets en formato CSV, integrándolos en el proceso de visualización.
-  
 - **Manejo de Errores:** Implementa un sistema de validación y mensajes amigables para informar sobre posibles errores en la generación o ejecución del código.
 
 ---
@@ -75,7 +72,7 @@ El backend se organiza mediante un **CrewAI Flow** que gestiona el proceso compl
 
 ## 5. Referencias y Recursos
 
-- **[CrewAI Flow](https://www.crewai.com):** Framework utilizado para orquestar el flujo de generación y ejecución del código.
+- **[CrewAI](https://www.crewai.com):** Framework utilizado para orquestar el flujo de generación y ejecución del código.
 - **[Streamlit](https://streamlit.io):** Framework para la creación de la interfaz web interactiva.
 - **[E2B Sandbox](https://e2b.dev):** Entorno de ejecución seguro para la ejecución del código generado.
 
