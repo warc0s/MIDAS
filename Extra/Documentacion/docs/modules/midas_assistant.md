@@ -3,7 +3,7 @@
 ## Descripción General
 MIDAS Assistant es el componente del sistema MIDAS que proporciona orientación, recomendaciones y soporte informativo sobre todos los componentes del ecosistema MIDAS. Actúa como un chatbot inteligente utilizando tecnología LLM para responder consultas relacionadas con el sistema MIDAS, sus componentes individuales y flujos de trabajo óptimos.
 
-Este componente se basa en LiteLLM como framework de abstracción, permitiendo la integración con diferentes modelos de lenguaje como Gemini, dependiendo de la configuración del usuario. Básicamente, a grandes rasgos, es un LLM con un gran system prompt con información acerca de cada componente Midas.
+Este componente se basa en LiteLLM como framework de abstracción, permitiendo la integración con diferentes modelos de lenguaje como Gemini, dependiendo de la configuración del usuario. Básicamente, a grandes rasgos, es un LLM con un gran system prompt con información acerca de cada componente Midas para así resolver dudas sobre el mismo.
 
 ## Arquitectura Técnica
 
