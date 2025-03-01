@@ -1,1 +1,1 @@
-Flow_GUI es el streamlit. La interfaz web.
+Flow_GUI.py es el streamlit. La interfaz web.

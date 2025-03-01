@@ -85,12 +85,12 @@ Este sistema aprovecha la biblioteca Faker para generar datos realistas en espa�
 
 | Formato | Compatibilidad | Características |
 |---------|----------------|----------------|
-| **CSV** | Todos los componentes | Formato principal, universalmente soportado |
-| **Excel** | Midas Touch | Facilita integración con herramientas empresariales |
+| **CSV** | Midas Touch & Plot | Formato principal, universalmente soportado |
+| **XLSX** | Midas Touch | Facilita integración con herramientas empresariales |
 | **Parquet** | Midas Touch | Formato columnar optimizado para análisis |
 | **JSON** | Midas Touch | Para estructuras de datos más complejas |
 
-Los datos son ingestados a través de interfaces intuitivas implementadas en Streamlit, que permiten la previsualización inmediata y validación básica antes del procesamiento.
+Los datos son subidos a través de interfaces intuitivas implementadas en Streamlit, que permiten la previsualización inmediata y validación básica antes del procesamiento. De igual forma, recomendamos usar siempre CSV.
 
 ### 2.3 Adquisición de conocimiento para módulos RAG 🧠
 
@@ -116,21 +116,16 @@ Esta flexibilidad garantiza que los usuarios puedan elegir la fuente de datos m�
 ---
 
 ## Sección 3: Limpieza de datos
-
 La limpieza y preparación de datos constituye una fase crítica en cualquier proyecto de machine learning. **El componente Midas Touch** aborda este reto a través de un enfoque automatizado y adaptativo.
 
 ### 3.1 Procesamiento adaptativo según tipo de problema 🔄
-
 **El agente DataAlchemistAgent de Midas Touch** implementa un pipeline inteligente de limpieza que se adapta automáticamente al tipo de problema detectado:
-
 - ✅ **Detección automática del objetivo:** El sistema extrae la columna objetivo directamente del prompt del usuario
 - ✅ **Identificación del tipo de problema:** Determina si se trata de clasificación o regresión mediante análisis semántico de la descripción
-- ✅ **Ajuste dinámico de estrategias:** Aplica diferentes enfoques de preprocesamiento según la naturaleza del problema
+- ✅ **Ajuste dinámico de estrategias:** Aplica diferentes enfoques de preprocesamiento según el tipo de datos (numéricos o categóricos)
 
 ### 3.2 Tratamiento de valores nulos 🧩
-
-**Midas Touch** implementa estrategias diferenciadas para la gestión de valores faltantes:
-
+**Midas Touch** implementa estrategias específicas para la gestión de valores faltantes:
 <table>
   <tr>
     <th>Tipo de Variable</th>
@@ -138,37 +133,38 @@ La limpieza y preparación de datos constituye una fase crítica en cualquier pr
   </tr>
   <tr>
     <td><strong>Numéricas</strong></td>
-    <td>Media, mediana o interpolación según distribución</td>
+    <td>Imputación con la mediana</td>
   </tr>
   <tr>
     <td><strong>Categóricas</strong></td>
-    <td>Moda o creación de categoría "Desconocido"</td>
+    <td>Imputación con la moda (valor más frecuente)</td>
   </tr>
   <tr>
-    <td><strong>Temporales</strong></td>
-    <td>Forward-fill o backward-fill</td>
+    <td><strong>Columnas con alta tasa de valores faltantes</strong></td>
+    <td>Eliminación de columnas con más del 70% de valores faltantes</td>
   </tr>
 </table>
 
-El sistema documenta automáticamente cada decisión de imputación en el notebook generado, garantizando la transparencia del proceso.
+El sistema documenta el proceso de preprocesamiento en el notebook generado, incluyendo las transformaciones aplicadas a cada tipo de variable.
 
-### 3.3 Detección y tratamiento de valores atípicos (outliers) 📊
+### 3.3 Detección y procesamiento de fechas 📅
+**El DataAlchemistAgent** incluye capacidades específicas para el manejo de columnas temporales:
 
-**El DataAlchemistAgent** emplea técnicas estadísticas robustas para identificar anomalías:
+- 🔍 **Detección automática**: Identifica columnas que parecen contener fechas mediante expresiones regulares
+- 🔍 **Extracción de componentes**: Convierte fechas detectadas en características útiles como año, mes, día y día de la semana
+- 🔍 **Transformación estructurada**: Reemplaza las fechas originales con componentes numéricos que pueden ser utilizados por los modelos
 
-> 🔍 **Método IQR:** Para distribuciones no necesariamente normales  
-> 🔍 **Z-score modificado:** Para detección en distribuciones aproximadamente normales  
-> 🔍 **Análisis de densidad local:** Para identificar outliers en espacios multidimensionales
+Este procesamiento permite que la información temporal sea aprovechada efectivamente por los algoritmos de machine learning, que típicamente requieren entradas numéricas.
 
-Las estrategias de mitigación incluyen recorte, transformación winsorizada o creación de características binarias que señalan la presencia de valores atípicos.
+### 3.4 Validación de calidad de datos ✓
+**Midas Touch** incluye validaciones básicas para garantizar la viabilidad del análisis:
 
-### 3.4 Validación de tipos y formatos ✓
+- 📋 **Validación de la columna objetivo**: Verifica que exista, no tenga demasiados valores faltantes y contenga suficiente variabilidad
+- 📋 **Detección de columnas problemáticas**: Identifica y elimina columnas con más del 70% de valores faltantes
+- 📋 **Verificación de tamaño mínimo**: Comprueba que el dataset tenga suficientes filas para el entrenamiento
+- 📋 **Alerta sobre columnas de alta cardinalidad**: Detecta variables categóricas con gran número de valores únicos
 
-**Midas Touch** incluye validaciones exhaustivas para garantizar la integridad de los datos:
-
-- 📋 **Consistencia de formatos:** Especialmente crítico en fechas, monedas y porcentajes
-- 📋 **Validación de rangos:** Detección de valores fuera de rangos lógicos para el dominio
-- 📋 **Coherencia relacional:** Verificación de restricciones lógicas entre variables relacionadas
+Estas verificaciones se registran en el log del sistema y se documentan en el notebook generado, permitiendo entender las decisiones tomadas durante el preprocesamiento.
 
 ### 3.5 Descripción detallada de los atributos 📝
 
@@ -176,22 +172,25 @@ Cada conjunto de datos procesado por **Midas Touch** es documentado automáticam
 
 | Tipo de documentación | Descripción |
 |----------------------|-------------|
-| 📊 **Diccionario de datos** | Descripción semántica de cada columna |
-| 📈 **Estadísticas descriptivas** | Medidas de centralidad y dispersión |
-| 📉 **Visualizaciones** | Distribuciones por variable |
-| 🔄 **Mapeo de transformaciones** | Documentación de cambios aplicados |
+| 📊 **Resumen del dataset** | Información sobre dimensiones y estructura de los datos |
+| 📈 **Estadísticas descriptivas** | Tipos de datos, valores faltantes y valores únicos |
+| 🔍 **Análisis de columnas** | Información básica sobre cada columna del dataset |
+| 🔄 **Mapeo de transformaciones** | Documentación de los cambios aplicados durante el preprocesamiento |
 
-Esta documentación se integra en el notebook generado, facilitando la comprensión y comunicación del modelo.
+Esta documentación se integra en el notebook generado, facilitando la comprensión y trazabilidad del proceso completo.
 
 ### 3.6 Resiliencia ante fallos 🛡️
 
-**El agente PhoenixAgent de Midas Touch** está específicamente diseñado para gestionar situaciones excepcionales durante la limpieza:
+**El agente PhoenixAgent de Midas Touch** está específicamente diseñado para gestionar situaciones excepcionales durante el procesamiento:
 
-- 🚨 **Detección de errores:** Identifica problemas durante el proceso de limpieza
-- 🔄 **Estrategias alternativas:** Aplica enfoques de respaldo cuando los métodos principales fallan
-- 📋 **Documentación de incidencias:** Registra cada decisión tomada ante situaciones imprevistas
+- 🚨 **Respuesta a errores:** Actúa cuando otros agentes reportan fallos durante el proceso
+- 🔄 **Estrategias adaptativas específicas:** Implementa soluciones según el tipo de error:
+  - Para errores en DataGuardianAgent: Selección de columna alternativa (última columna)
+  - Para errores en DataAlchemist: Simplificación del preprocesamiento
+  - Para errores en ModelShaman: Utilización de modelos fallback más simples
+- 📋 **Registro de recuperación:** Documenta las acciones tomadas para recuperar el workflow
 
-Esta arquitectura garantiza que el proceso de limpieza sea robusto incluso ante datasets particularmente desafiantes.
+Esta arquitectura garantiza que el proceso sea robusto incluso ante datasets particularmente desafiantes o errores inesperados.
 
 ---
 
@@ -203,15 +202,11 @@ La exploración y visualización de datos constituye una fase fundamental para c
 
 **Midas Plot** implementa un enfoque innovador que permite a los usuarios solicitar visualizaciones complejas utilizando simplemente lenguaje natural:
 
-<div align="center">
-<img src="https://github.com/warc0s/MIDAS/blob/main/Extra/plot_example.png" alt="Plot Example" width="60%">
-</div>
-
-- 🔤 **Interpretación semántica:** Transforma descripciones textuales en código ejecutable de matplotlib
-- 🔄 **Flexibilidad expresiva:** Permite especificar desde simples histogramas hasta complejos gráficos multivariados
+- 🔤 **Interpretación semántica:** Transforma descripciones textuales en una gráfica real, en segundos
+- 🔄 **Flexibilidad expresiva:** Permite especificar desde simples histogramas hasta gráficos complejos multivariados
 - 🚀 **Abstracción de complejidad técnica:** Elimina la necesidad de conocer detalles de implementación en Python
 
-Este enfoque democratiza la creación de visualizaciones, haciéndolas accesibles tanto a data scientists experimentados como a analistas de negocio con conocimientos técnicos limitados.
+Este enfoque democratiza la creación de visualizaciones, haciéndolas accesibles tanto a cientificos de datos experimentados como a analistas de negocio con conocimientos técnicos limitados.
 
 ### 4.2 Arquitectura basada en CrewAI Flow ⚙️
 
@@ -236,33 +231,16 @@ Esta arquitectura garantiza tanto la flexibilidad como la seguridad del proceso 
 | **Temporales** | Evolución cronológica | Series temporales, descomposiciones estacionales |
 | **Categóricas** | Relaciones entre categorías | Diagramas de Sankey, gráficos de radar, diagramas aluviales |
 
-El sistema optimiza automáticamente aspectos como paletas de colores, escalas, leyendas y anotaciones para maximizar la legibilidad y el impacto visual.
+Básicamente, cualquier gráfica que matplotlib soporte, Midas Plot lo soporta.
+Además, el sistema optimiza automáticamente aspectos como paletas de colores, escalas, leyendas y anotaciones para maximizar la legibilidad y el impacto visual.
 
-### 4.4 Análisis automático de correlaciones 🔄
-
-Además de las visualizaciones explícitamente solicitadas, **Midas Plot** puede identificar y representar correlaciones significativas entre variables:
-
-> 📈 **Matrices de correlación:** Visualización de coeficientes de Pearson, Spearman o Kendall  
-> 🔍 **Destacado de relaciones fuertes:** Énfasis visual en correlaciones estadísticamente significativas  
-> 📊 **Análisis no lineales:** Detección de relaciones polinómicas o logarítmicas no capturadas por correlaciones simples
-
-### 4.5 Detección y visualización de valores atípicos 🔎
-
-**El componente Midas Plot** incluye capacidades específicas para identificar y visualizar outliers:
-
-| Tipo de visualización | Propósito |
-|----------------------|-----------|
-| 📊 **Diagramas de caja con whiskers** | Identificación univariante de valores extremos |
-| 📈 **Gráficos de dispersión con elipses** | Detección de anomalías bivariantes |
-| 📉 **Visualizaciones de densidad con umbrales** | Identificación de regiones de baja probabilidad |
-
-### 4.6 Integración en el flujo de trabajo 🔄
+### 4.4 Integración en el flujo de trabajo 🔄
 
 Las visualizaciones generadas por **Midas Plot** se integran perfectamente en el flujo de trabajo más amplio de MIDAS:
 
 - 📥 **Exportación en formato PNG:** Permite incorporar las visualizaciones en informes o presentaciones
-- 📓 **Integración con notebooks:** Complementa la documentación generada por Midas Touch
-- 🔄 **Retroalimentación para modelos:** Proporciona insights visuales que pueden informar decisiones de modelado
+- 📓 **Integración con notebooks:** Una vez generada tu gráfica, puedes añadirla a cualquier cuaderno jupyter para completarlo
+- 🔄 **Retroalimentación para modelos:** Proporciona información visual sobre tu dataset, para así comprenderlo mejor y decidir el siguiente paso en tu entrenamiento del modelo
 
 Esta integración asegura que las visualizaciones no sean un fin en sí mismas, sino herramientas valiosas para mejorar la comprensión de los datos y la calidad de los modelos resultantes.
 
@@ -274,63 +252,67 @@ La preparación adecuada de los datos constituye un elemento crítico para el é
 
 ### 5.1 Ingeniería de características adaptativa 🛠️
 
-**El DataAlchemistAgent de Midas Touch** implementa estrategias de ingeniería de características que se adaptan automáticamente a la naturaleza de los datos y al problema específico:
+**El DataAlchemistAgent de Midas Touch** implementa estrategias básicas de ingeniería de características que se adaptan al tipo de datos:
 
 <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; border-left: 5px solid #4caf50;">
 <b>Características Implementadas:</b><br>
-- Extracción de componentes temporales de fechas<br>
-- Codificación inteligente de variables categóricas<br>
-- Transformaciones no lineales automáticas<br>
-- Creación de características de interacción
+- Extracción de componentes temporales de fechas (año, mes, día, día de semana)<br>
+- Detección automática de columnas con formato de fecha<br>
+- Eliminación de columnas con alta tasa de valores faltantes (>70%)<br>
+- Construcción de pipeline de transformación con sklearn
 </div>
 
 ### 5.2 Normalización y escalado de datos 📏
 
-**Midas Touch** implementa técnicas específicas de normalización según los requisitos del algoritmo y la naturaleza de los datos:
+**Midas Touch** implementa técnicas específicas de normalización según el tipo de datos:
 
-| Técnica | Uso Recomendado | Implementación |
+| Tipo de Variable | Transformación Aplicada | Implementación |
 |---------|-----------------|----------------|
-| **Escalado MinMax** | Preservar distribución relativa | `sklearn.preprocessing.MinMaxScaler` |
-| **Estandarización (Z-score)** | Algoritmos sensibles a escala | `sklearn.preprocessing.StandardScaler` |
-| **Robust Scaler** | Datos con outliers significativos | `sklearn.preprocessing.RobustScaler` |
-| **Normalización por cuantiles** | Distribuciones sesgadas | `sklearn.preprocessing.QuantileTransformer` |
+| **Variables numéricas** | Estandarización (Z-score) | `sklearn.preprocessing.StandardScaler` |
+| **Variables categóricas** | Codificación one-hot | `sklearn.preprocessing.OneHotEncoder` |
+| **Valores faltantes numéricos** | Imputación con mediana | `sklearn.impute.SimpleImputer(strategy='median')` |
+| **Valores faltantes categóricos** | Imputación con valor más frecuente | `sklearn.impute.SimpleImputer(strategy='most_frequent')` |
 
-El sistema evalúa automáticamente la distribución de cada variable para seleccionar el método de normalización más apropiado.
+Estas transformaciones se aplican automáticamente dentro de un pipeline de scikit-learn, que maneja adecuadamente los diferentes tipos de columnas presentes en el dataset.
 
 ### 5.3 Implementación de pipelines de transformación 🔄
+**El DataAlchemistAgent** construye pipelines estructurados utilizando la API Pipeline de scikit-learn, proporcionando:
+- ✅ **Reproducibilidad:** Las transformaciones se aplican consistentemente a los datos
+- 🔄 **Preprocesamiento modular:** Separación de transformaciones para columnas numéricas y categóricas
+- 📝 **Documentación detallada:** Los pasos del pipeline quedan documentados en el notebook generado
 
-**El DataAlchemistAgent** construye pipelines estructurados utilizando la API Pipeline de scikit-learn, garantizando:
+Específicamente, el sistema implementa:
+- Un pipeline para variables numéricas con imputación por mediana y escalado estándar
+- Un pipeline para variables categóricas con imputación por moda y codificación one-hot
+- Un ColumnTransformer que aplica cada pipeline al tipo de columna correspondiente
 
-- ✅ **Reproducibilidad:** Las mismas transformaciones se aplican consistentemente a datos de entrenamiento y producción
-- 🛡️ **Prevención de data leakage:** Separación estricta entre datos de entrenamiento y validación durante transformaciones
-- 📊 **Secuenciación óptima:** Ordenamiento de transformaciones para maximizar la efectividad del proceso
-- 📝 **Documentación explícita:** Cada paso del pipeline queda documentado en el notebook generado
+### 5.4 Manejo de diferentes tipos de columnas
+**El DataAlchemistAgent** identifica y procesa diferentes tipos de datos:
+- 🔢 **Variables numéricas:** Detectadas automáticamente y procesadas con escalado apropiado
+- 🔤 **Variables categóricas:** Codificadas mediante one-hot encoding
+- 📅 **Variables de fecha:** Detectadas por patrones y convertidas en componentes temporales útiles
+- ⚠️ **Columnas problemáticas:** Identificación de columnas con alta proporción de valores faltantes
 
-### 5.4 Selección y reducción de dimensionalidad 📉
+Esto permite que el sistema funcione con una amplia variedad de datasets sin requerir preprocesamiento manual previo.
 
-**El DataAlchemistAgent** implementa técnicas para optimizar el conjunto de características utilizadas:
+### 5.5 Estrategias de validación 🧩
+**Midas Touch** implementa técnicas específicas para la división y validación de datos:
+- 📊 **Estratificación en división de datos:** Para problemas de clasificación, preserva la distribución de clases en los conjuntos de entrenamiento y prueba (cuando hay suficientes ejemplos de cada clase)
+- 🔄 **Validación cruzada (5-fold):** Evalúa la robustez del modelo mediante validación cruzada con 5 particiones
+- 🛡️ **Prevención de fugas de datos:** División explícita de conjuntos de entrenamiento y prueba antes de la evaluación del modelo
 
-- 🔍 **Eliminación de alta correlación**
-- 📊 **Selección basada en importancia**
-- 📉 **PCA (Análisis de Componentes Principales)**
-- 🔄 **Feature Agglomeration para alta dimensionalidad**
-
-### 5.5 Particionamiento estratégico para validación 🧩
-
-**Midas Touch** implementa estrategias avanzadas de división de datos:
-
-- 📊 **Validación cruzada estratificada:** Para preservar distribuciones de clases en problemas de clasificación
-- ⏱️ **Time-series split:** Para datos temporales, respetando la secuencialidad
-- 🔄 **Group k-fold:** Para datos con dependencias grupales, evitando filtraciones entre grupos
+El sistema adapta sus estrategias de validación según el tipo de problema (clasificación/regresión) y las características del dataset.
 
 ### 5.6 Implementación técnica a través de agentes especializados 🤖
+El proceso de preparación de datos se implementa a través de dos agentes clave de **Midas Touch**:
+- **DataGuardianAgent:** Identifica la columna objetivo mencionada en el prompt y analiza sus características estadísticas
+- **DataAlchemistAgent:** Ejecuta las transformaciones específicas y construye los pipelines de preprocesamiento
 
-Esta sofisticada preparación de datos se implementa a través de dos agentes clave de **Midas Touch**:
-
-- **DataGuardianAgent:** Identifica la columna objetivo y establece la estrategia global
-- **DataAlchemistAgent:** Ejecuta las transformaciones específicas y construye los pipelines
-
-El proceso completo queda documentado en notebooks generados automáticamente por el **NotebookScribeAgent**, garantizando la transparencia y reproducibilidad de cada transformación aplicada.
+El proceso completo queda documentado en el notebook generado automáticamente por el **NotebookScribeAgent**, incluyendo:
+- Código para cada transformación aplicada
+- Explicaciones en formato markdown de cada decisión tomada
+- Visualizaciones de resumen de los datos antes y después del preprocesamiento
+- Información sobre el impacto de las transformaciones en la estructura del dataset
 
 ---
 
@@ -340,17 +322,20 @@ El entrenamiento de modelos y la evaluación exhaustiva de su rendimiento consti
 
 ### 6.1 Selección inteligente de algoritmos 🧠
 
-**El agente ModelShamanAgent de Midas Touch** implementa un sistema de selección inteligente de algoritmos:
+**El agente ModelShamanAgent de Midas Touch** implementa un sistema de selección automática de algoritmos basado en criterios específicos:
 
 Criterios de Selección:
-- Adaptación automática al tipo de problema<br>
-- Análisis de características del dataset<br>
-- Equilibrio entre rendimiento y explicabilidad
+- Tipo de problema (clasificación o regresión)<br>
+- Tamaño del dataset (número de muestras)<br>
+- Complejidad de las características (número de variables)
 
-| Tipo de Problema | Algoritmos Implementados |
+| Criterio | Algoritmo Seleccionado |
 |------------------|--------------------------|
-| **Clasificación** | RandomForestClassifier, GradientBoostingClassifier |
-| **Regresión** | RandomForestRegressor, GradientBoostingRegressor |
+| **Datasets pequeños (<1000 muestras) o con muchas características (>50)** | RandomForest (Classifier/Regressor) |
+| **Datasets más grandes con pocas características** | GradientBoosting (Classifier/Regressor) |
+| **Casos de fallback (tras errores)** | DummyClassifier/DummyRegressor |
+
+El sistema selecciona automáticamente entre estos algoritmos de scikit-learn según las características del dataset, y en caso de fallos repetidos durante el entrenamiento, utiliza modelos baseline como mecanismo de recuperación.
 
 ### 6.2 Evaluación multimétrica mediante Midas Test 📊
 
@@ -371,14 +356,18 @@ Cada agente evalúa métricas específicas según el tipo de problema:
 | **Clasificación** | Accuracy, precision, recall, F1-score, AUC-ROC | Matrices de confusión, curvas ROC |
 | **Regresión** | MAE, MSE, RMSE, R², MAPE | Gráficos de dispersión, histogramas de errores |
 
-### 6.3 Validación cruzada y prevención de overfitting 🛡️
+### 6.3 Validación cruzada y evaluación del modelo 🛡️
 
-**El ModelShamanAgent de Midas Touch** implementa estrategias robustas para garantizar la generalización de los modelos:
+**El ModelShamanAgent de Midas Touch** implementa estrategias de validación para evaluar el rendimiento de los modelos:
 
-> 🔄 **K-Fold Cross Validation:** Con k=5 por defecto, adaptable según tamaño del dataset  
-> 📊 **Estratificación:** Preservación de distribuciones de clases en folds para clasificación  
-> 📈 **Análisis de curvas de aprendizaje:** Para detectar subajuste o sobreajuste  
-> ⏱️ **Validación temporal:** Para datos secuenciales, respetando la cronología
+> 🔄 **K-Fold Cross Validation:** Implementa validación cruzada con k=5 para estimaciones robustas de rendimiento  
+> 📊 **Estratificación condicional:** Aplica estratificación en la división train/test cuando hay al menos 2 ejemplos por clase  
+> 🧮 **Métricas específicas según problema:**  
+>   +Clasificación: accuracy, f1-score (weighted), precision, recall  
+>   +Regresión: R², MSE, RMSE  
+> 🛑 **Validación contra umbrales mínimos:** El OracleAgent verifica que las métricas superen los umbrales configurados
+
+El sistema captura y maneja adecuadamente las advertencias de métricas indefinidas en situaciones con clases minoritarias, garantizando resultados fiables incluso en condiciones complejas.
 
 ### 6.4 Análisis de latencia y rendimiento computacional ⚡
 
@@ -420,14 +409,18 @@ Estas métricas son fundamentales para determinar la viabilidad del modelo en en
 
 ### 6.6 Serialización y persistencia de modelos 💾
 
-**El ModelShamanAgent de Midas Touch** implementa mecanismos robustos para la preservación de modelos:
+**El componente Midas Touch** implementa un sistema completo para la serialización y persistencia de modelos:
 
-- 💾 **Serialización mediante joblib**
-- 📝 **Inclusión de metadatos** (features y procesamiento)
-- 🔄 **Mapeo de clases** para problemas de clasificación
-- 📋 **Vinculación con documentación** explicativa
+- 💾 **Serialización mediante joblib** con versionado automático por timestamp
+- 📝 **Guardado de metadatos en JSON** incluyendo:
+  - Tipo de modelo y columna objetivo
+  - Lista de características utilizadas
+  - Métricas de rendimiento detalladas
+  - Mapeo entre valores numéricos y etiquetas originales (para clasificación)
+- 📊 **Generación de reportes de rendimiento** en formato texto
+- 🗃️ **Creación de archivos ZIP** con todos los resultados para facilitar la distribución
 
-Este enfoque integral garantiza que los modelos no solo sean precisos, sino también comprensibles, robustos y adecuados para implementación en entornos reales.
+El sistema maneja automáticamente la conversión de tipos de datos complejos (como arrays NumPy) a formatos serializables, garantizando la integridad de toda la información del modelo para su posterior uso o análisis.
 
 ---
 
@@ -473,13 +466,13 @@ Modelos Generativos Principales:
 
 **❓ MIDAS HELP (Arquitectura LLM+RAG+Reranker)**
 - Clasificador BERT fine-tuned
+- Selector de LLM automatizado, aunque puedes "forzar" el que prefieras
 - Embeddings BGE-M3
 - Reranker BGE V2 M3
-- Selector de LLM automatizado
 
 ### 7.5 Generación automática de código 💻
 
-Múltiples componentes de **MIDAS** implementan generación de código mediante NLP:
+Por último, múltiples componentes de **MIDAS** implementan generación de código mediante NLP (prompt redactado por el usuario):
 
 <table>
   <tr>
@@ -495,7 +488,7 @@ Múltiples componentes de **MIDAS** implementan generación de código mediante 
   <tr>
     <td><strong>Midas Deploy</strong></td>
     <td>Interfaces Streamlit</td>
-    <td>AG2 multiagente</td>
+    <td>AG2 Multiagente</td>
   </tr>
   <tr>
     <td><strong>Midas Touch</strong></td>
@@ -503,27 +496,6 @@ Múltiples componentes de **MIDAS** implementan generación de código mediante 
     <td>Agentes Python vanilla</td>
   </tr>
 </table>
-
-### 7.6 Transformación texto-a-consulta 🔄
-
-**Los componentes Midas Touch y Plot** implementan técnicas para convertir lenguaje natural en operaciones estructuradas:
-
-- 🧠 **Interpretación semántica:** Conversión de descripciones textuales en operaciones de datos
-- 🔄 **Mapeo de conceptos dominio-específicos:** Traducción de términos de negocio a operaciones técnicas
-- 🔍 **Resolución de ambigüedades:** Clarificación de expresiones imprecisas mediante contexto
-
-### 7.7 Arquitectura de agentes conversacionales 🤖
-
-**MIDAS** implementa múltiples frameworks de agentes para facilitar el diálogo técnico:
-
-<div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; border-left: 5px solid #e83e8c;">
-<b>Frameworks de Agentes:</b><br>
-- <b>AG2:</b> Framework avanzado utilizado en Midas Dataset, Deploy y Test<br>
-- <b>CrewAI:</b> Implementado en Midas Plot para gestión de flujo<br>
-- <b>Python "vanilla":</b> Sistema personalizado en Midas Touch
-</div>
-
-Esta infraestructura NLP constituye la columna vertebral de MIDAS, permitiendo transformar interacciones en lenguaje natural en operaciones técnicas complejas, democratizando así el acceso a capacidades avanzadas de machine learning.
 
 ---
 
@@ -545,23 +517,23 @@ El sistema adopta un enfoque modular en el desarrollo de interfaces, con impleme
 <table>
   <tr>
     <th>Componente</th>
-    <th>Framework UI</th>
+    <th>Framework Web</th>
     <th>Características Principales</th>
   </tr>
   <tr>
     <td><strong>Midas Dataset</strong></td>
     <td>Streamlit</td>
-    <td>Configuración de parámetros, previsualización</td>
+    <td>Generación de datos sinteticos</td>
   </tr>
   <tr>
     <td><strong>Midas Touch</strong></td>
     <td>Streamlit</td>
-    <td>Carga de datos, visualización de métricas</td>
+    <td>Carga de datos, creación de modelos ML</td>
   </tr>
   <tr>
     <td><strong>Midas Plot</strong></td>
     <td>Streamlit</td>
-    <td>Generación de visualizaciones por texto</td>
+    <td>Generación de visualizaciones mediante texto</td>
   </tr>
   <tr>
     <td><strong>Midas Test</strong></td>
@@ -652,8 +624,8 @@ El proceso de diseño e implementación de **MIDAS** ha revelado reflexiones val
 A pesar de sus logros, **MIDAS** presenta limitaciones que deben reconocerse:
 
 - 🔌 **Dependencia de servicios externos** de LLM
-- 🔄 **Diversidad de frameworks** que aumenta complejidad
-- 📊 **Optimización para datasets** de tamaño medio (<25K)
+- 🔄 **Diversidad de frameworks** que aumenta complejidad de mantenimiento
+- 📊 **No tan óptimo** en datasets de gran tamaño (+25K filas)
 - 🧮 **Soporte limitado** de algoritmos ML
 - 🔄 **Ausencia de un orquestador central** completo
 
