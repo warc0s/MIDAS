@@ -2,7 +2,7 @@
 
 ## Descripción General
 
-Midas Touch es el componente que automatiza el proceso completo desde la carga de datos hasta el entrenamiento de modelos. El sistema toma como entrada un dataset y una descripción en lenguaje natural de lo que se desea predecir, y genera automáticamente un modelo entrenado, documentación detallada y métricas de rendimiento.
+Midas Touch es el componente central de MIDAS, el cual automatiza el proceso completo desde la carga de datos hasta el entrenamiento del modelo. El sistema toma como entrada un dataset y una descripción en lenguaje natural de lo que se desea predecir, y genera automáticamente un modelo entrenado, documentación detallada y métricas de rendimiento.
 
 Este componente utiliza tecnologías de IA, específicamente agentes y modelos de lenguaje grande (LLM) de Gemini (Gemini 2.0 Flash) para interpretar la intención del usuario y guiar el proceso de análisis. Implementa un enfoque basado en múltiples agentes especializados que colaboran para realizar todas las etapas del flujo de trabajo de machine learning.
 
