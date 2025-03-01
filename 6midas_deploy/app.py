@@ -4,7 +4,51 @@ import os
 from agents_deploy import process_joblib, start_conversation
 
 def main():
-    st.title("🔍 Machine Learning Model Interface")
+    st.set_page_config(
+    page_title="Midas Deploy | Midas System",
+    page_icon="https://github.com/warc0s/MIDAS/blob/main/Extra/Logos/transparentes/deploy_trans.png?raw=true",
+)
+
+    logo_url = "https://github.com/warc0s/MIDAS/blob/main/Extra/Logos/transparentes/deploy_trans.png?raw=true"
+
+    # Aplicar estilos personalizados
+    st.markdown(
+        f"""
+        <style>
+            /* Cambiar el color de fondo */
+            body {{
+                background-color: #0A0F22;
+            }}
+
+            /* Cambiar el color del título */
+            .title-container h1 {{
+                color: #DAA520;
+            }}
+
+            /* Centrar el logo y el título */
+            .title-container {{
+                display: flex;
+                align-items: center;
+                gap: 15px;
+            }}
+
+            /* Ajustar tamaño del logo */
+            .title-container img {{
+                width: 60px;
+                height: 60px;
+            }}
+
+        </style>
+
+        <div class="title-container">
+            <img src="{logo_url}" alt="Logo">
+            <h1>Midas Deploy</h1>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    st.markdown("### Despliegue de Modelos de Machine Learning", unsafe_allow_html=True)
     
     # Inicializar variables de sesión
     if "interface_ready" not in st.session_state:

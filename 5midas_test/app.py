@@ -126,22 +126,6 @@ if uploaded_file:
                     st.write(f"- **Tipo de datos incorrecto:** {robustness['wrong_data_type']}")
                     st.write(f"- **Predicciones consistentes:** {robustness['consistent_predictions']}")
 
-
-                 # Gráfico de uso de CPU
-                    fig_cpu, ax_cpu = plt.subplots()
-                    ax_cpu.bar(['Uso de CPU'], [perf['cpu_usage']])
-                    ax_cpu.set_ylabel('Porcentaje')
-                    ax_cpu.set_title('Uso de CPU')
-                    st.pyplot(fig_cpu)
-
-                    # Gráfico de tiempo de predicción
-                    fig_time, ax_time = plt.subplots()
-                    ax_time.bar(['Tiempo de predicción'], [perf['prediction_time']])
-                    ax_time.set_ylabel('Segundos')
-                    ax_time.set_title('Tiempo de predicción')
-                    st.pyplot(fig_time)
-
-                    
                 st.subheader("📄 Reporte Generado")
                 report = generate_markdown_report(groupchat.messages)
                 with open("informe_analisis_modelo.md", "r", encoding="utf-8") as f:
