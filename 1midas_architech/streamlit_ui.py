@@ -10,9 +10,11 @@ from openai import AsyncOpenAI
 
 # Configuración de la página: título, layout ancho y sidebar expandido
 st.set_page_config(
-    page_title="Midas Architech",
+    page_title="Midas Architech | Midas System",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="expanded",
+    page_icon="https://github.com/warc0s/MIDAS/blob/main/Extra/Logos/transparentes/architech_trans.png?raw=true"
+
 )
 
 # Agregar estilos CSS personalizados con tonos dorados, animaciones y spinner

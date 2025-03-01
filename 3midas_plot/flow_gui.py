@@ -13,8 +13,8 @@ from dotenv import load_dotenv
 # CONFIGURACIÓN DE LA PÁGINA
 # --------------------------------------------------------------------------------
 st.set_page_config(
-    page_title="Midas Plot",
-    page_icon="📊",
+    page_title="Midas Plot | Midas System",
+    page_icon="https://github.com/warc0s/MIDAS/blob/main/Extra/Logos/transparentes/plot_trans.png?raw=true",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -22,7 +22,7 @@ st.set_page_config(
 # --------------------------------------------------------------------------------
 # CONSTANTES Y VARIABLES DE SESIÓN
 # --------------------------------------------------------------------------------
-LOGO_URL = "https://cdn-icons-png.flaticon.com/512/1534/1534959.png"
+LOGO_URL = "https://github.com/warc0s/MIDAS/blob/main/Extra/Logos/transparentes/plot_trans.png?raw=true"
 
 if "user_prompt" not in st.session_state:
     st.session_state["user_prompt"] = ""
@@ -320,9 +320,7 @@ def main():
         """
         <footer>
             <div style="opacity: 0.8;">
-                2024 Midas Plot | Versión 2.1 | 
-                <a href="#privacy" style="color: var(--secondary); text-decoration: none;">Privacidad</a> | 
-                <a href="#terms" style="color: var(--secondary); text-decoration: none;">Términos</a>
+                2025 Midas Plot | Sistema Midas 
             </div>
         </footer>
         """,

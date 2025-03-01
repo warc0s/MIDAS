@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, send_from_directory
 import os
 from dotenv import load_dotenv
 from litellm import completion
@@ -94,90 +94,90 @@ Recuerda siempre proporcionar recomendaciones prácticas y basadas en los compon
 chat_history = {}  # Diccionario para almacenar historial de mensajes por sesión
 
 def get_response(message, session_id="default"):
-    """Obtiene una respuesta del LLM usando litellm con memoria de conversación"""
-    try:
-        logger.info(f"Procesando mensaje para sesión {session_id} usando modelo {MODEL}")
-        
-        # Inicializar historial si no existe
-        if session_id not in chat_history:
-            chat_history[session_id] = []
-        
-        # Construir mensajes con historial
-        messages = [{"role": "system", "content": SYSTEM_PROMPT}]
-        
-        # Añadir mensajes anteriores al contexto
-        messages.extend(chat_history[session_id])
-        
-        # Añadir mensaje actual
-        messages.append({"role": "user", "content": message})
-        
-        # Llamar a la API
-        response = completion(
-            model=MODEL,
-            messages=messages,
-            api_key=API_KEY
-        )
-        
-        # Obtener respuesta
-        response_text = response.choices[0].message.content
-        
-        # Actualizar historial
-        chat_history[session_id].append({"role": "user", "content": message})
-        chat_history[session_id].append({"role": "assistant", "content": response_text})
-        
-        # Limitar el tamaño del historial (opcional, para evitar tokens excesivos)
-        if len(chat_history[session_id]) > 20:  # Mantener últimos 10 pares pregunta-respuesta
-            chat_history[session_id] = chat_history[session_id][-20:]
-        
-        return response_text
-    
-    except Exception as e:
-        logger.error(f"Error al obtener respuesta: {str(e)}")
-        return f"Lo siento, ocurrió un error al procesar tu solicitud: {str(e)}"
+   """Obtiene una respuesta del LLM usando litellm con memoria de conversación"""
+   try:
+       logger.info(f"Procesando mensaje para sesión {session_id} usando modelo {MODEL}")
+       
+       # Inicializar historial si no existe
+       if session_id not in chat_history:
+           chat_history[session_id] = []
+       
+       # Construir mensajes con historial
+       messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+       
+       # Añadir mensajes anteriores al contexto
+       messages.extend(chat_history[session_id])
+       
+       # Añadir mensaje actual
+       messages.append({"role": "user", "content": message})
+       
+       # Llamar a la API
+       response = completion(
+           model=MODEL,
+           messages=messages,
+           api_key=API_KEY
+       )
+       
+       # Obtener respuesta
+       response_text = response.choices[0].message.content
+       
+       # Actualizar historial
+       chat_history[session_id].append({"role": "user", "content": message})
+       chat_history[session_id].append({"role": "assistant", "content": response_text})
+       
+       # Limitar el tamaño del historial (opcional, para evitar tokens excesivos)
+       if len(chat_history[session_id]) > 20:  # Mantener últimos 10 pares pregunta-respuesta
+           chat_history[session_id] = chat_history[session_id][-20:]
+       
+       return response_text
+   
+   except Exception as e:
+       logger.error(f"Error al obtener respuesta: {str(e)}")
+       return f"Lo siento, ocurrió un error al procesar tu solicitud: {str(e)}"
 
 def clear_session_history(session_id="default"):
-    """Limpia el historial de una sesión específica"""
-    if session_id in chat_history:
-        chat_history[session_id] = []
-        logger.info(f"Historial de la sesión {session_id} eliminado")
-    return True
+   """Limpia el historial de una sesión específica"""
+   if session_id in chat_history:
+       chat_history[session_id] = []
+       logger.info(f"Historial de la sesión {session_id} eliminado")
+   return True
 
 @app.route('/')
 def index():
-    """Renderiza la página principal"""
-    return render_template('index.html')
+   """Renderiza la página principal"""
+   return render_template('index.html')
 
 @app.route('/query', methods=['POST'])
 def query():
-    """Procesa consultas y devuelve respuestas"""
-    data = request.json
-    user_message = data.get('message', '')
-    session_id = data.get('session_id', 'default')  # Usar ID de sesión si está disponible
-    
-    if not user_message:
-        return jsonify({"error": "No se proporcionó un mensaje"}), 400
-    
-    try:
-        response_text = get_response(user_message, session_id)
-        
-        # Mantener compatibilidad con el frontend anterior
-        return jsonify({
-            "response": response_text
-        })
-    
-    except Exception as e:
-        logger.error(f"Error en el endpoint /query: {str(e)}")
-        return jsonify({"error": str(e)}), 500
+   """Procesa consultas y devuelve respuestas"""
+   data = request.json
+   user_message = data.get('message', '')
+   session_id = data.get('session_id', 'default')  # Usar ID de sesión si está disponible
+   
+   if not user_message:
+       return jsonify({"error": "No se proporcionó un mensaje"}), 400
+   
+   try:
+       response_text = get_response(user_message, session_id)
+       
+       # Mantener compatibilidad con el frontend anterior
+       return jsonify({
+           "response": response_text
+       })
+   
+   except Exception as e:
+       logger.error(f"Error en el endpoint /query: {str(e)}")
+       return jsonify({"error": str(e)}), 500
 
 @app.route('/clear_history', methods=['POST'])
 def clear_history():
-    """Endpoint para limpiar el historial de chat"""
-    data = request.json
-    session_id = data.get('session_id', 'default')
-    
-    success = clear_session_history(session_id)
-    
-    return jsonify({"success": success})
+   """Endpoint para limpiar el historial de chat"""
+   data = request.json
+   session_id = data.get('session_id', 'default')
+   
+   success = clear_session_history(session_id)
+   
+   return jsonify({"success": success})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+   app.run(host='127.0.0.1', port=5001, debug=False)

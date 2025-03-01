@@ -268,8 +268,8 @@ def display_notebook_cell(cell):
 # Aplicación Streamlit principal
 def main():
     st.set_page_config(
-        page_title="Midas Touch Workflow",
-        page_icon="✨",
+        page_title="Midas Touch | Midas System",
+        page_icon="https://github.com/warc0s/MIDAS/blob/main/Extra/Logos/transparentes/touch_trans.png?raw=true",
         layout="wide",
     )
     
@@ -370,7 +370,7 @@ def main():
     </style>
     """, unsafe_allow_html=True)
     
-    st.title("✨ Midas Touch: Sistema Inteligente de Flujo de Trabajo ML")
+    st.title("🪙 Midas Touch: Sistema Inteligente de Flujo de Trabajo ML")
     
     # Generar un ID de sesión único si no existe
     if 'session_id' not in st.session_state:
