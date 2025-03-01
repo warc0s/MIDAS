@@ -1,4 +1,4 @@
-# Componente MIDAS Plot
+# Midas Plot
 
 ## 1. Descripción General
 
