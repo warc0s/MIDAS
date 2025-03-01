@@ -473,9 +473,9 @@ Modelos Generativos Principales:
 
 **❓ MIDAS HELP (Arquitectura LLM+RAG+Reranker)**
 - Clasificador BERT fine-tuned
+- Selector de LLM automatizado, aunque puedes "forzar" el que prefieras
 - Embeddings BGE-M3
 - Reranker BGE V2 M3
-- Selector de LLM automatizado
 
 ### 7.5 Generación automática de código 💻
 
