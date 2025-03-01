@@ -24,7 +24,7 @@ Este sistema implementa un enfoque de RAG asistido por agentes, permitiendo nave
 
 - **Sistema de Embeddings**:
   - Utiliza el modelo *text-embedding-3-small* de OpenAI (1536 dimensiones) para generar representaciones vectoriales del texto.
-  - Implementa el modelo *gpt-4o-mini* para la generación automática de títulos y resúmenes de cada chunk. La finalidad es ayudar al agente a razonar sobre la relevancia de dicho chunk.
+  - Implementa el modelo *gpt-4o-mini* para la generación automática de títulos y resúmenes de cada chunk.
 
 - **Base de Datos Vectorial**:
   - *Supabase* como infraestructura para almacenar embeddings y metadatos.
