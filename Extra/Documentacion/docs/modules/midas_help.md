@@ -1,4 +1,4 @@
-# Componente MIDAS Help
+# Midas Help
 
 ## Descripción General
 MIDAS Help constituye el componente de asistencia y documentación interactiva del sistema MIDAS. Implementa un chatbot inteligente basado en una arquitectura LLM+RAG+Reranker que permite a los usuarios resolver dudas sobre el funcionamiento del sistema mediante lenguaje natural. Esta implementación utiliza una aproximación RAG mejorada, incorporando un reranker y un selector de LLM inteligente, pero sin llegar a características avanzadas como "Agentic RAG" o bases de datos vectoriales. Todo el flujo está basado en el framework Llama Index.
