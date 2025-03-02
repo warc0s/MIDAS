@@ -6,7 +6,8 @@ import re
 import unicodedata
 import torch
 import uuid
-from datetime import datetime
+import random
+from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify, render_template
 from transformers import BertForSequenceClassification, BertTokenizer
@@ -51,6 +52,28 @@ def clasificar_dificultad(texto):
 
 # ------------- Sistema de memoria para conversaciones -------------
 conversation_history = {}  # {session_id: [lista de mensajes]}
+last_activity = {}  # {session_id: timestamp}
+SESSION_TIMEOUT = timedelta(hours=12)  # Sesiones inactivas por más de 12 horas se eliminarán
+
+def clean_inactive_sessions():
+    """Elimina sesiones inactivas para liberar memoria"""
+    current_time = datetime.now()
+    inactive_sessions = []
+    
+    for session_id, timestamp in list(last_activity.items()):
+        if current_time - timestamp > SESSION_TIMEOUT:
+            inactive_sessions.append(session_id)
+    
+    for session_id in inactive_sessions:
+        if session_id in conversation_history:
+            del conversation_history[session_id]
+        if session_id in last_activity:
+            del last_activity[session_id]
+        if session_id in processing_queries:
+            del processing_queries[session_id]
+    
+    if inactive_sessions:
+        logger.info(f"Eliminadas {len(inactive_sessions)} sesiones inactivas")
 
 def get_conversation_history(session_id):
     """Obtiene o crea un historial de conversación para el ID de sesión dado"""
@@ -60,6 +83,9 @@ def get_conversation_history(session_id):
     if session_id not in conversation_history:
         conversation_history[session_id] = []
         logger.info(f"Creada nueva sesión con ID: {session_id}")
+    
+    # Actualizar timestamp de última actividad
+    last_activity[session_id] = datetime.now()
     
     return session_id, conversation_history[session_id]
 
@@ -71,6 +97,8 @@ def add_to_history(session_id, role, content):
             'content': content,
             'timestamp': datetime.now().isoformat()
         })
+        # Actualizar timestamp de última actividad
+        last_activity[session_id] = datetime.now()
         logger.info(f"Añadido mensaje de {role} a sesión {session_id}")
     
 def format_conversation_history(history, max_messages=5):
@@ -265,8 +293,8 @@ query_engine = create_enhanced_query_engine(Settings.llm)
 query_engine_deepseek = create_enhanced_query_engine(llm_deepseek)
 query_engine_gemini = create_enhanced_query_engine(llm_gemini)
 
-# Sistema de concurrencia original
-processing_query = False
+# Sistema de concurrencia por sesión (reemplaza el sistema global)
+processing_queries = {}  # {session_id: is_processing}
 processing_lock = threading.Lock()
 
 @app.route('/')
@@ -275,7 +303,6 @@ def home():
 
 @app.route('/query', methods=['POST'])
 def handle_query():
-    global processing_query
     try:
         data = request.json
         user_input = data.get('message', '').strip()
@@ -285,6 +312,10 @@ def handle_query():
         if not user_input:
             return jsonify({'error': 'La consulta no puede estar vacía'}), 400
 
+        # Limpieza periódica de sesiones inactivas (5% de probabilidad en cada petición)
+        if random.random() < 0.05:
+            clean_inactive_sessions()
+
         # Obtener o crear historial de conversación
         session_id, history = get_conversation_history(session_id)
         
@@ -292,56 +323,66 @@ def handle_query():
         add_to_history(session_id, 'user', user_input)
         logger.info(f"Consulta registrada. Sesión {session_id} tiene {len(history)} mensajes")
 
-        # Selección de LLM basada en la entrada del usuario
-        if selected_llm != 'Automatico':
-            if selected_llm == "Llama 3.3 70B":
-                current_engine = query_engine
-                llm_usado = 'Llama 3.3 70B'
-            elif selected_llm == "DeepSeek V3":
-                current_engine = query_engine_deepseek
-                llm_usado = 'DeepSeek V3'
-            elif selected_llm == "Gemini 2.0 Flash":
-                current_engine = query_engine_gemini
-                llm_usado = 'Gemini 2.0 Flash'
-            else:
-                return jsonify({'error': 'Opción de LLM no reconocida.'}), 400
-            logger.info(f"LLM forzado: {llm_usado}")
-        else:
-            # Flujo automático: clasificar el prompt con BERT
-            dificultad = clasificar_dificultad(user_input)
-            logger.info(f"Prompt classified with difficulty: {dificultad}")
-            
-            if dificultad == 2:
-                response_text = "Lo siento, no puedo responder a eso. Si crees que se trata de un error, por favor, reformula la pregunta."
-                # Añadir la respuesta al historial
-                add_to_history(session_id, 'assistant', response_text)
-                
-                response_data = {
-                    'response': response_text,
-                    'status': 'success',
-                    'llm': 'Bloqueado - PromptAnalysis',
-                    'session_id': session_id
-                }
-                return jsonify(response_data)
-            
-            if dificultad == 0:
-                current_engine = query_engine
-                llm_usado = 'Llama 3.3 70B'
-            elif dificultad == 1:
-                current_engine = query_engine_deepseek
-                llm_usado = 'DeepSeek V3'
-            else:
-                return jsonify({'error': 'Clasificación de pregunta desconocida.'}), 400
-
-        # Usar el bloqueo original
+        # Verificar si esta sesión específica ya está procesando una consulta
         with processing_lock:
-            if processing_query:
+            if session_id in processing_queries and processing_queries[session_id]:
                 return jsonify({
-                    'error': 'El chatbot ya está procesando una consulta. Por favor, espere.'
+                    'error': 'Ya estamos procesando tu consulta anterior. Por favor, espera un momento.'
                 }), 429
-            processing_query = True
+            processing_queries[session_id] = True
 
         try:
+            # Selección de LLM basada en la entrada del usuario
+            if selected_llm != 'Automatico':
+                if selected_llm == "Llama 3.3 70B":
+                    current_engine = query_engine
+                    llm_usado = 'Llama 3.3 70B'
+                elif selected_llm == "DeepSeek V3":
+                    current_engine = query_engine_deepseek
+                    llm_usado = 'DeepSeek V3'
+                elif selected_llm == "Gemini 2.0 Flash":
+                    current_engine = query_engine_gemini
+                    llm_usado = 'Gemini 2.0 Flash'
+                else:
+                    # Liberar el bloqueo antes de retornar error
+                    with processing_lock:
+                        processing_queries[session_id] = False
+                    return jsonify({'error': 'Opción de LLM no reconocida.'}), 400
+                logger.info(f"LLM forzado: {llm_usado}")
+            else:
+                # Flujo automático: clasificar el prompt con BERT
+                dificultad = clasificar_dificultad(user_input)
+                logger.info(f"Prompt classified with difficulty: {dificultad}")
+                
+                if dificultad == 2:
+                    response_text = "Lo siento, no puedo responder a eso. Si crees que se trata de un error, por favor, reformula la pregunta."
+                    # Añadir la respuesta al historial
+                    add_to_history(session_id, 'assistant', response_text)
+                    
+                    # Liberar el bloqueo
+                    with processing_lock:
+                        processing_queries[session_id] = False
+                        
+                    response_data = {
+                        'response': response_text,
+                        'status': 'success',
+                        'llm': 'Bloqueado - PromptAnalysis',
+                        'session_id': session_id
+                    }
+                    return jsonify(response_data)
+                
+                if dificultad == 0:
+                    current_engine = query_engine
+                    llm_usado = 'Llama 3.3 70B'
+                elif dificultad == 1:
+                    current_engine = query_engine_deepseek
+                    llm_usado = 'DeepSeek V3'
+                else:
+                    # Liberar el bloqueo antes de retornar error
+                    with processing_lock:
+                        processing_queries[session_id] = False
+                    return jsonify({'error': 'Clasificación de pregunta desconocida.'}), 400
+
             logger.info(f"Procesando consulta con contexto. Sesión: {session_id}")
             
             # Obtener historial previo (excluyendo la consulta actual recién añadida)
@@ -369,10 +410,17 @@ def handle_query():
             return jsonify(response_data)
             
         finally:
+            # Asegurar que el bloqueo siempre se libere
             with processing_lock:
-                processing_query = False
+                if session_id in processing_queries:
+                    processing_queries[session_id] = False
         
     except Exception as e:
+        # En caso de excepción, asegurarse de liberar el bloqueo
+        if 'session_id' in locals() and session_id:
+            with processing_lock:
+                if session_id in processing_queries:
+                    processing_queries[session_id] = False
         logger.error(f"Error procesando consulta: {e}")
         return jsonify({'error': str(e)}), 500
 
@@ -385,6 +433,8 @@ def clear_conversation_history():
         if session_id and session_id in conversation_history:
             conversation_history[session_id] = []
             logger.info(f"Historial borrado para sesión {session_id}")
+            # Actualizar timestamp de última actividad
+            last_activity[session_id] = datetime.now()
             return jsonify({
                 'status': 'success', 
                 'message': 'Historial de conversación borrado',
