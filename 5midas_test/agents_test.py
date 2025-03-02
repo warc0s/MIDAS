@@ -9,6 +9,9 @@ from deep_translator import GoogleTranslator
 from sklearn.pipeline import Pipeline
 from sklearn.base import BaseEstimator
 from sklearn.utils.validation import check_is_fitted
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Configuración del modelo LLM
 llm_config = { 
@@ -61,6 +64,7 @@ group_manager = GroupChatManager(
     name="group_manager",
     groupchat=groupchat,
     llm_config=llm_config,
+    human_input_mode="TERMINATE"
 )
 
 def load_model(file_path):

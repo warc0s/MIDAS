@@ -4,8 +4,8 @@ import os
 import sklearn
 from sklearn.pipeline import Pipeline
 from sklearn.base import BaseEstimator
-
 from dotenv import load_dotenv
+
 load_dotenv()
 
 def get_model_info(model):
