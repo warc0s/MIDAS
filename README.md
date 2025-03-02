@@ -10,17 +10,17 @@
 
 ## 📑 Índice
 
-1. [Visión General](#-visión-general)
-2. [Justificación y Descripción del Proyecto](#sección-1-justificación-y-descripción-del-proyecto)
-3. [Obtención de Datos](#sección-2-obtención-de-datos)
-4. [Limpieza de Datos](#sección-3-limpieza-de-datos)
-5. [Exploración y Visualización de Datos](#sección-4-exploración-y-visualización-de-los-datos)
-6. [Preparación de Datos para ML](#sección-5-preparación-de-los-datos-para-los-algoritmos-de-machine-learning)
-7. [Entrenamiento y Evaluación de Modelos](#sección-6-entrenamiento-del-modelo-y-comprobación-del-rendimiento)
-8. [Procesamiento de Lenguaje Natural](#sección-7-procesamiento-de-lenguaje-natural)
-9. [Aplicación Web](#sección-8-aplicación-web)
-10. [Conclusiones](#sección-9-conclusiones)
-11. [Creadores](#-creadores)
+0. [Visión General](#-visión-general)
+1. [Justificación y Descripción del Proyecto](#sección-1-justificación-y-descripción-del-proyecto)
+2. [Obtención de Datos](#sección-2-obtención-de-datos)
+3. [Limpieza de Datos](#sección-3-limpieza-de-datos)
+4. [Exploración y Visualización de Datos](#sección-4-exploración-y-visualización-de-los-datos)
+5. [Preparación de Datos para ML](#sección-5-preparación-de-los-datos-para-los-algoritmos-de-machine-learning)
+6. [Entrenamiento y Evaluación de Modelos](#sección-6-entrenamiento-del-modelo-y-comprobación-del-rendimiento)
+7. [Procesamiento de Lenguaje Natural](#sección-7-procesamiento-de-lenguaje-natural)
+8. [Aplicación Web](#sección-8-aplicación-web)
+9. [Conclusiones](#sección-9-conclusiones)
+10. [Creadores](#-creadores)
 
 ## 🌟 Visión General
 
@@ -65,19 +65,32 @@ MIDAS implementa múltiples estrategias de obtención de datos, alineadas con la
 
 ### 2.1 Generación sintética mediante Midas Dataset 🧬
 
-**El componente Midas Dataset** constituye una poderosa herramienta para la generación automatizada de conjuntos de datos sintéticos, permitiendo a los usuarios especificar características deseadas mediante lenguaje natural. Esta funcionalidad es fundamental en escenarios donde:
+**El componente Midas Dataset** constituye una herramienta efectiva para la generación automatizada de conjuntos de datos sintéticos. Esta funcionalidad es fundamental en escenarios donde:
 
 > 🔹 Se necesitan datos para pruebas de concepto sin exponer información sensible  
-> 🔹 Se requiere aumentar conjuntos de datos existentes  
-> 🔹 Se desea simular casos específicos o extremos
+> 🔹 Se requiere crear datasets de prueba con datos realistas  
+> 🔹 Se desea generar información estructurada para desarrollo y testing
 
-**Mecanismo de obtención:** Midas Dataset implementa un sistema multiagente basado en el framework AG2 que coordina tres agentes especializados:
+**Mecanismo de funcionamiento:** Midas Dataset implementa un sistema multi-agente basado en AG2 que coordina tres agentes especializados:
 
-- **Input Agent:** Procesa y valida las peticiones iniciales del usuario
-- **Validation Agent:** Verifica la coherencia de los parámetros solicitados
-- **Column Classifier Agent:** Mapea automáticamente nombres de columnas a tipos de datos apropiados
+- **Input Agent:** Recibe y procesa las solicitudes iniciales del usuario
+- **Validation Agent:** Verifica que los parámetros proporcionados sean válidos
+- **Column Classifier Agent:** Clasifica automáticamente los nombres de columnas para mapearlos a tipos de datos apropiados
 
-Este sistema aprovecha la biblioteca Faker para generar datos realistas en español (es_ES), cubriendo desde información demográfica hasta valores numéricos con distribuciones controladas.
+El sistema utiliza la biblioteca Faker para generar datos realistas en español (es_ES), con soporte para diversas categorías de información:
+
+- Datos personales (nombres, apellidos, edad)
+- Información de contacto (correo, teléfono)
+- Direcciones (calle, ciudad, país)
+- Datos financieros (precios, porcentajes)
+- Identificadores únicos (IDs, códigos)
+- Y muchos más tipos predefinidos
+
+El proceso de generación es **simple pero potente**:
+1. El usuario especifica el número de registros y los nombres de columnas
+2. El sistema detecta automáticamente los tipos de datos adecuados basándose en los nombres
+3. Para columnas numéricas, se pueden definir valores mínimos y máximos
+4. Se genera el dataset completo que puede ser modificado posteriormente
 
 ### 2.2 Carga directa desde fuentes externas 📂
 
@@ -337,24 +350,26 @@ Criterios de Selección:
 
 El sistema selecciona automáticamente entre estos algoritmos de scikit-learn según las características del dataset, y en caso de fallos repetidos durante el entrenamiento, utiliza modelos baseline como mecanismo de recuperación.
 
-### 6.2 Evaluación multimétrica mediante Midas Test 📊
+### 6.2 Evaluación mediante agentes especializados 📊
 
-**El componente Midas Test** proporciona una evaluación exhaustiva a través de múltiples agentes especializados:
+**El componente Midas Test** coordina un análisis colaborativo mediante múltiples agentes especializados basados en LLM:
 
-**Fase 1:**
-- **Model Analyzer**: Examina estructura y configuración
-- **Performance Tester**: Evalúa métricas específicas
+**Arquitectura de agentes:**
+- **Model Analyzer**: Examina estructura y características generales del modelo
+- **Performance Tester**: Analiza rendimiento computacional y uso de recursos
+- **Robustness Checker**: Evalúa comportamiento ante datos anómalos
+- **Output Validator**: Verifica la consistencia y validez de las predicciones
 
-**Fase 2:**
-- **Robustness Checker**: Verifica resistencia ante datos anómalos
-- **Output Validator**: Confirma validez de predicciones
+El sistema realiza pruebas técnicas fundamentales sin depender del tipo de problema:
 
-Cada agente evalúa métricas específicas según el tipo de problema:
+| Aspecto Evaluado | Pruebas Realizadas |
+|------------------|----------------------|
+| **Validez del modelo** | Verificación de compatibilidad con Scikit-learn |
+| **Robustez** | Comportamiento ante valores nulos, extremos y tipos incorrectos |
+| **Predicciones** | Formato correcto (array NumPy), rango de valores, consistencia |
+| **Rendimiento** | Carga, latencia, memoria, CPU, throughput |
 
-| Tipo de Problema | Métricas Principales | Visualizaciones |
-|------------------|----------------------|-----------------|
-| **Clasificación** | Accuracy, precision, recall, F1-score, AUC-ROC | Matrices de confusión, curvas ROC |
-| **Regresión** | MAE, MSE, RMSE, R², MAPE | Gráficos de dispersión, histogramas de errores |
+Los agentes LLM analizan los resultados de estas pruebas para proporcionar interpretaciones, contexto y recomendaciones en lenguaje natural.
 
 ### 6.3 Validación cruzada y evaluación del modelo 🛡️
 
@@ -371,7 +386,7 @@ El sistema captura y maneja adecuadamente las advertencias de métricas indefini
 
 ### 6.4 Análisis de latencia y rendimiento computacional ⚡
 
-**El componente Midas Test** evalúa aspectos críticos para la implementación práctica del modelo:
+**El componente Midas Test** evalúa aspectos críticos para la implementación práctica del modelo mediante mediciones precisas:
 
 <table>
   <tr>
@@ -380,32 +395,43 @@ El sistema captura y maneja adecuadamente las advertencias de métricas indefini
   </tr>
   <tr>
     <td><strong>Tiempo de carga</strong></td>
-    <td>Milisegundos para deserializar el modelo</td>
+    <td>Segundos para deserializar el modelo desde archivo joblib</td>
   </tr>
   <tr>
     <td><strong>Latencia</strong></td>
-    <td>Tiempos de respuesta por tamaño de batch</td>
+    <td>Tiempos de respuesta en milisegundos para diferentes tamaños de batch (1, 100, 1000, 10000)</td>
   </tr>
   <tr>
     <td><strong>Throughput</strong></td>
-    <td>Predicciones por segundo</td>
+    <td>Predicciones por segundo calculadas con un batch de 1000 muestras</td>
   </tr>
   <tr>
     <td><strong>Recursos</strong></td>
-    <td>Uso de CPU y memoria durante predicciones</td>
+    <td>Incremento de uso de CPU (%) y memoria (MB) durante la fase de predicción</td>
   </tr>
 </table>
 
-Estas métricas son fundamentales para determinar la viabilidad del modelo en entornos de producción con restricciones específicas.
+Estas métricas se obtienen mediante pruebas directas sobre el modelo cargado utilizando datos sintéticos generados automáticamente y la biblioteca psutil para monitoreo de recursos.
 
 ### 6.5 Generación de reportes detallados 📝
 
-**Midas Test** genera automáticamente documentación exhaustiva de la evaluación:
+**Midas Test** produce documentación estructurada en español que sintetiza el análisis completo:
 
-- 📄 **Informes en formato Markdown:** Estructurados para facilitar la comprensión
-- 📊 **Visualizaciones específicas:** Como matrices de confusión o curvas ROC
-- ✅ **Recomendaciones automatizadas:** Clasificación de modelos como "APTOS" o "NO APTOS"
-- 🔍 **Sugerencias de mejora:** Identificación de áreas potenciales de optimización
+- 📄 **Informes en formato Markdown:** Organizados en secciones claramente definidas con emojis distintivos
+- 🔄 **Traducción automática:** Conversión del análisis técnico generado por los agentes LLM del inglés al español
+- ✅ **Clasificación binaria:** Etiquetado del modelo como "APTO" o "NO APTO" basado en su validez y consistencia de predicciones
+- 🔍 **Desglose de resultados:** Presentación detallada de todas las pruebas realizadas y sus resultados
+
+El informe se estructura en siete secciones principales:
+1. Resumen del Modelo
+2. Métricas de Rendimiento
+3. Análisis de Latencia
+4. Validez de Predicciones
+5. Pruebas de Robustez
+6. Recomendación Final
+7. Sugerencias de Mejora
+
+Los informes se pueden descargar desde la interfaz Streamlit o se generan automáticamente como "informe_analisis_modelo.md" al usar la interfaz de línea de comandos.
 
 ### 6.6 Serialización y persistencia de modelos 💾
 
