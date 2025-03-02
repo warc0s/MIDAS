@@ -3,37 +3,49 @@ from __future__ import annotations as _annotations
 from dataclasses import dataclass
 from dotenv import load_dotenv
 import logfire
-import asyncio
-import httpx
 import os
+import logging
 
-from pydantic_ai import Agent, ModelRetry, RunContext
+from pydantic_ai import Agent, RunContext
 from pydantic_ai.models.gemini import GeminiModel
-#from pydantic_ai.models.openai import OpenAIModel
 from openai import AsyncOpenAI
 from supabase import Client
-from typing import List
+from typing import List, Dict, Any, Optional
 
+# Configurar logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger("midas_agents")
+
+# Cargar variables de entorno
 load_dotenv()
 
+# Obtener y validar claves API necesarias
 gemini_api_key = os.getenv('GEMINI_API_KEY')
-model = GeminiModel('gemini-2.0-flash', api_key=gemini_api_key)
+if not gemini_api_key:
+    logger.warning("No se encontró GEMINI_API_KEY en las variables de entorno")
 
-#deepinfra_api_key = os.getenv('DEEPINFRA_API_KEY')
-"""model = OpenAIModel(
-    'meta-llama/Llama-3.3-70B-Instruct-Turbo',
-    base_url='https://api.deepinfra.com/v1/openai',
-    api_key=deepinfra_api_key,
-)"""
+# Inicializar modelo
+try:
+    model = GeminiModel('gemini-2.0-flash', api_key=gemini_api_key)
+    logger.info("Modelo Gemini inicializado correctamente")
+except Exception as e:
+    logger.error(f"Error al inicializar el modelo Gemini: {str(e)}")
+    raise
 
+# Configurar logfire
 logfire.configure(send_to_logfire='if-token-present')
 
 @dataclass
 class PydanticAIDeps:
+    """Dependencias necesarias para el agente de Pydantic AI."""
     supabase: Client
     openai_client: AsyncOpenAI
-    docs_source: str  # Nuevo campo para la fuente de docs
+    docs_source: str  # Fuente de documentación a consultar
 
+# Prompt del sistema para el experto en Pydantic AI
 system_prompt = """
 You are an expert at Python and agent frameworks that you have access to all the documentation to,
 including examples, an API reference, and other resources to help you build agents.
@@ -48,6 +60,7 @@ Then also always check the list of available documentation pages and retrieve th
 Always let the user know when you didn't find the answer in the documentation or the right URL - be honest. Reply ALWAYS in Spanish.
 """
 
+# Definición del agente
 pydantic_ai_expert = Agent(
     model,
     system_prompt=system_prompt,
@@ -56,7 +69,20 @@ pydantic_ai_expert = Agent(
 )
 
 async def get_embedding(text: str, openai_client: AsyncOpenAI) -> List[float]:
-    """Get embedding vector from OpenAI."""
+    """
+    Obtiene un vector de embedding desde OpenAI.
+    
+    Args:
+        text: Texto a embeber
+        openai_client: Cliente de OpenAI
+        
+    Returns:
+        Lista de valores flotantes representando el embedding
+    """
+    if not text:
+        logger.warning("Se intentó obtener embedding de texto vacío")
+        return [0.0] * 1536
+        
     try:
         response = await openai_client.embeddings.create(
             model="text-embedding-3-small",
@@ -64,39 +90,45 @@ async def get_embedding(text: str, openai_client: AsyncOpenAI) -> List[float]:
         )
         return response.data[0].embedding
     except Exception as e:
-        print(f"Error getting embedding: {e}")
-        return [0] * 1536  # Return zero vector on error
+        logger.error(f"Error al obtener embedding: {str(e)}")
+        return [0.0] * 1536  # Vector de ceros como fallback
 
 @pydantic_ai_expert.tool
 async def retrieve_relevant_documentation(ctx: RunContext[PydanticAIDeps], user_query: str) -> str:
     """
-    Retrieve relevant documentation chunks based on the query with RAG.
+    Recupera fragmentos relevantes de documentación basados en la consulta mediante RAG.
     
     Args:
-        ctx: The context including the Supabase client and OpenAI client
-        user_query: The user's question or query
+        ctx: Contexto con cliente Supabase y OpenAI
+        user_query: Consulta del usuario
         
     Returns:
-        A formatted string containing the top 5 most relevant documentation chunks
+        Cadena formateada con los 5 fragmentos de documentación más relevantes
     """
+    if not user_query:
+        return "Se requiere una consulta para buscar documentación relevante."
+        
     try:
-        # Get the embedding for the query
+        # Obtener embedding para la consulta
+        logger.info(f"Generando embedding para consulta: {user_query[:50]}...")
         query_embedding = await get_embedding(user_query, ctx.deps.openai_client)
         
-        # Query Supabase for relevant documents usando la fuente dinámica
+        # Consultar Supabase para documentos relevantes
+        logger.info(f"Buscando documentación en la fuente: {ctx.deps.docs_source}")
         result = ctx.deps.supabase.rpc(
             'match_site_pages',
             {
                 'query_embedding': query_embedding,
                 'match_count': 5,
-                'filter': {'source': ctx.deps.docs_source}  # Usar fuente dinámica
+                'filter': {'source': ctx.deps.docs_source}
             }
         ).execute()
         
         if not result.data:
-            return "No relevant documentation found."
+            logger.warning(f"No se encontró documentación para: {user_query[:50]}")
+            return "No se encontró documentación relevante para esta consulta."
             
-        # Format the results
+        # Formatear los resultados
         formatted_chunks = []
         for doc in result.data:
             chunk_text = f"""
@@ -105,54 +137,61 @@ async def retrieve_relevant_documentation(ctx: RunContext[PydanticAIDeps], user_
 {doc['content']}
 """
             formatted_chunks.append(chunk_text)
-            
-        # Join all chunks with a separator
+        
+        logger.info(f"Se encontraron {len(formatted_chunks)} fragmentos relevantes")
         return "\n\n---\n\n".join(formatted_chunks)
         
     except Exception as e:
-        print(f"Error retrieving documentation: {e}")
-        return f"Error retrieving documentation: {str(e)}"
+        logger.error(f"Error al recuperar documentación: {str(e)}")
+        return f"Error al recuperar documentación: {str(e)}"
 
 @pydantic_ai_expert.tool
 async def list_documentation_pages(ctx: RunContext[PydanticAIDeps]) -> List[str]:
     """
-    Retrieve a list of all available documentation pages.
+    Recupera una lista de todas las páginas de documentación disponibles.
     
     Returns:
-        List[str]: List of unique URLs for all documentation pages
+        Lista de URLs únicas para todas las páginas de documentación
     """
     try:
-        # Query Supabase for unique URLs donde la fuente es dinámica
+        # Consultar Supabase para URLs únicas
+        logger.info(f"Listando páginas de documentación para: {ctx.deps.docs_source}")
         result = ctx.deps.supabase.from_('site_pages') \
             .select('url') \
             .eq('metadata->>source', ctx.deps.docs_source) \
             .execute()
         
         if not result.data:
+            logger.warning(f"No se encontraron páginas para la fuente: {ctx.deps.docs_source}")
             return []
             
-        # Extract unique URLs
+        # Extraer URLs únicas
         urls = sorted(set(doc['url'] for doc in result.data))
+        logger.info(f"Se encontraron {len(urls)} páginas de documentación")
         return urls
         
     except Exception as e:
-        print(f"Error retrieving documentation pages: {e}")
+        logger.error(f"Error al listar páginas de documentación: {str(e)}")
         return []
 
 @pydantic_ai_expert.tool
 async def get_page_content(ctx: RunContext[PydanticAIDeps], url: str) -> str:
     """
-    Retrieve the full content of a specific documentation page by combining all its chunks.
+    Recupera el contenido completo de una página de documentación específica.
     
     Args:
-        ctx: The context including the Supabase client
-        url: The URL of the page to retrieve
+        ctx: Contexto con cliente Supabase
+        url: URL de la página a recuperar
         
     Returns:
-        str: The complete page content with all chunks combined in order
+        Contenido completo de la página con todos los fragmentos combinados en orden
     """
+    if not url:
+        return "Se requiere una URL para obtener el contenido de la página."
+        
     try:
-        # Query Supabase for all chunks of this URL usando la fuente dinámica
+        # Consultar Supabase para todos los fragmentos de esta URL
+        logger.info(f"Recuperando contenido para URL: {url}")
         result = ctx.deps.supabase.from_('site_pages') \
             .select('title, content, chunk_number') \
             .eq('url', url) \
@@ -161,19 +200,20 @@ async def get_page_content(ctx: RunContext[PydanticAIDeps], url: str) -> str:
             .execute()
         
         if not result.data:
-            return f"No content found for URL: {url}"
+            logger.warning(f"No se encontró contenido para URL: {url}")
+            return f"No se encontró contenido para la URL: {url}"
             
-        # Format the page with its title and all chunks
+        # Formatear la página con su título y todos los fragmentos
         page_title = result.data[0]['title'].split(' - ')[0]
         formatted_content = [f"# {page_title}\n"]
         
-        # Add each chunk's content
+        # Añadir el contenido de cada fragmento
         for chunk in result.data:
             formatted_content.append(chunk['content'])
             
-        # Join everything together
+        logger.info(f"Se recuperaron {len(result.data)} fragmentos para URL: {url}")
         return "\n\n".join(formatted_content)
         
     except Exception as e:
-        print(f"Error retrieving page content: {e}")
-        return f"Error retrieving page content: {str(e)}"
+        logger.error(f"Error al recuperar contenido de página: {str(e)}")
+        return f"Error al recuperar el contenido de la página: {str(e)}"
