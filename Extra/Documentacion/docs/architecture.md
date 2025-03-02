@@ -23,19 +23,7 @@ MIDAS está compuesto por ocho módulos especializados que pueden funcionar de m
 
 La arquitectura de MIDAS sigue un patrón de flujo de trabajo lineal con múltiples puntos de entrada y retroalimentación:
 
-[MIDAS DATASET] ────┐
-│
-▼
-[MIDAS TOUCH] ───┐
-│          │
-▼          ▼
-[MIDAS TEST] [MIDAS PLOT]
-│          │
-▼          │
-[MIDAS DEPLOY]◄──┘
-[MIDAS ARCHITECT]
-[MIDAS HELP]     } ── Sistemas de soporte transversales
-[MIDAS ASSISTANT]
+![Midas Completo Diagrama](https://github.com/warc0s/MIDAS/blob/main/Extra/Imagenes/Diagrama_ArquitecturaModular.png?raw=true)
 
 ## Tecnologías y Frameworks
 
@@ -112,15 +100,5 @@ La arquitectura actual presenta algunas limitaciones que podrían abordarse en v
 3. **Dependencia de servicios externos**: Varios componentes dependen de APIs externas para acceder a LLMs
 4. **Ausencia de orquestación central**: No existe un componente que coordine automáticamente el flujo completo
 5. **Limitaciones de escalabilidad**: Algunos componentes están optimizados para datasets de tamaño pequeño a mediano
-
-## Evolución Futura
-
-La arquitectura de MIDAS está diseñada para evolucionar en varias direcciones:
-
-1. **Integración más profunda** entre componentes para facilitar flujos de trabajo end-to-end
-2. **Unificación de frameworks** para simplificar el mantenimiento
-3. **Implementación de un orquestador central** que permita automatizar flujos de trabajo completos
-4. **Extensión de capacidades** para soportar casos de uso más complejos
-5. **Mejora de interfaces** para ofrecer una experiencia de usuario más coherente
 
 [Empezar →](/modules/plot)
