@@ -16,7 +16,31 @@ El backend de Midas Touch está implementado en Python y utiliza un diseño modu
 
 - **Framework central**: 
   - `AICortex`: *Clase principal* que coordina el flujo de trabajo completo.
-  - `OperationalContext`: *Memoria compartida y centro de coordinación* que mantiene el estado global del workflow y permite a los agentes acceder y modificar información que será utilizada por otros agentes en etapas posteriores.
+  - `OperationalContext`: *Memoria compartida y centro de coordinación* que mantiene el estado global del workflow y permite a los agentes acceder y modificar información que será utilizada por otros agentes en etapas posteriores. Contiene exactamente los valores:
+ 
+***
+    # Etapa actual del workflow
+    'current_stage': WorkflowStage.DATA_LOADING,
+    
+    # Datos del dataset
+    'dataset': None,            # Dataset cargado
+    'target_column': None,      # Columna objetivo identificada
+    'data_statistics': {},      # Estadísticas del dataset (ej. distribuciones, valores nulos, etc.)
+    
+    # Información del problema a resolver
+    'problem_type': None,       # Tipo de problema: clasificación o regresión
+    
+    # Información del proceso y validaciones
+    'validation_reports': {},   # Reportes generados durante la validación del modelo
+    'pipeline_steps': [],       # Lista de pasos aplicados en el pipeline de procesamiento
+    'model_versions': [],       # Versiones del modelo generadas o actualizadas durante el workflow
+    
+    # Gestión de errores y contingencias
+    'error_log': [],            # Registro de errores ocurridos
+    'retry_count': 0,           # Contador de reintentos en caso de fallos
+    'fallback_activated': False, # Indicador que señala si se activó el modo fallback
+    'performance_metrics': {}   # Métricas de rendimiento del modelo (ej. precisión, recall, etc.)
+***
 
 - **Agentes especializados**:
   - `IntentAgent`: *Analiza la descripción del usuario* utilizando un LLM para determinar el objetivo del análisis y el tipo de problema (clasificación/regresión).
