@@ -42,6 +42,6 @@ nav:
       - Help: modules/midas_help.md
       - Test: modules/midas_test.md
       - Deploy: modules/midas_deploy.md
-      - Hub: modules/midas_hub.md
+      - Assistant: modules/midas_assistant.md
   - FAQ: faq.md
   - Changelog: changelog.md

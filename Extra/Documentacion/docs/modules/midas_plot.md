@@ -82,3 +82,7 @@ El backend se organiza mediante un **CrewAI Flow** que gestiona el proceso compl
 
 - **Dependencia de la Calidad del Prompt:** La precisión del resultado depende en gran medida de la claridad y calidad del prompt proporcionado por el usuario.
 - **Formatos de Salida Limitados:** Actualmente, la salida se limita a imágenes en formato PNG codificadas en base64.
+
+## Capturas:
+
+![Midas Imagen](https://github.com/warc0s/MIDAS/blob/main/Extra/Imagenes/Midas_Plot_4_1.png?raw=true)

@@ -109,3 +109,7 @@ MIDAS Deploy utiliza ConversableAgent de AG2 para crear agentes especializados:
 - Solo soporta modelos compatibles con scikit-learn guardados en formato joblib
 - Opciones de personalización limitadas para la interfaz generada
 - Puede generar interfaces que necesiten ajustes menores para modelos complejos
+
+## Capturas:
+
+![Midas Imagen](https://github.com/warc0s/MIDAS/blob/main/Extra/Imagenes/Midas_Deploy_8_2.png?raw=true)

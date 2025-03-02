@@ -161,3 +161,9 @@ El reporte generado contendrá secciones como:
 - La evaluación actual se centra en la validez del modelo y consistencia de predicciones, sin métricas específicas de calidad predictiva.
 - El rendimiento de los agentes puede variar dependiendo de la calidad de las respuestas del LLM utilizado.
 - La traducción automática al español puede contener imprecisiones en terminología técnica.
+
+## Capturas:
+
+![Midas Imagen](https://github.com/warc0s/MIDAS/blob/main/Extra/Imagenes/Midas_Test_Interfaz_6_2.png?raw=true)
+
+![Midas Imagen](https://github.com/warc0s/MIDAS/blob/main/Extra/Imagenes/Midas_Test_Reporte_6_5.png?raw=true)

@@ -73,3 +73,7 @@ Este componente se basa en LiteLLM como framework de abstracción, permitiendo l
 - La versión CLI no conserva el historial de conversación entre sesiones (aunque la versión web sí lo hace)
 - No existe integración directa con otros componentes MIDAS, es puramente informativo
 - La idea original era implementarlo como un agente que tuviera como herramientas cada componente MIDAS, de forma que con un prompt simple como "hazme un modelo ML que prediga X" fuera capaz de invocar automáticamente estas herramientas con los mejores prompts posibles que el agente conoce y devolviera exactamente lo que el usuario necesita. Sin embargo, debido a limitaciones de tiempo, esta funcionalidad no pudo ser implementada.
+
+## Capturas:
+
+![Midas Imagen](https://github.com/warc0s/MIDAS/blob/main/Extra/Imagenes/Midas_Assistant.png?raw=true)

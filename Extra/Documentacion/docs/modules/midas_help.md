@@ -59,3 +59,7 @@ La implementación actual no incluye:
 - Bases de datos vectoriales para optimización de la velocidad de búsqueda
 
 La expansión de estas capacidades fue contemplada, pero no implementada por falta de tiempo.
+
+## Capturas:
+
+![Midas Imagen](https://github.com/warc0s/MIDAS/blob/main/Extra/Imagenes/Midas_Help_7_3.png?raw=true)

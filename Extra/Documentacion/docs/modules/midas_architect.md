@@ -87,3 +87,7 @@ Para interactuar con Midas Architect:
 - No se ha implementado un sistema de citas de fuentes para las respuestas. Los intentos de incluir fuentes mediante prompting resultaron en la generación de URLs inexistentes (alucinadas).
 - El modelo Gemini 2.0 Flash puede tener limitaciones en el procesamiento de consultas muy específicas o complejas.
 - Sistema diseñado para consultas en español únicamente a pesar de que la documentación original está en inglés.
+
+## Capturas:
+
+![Midas Imagen](https://github.com/warc0s/MIDAS/blob/main/Extra/Imagenes/Midas_Architech.png?raw=true)

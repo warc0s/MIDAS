@@ -145,3 +145,9 @@ La función `start_conversation()` orquesta la interacción entre agentes:
 - Las relaciones entre columnas no están soportadas (cada columna se genera independientemente)
 - No hay validación exhaustiva de las entradas del usuario ni manejo robusto de errores
 - La generación de datos está limitada a los tipos soportados por Faker
+
+## Capturas:
+
+![Midas Imagen](https://github.com/warc0s/MIDAS/blob/main/Extra/Imagenes/Midas_Dataset_2_1.png?raw=true)
+
+![Midas Imagen](https://github.com/warc0s/MIDAS/blob/main/Extra/Imagenes/Midas_Dataset_2_1_2.png?raw=true)

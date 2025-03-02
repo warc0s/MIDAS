@@ -278,3 +278,9 @@ Durante el proceso, se ofrece información en tiempo real sobre:
 - **Umbrales predeterminados**: Los umbrales de rendimiento y otros parámetros están codificados en CONFIG y no son ajustables dinámicamente desde la interfaz streamlit.
 - **Validación de entrada**: No hay validación avanzada del texto introducido por el usuario, lo que puede afectar la interpretación si no se sigue el formato recomendado.
 - **Limitaciones de robustez**: Puede tener dificultades con estructuras de datos muy complejas o tipos de datos no estándar.
+
+## Capturas:
+
+![Midas Imagen](https://github.com/warc0s/MIDAS/blob/main/Extra/Imagenes/Midas_Touch_Interfaz_6_0.png?raw=true)
+
+![Midas Imagen](https://github.com/warc0s/MIDAS/blob/main/Extra/Imagenes/Midas_Touch_Preprocesamiento_3_2.png?raw=true)
