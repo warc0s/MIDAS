@@ -517,6 +517,8 @@ Modelos Generativos Principales:
 - Base de datos vectorial Supabase
 - Herramientas de recuperación y razonamiento
 
+![Midas Architech Interfaz](https://github.com/warc0s/MIDAS/blob/main/Extra/Imagenes/Midas_Architech.png?raw=true)
+
 **❓ MIDAS HELP (Arquitectura LLM+RAG+Reranker)**
 - Clasificador BERT fine-tuned
 - Selector de LLM automatizado, aunque puedes "forzar" el que prefieras
