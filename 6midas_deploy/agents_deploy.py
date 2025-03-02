@@ -2,6 +2,7 @@ from autogen import ConversableAgent
 import joblib
 import os
 import sklearn
+import re
 from sklearn.pipeline import Pipeline
 from sklearn.base import BaseEstimator
 from dotenv import load_dotenv
@@ -112,13 +113,15 @@ def start_conversation(model_info, model_description):
          "summary_method": "last_msg"}
     ])[0])
 
-    generated_code = chat_results[2].summary  # Obtener código generado
-    
+    # Obtener código generado y limpiarlo directamente
+    generated_code = re.sub(r"^```python\s*|\s*```$", "", chat_results[2].summary.strip())
+
     # Guardar código en un archivo
     with open("generated_interface.py", "w", encoding="utf-8") as f:
         f.write(generated_code)
-    
+
     return generated_code  # Retornar el código para ser usado en Streamlit
+
 
 def main():
     file_path = input("Ingrese la ruta del archivo joblib: ").strip()
