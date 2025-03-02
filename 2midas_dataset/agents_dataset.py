@@ -205,31 +205,31 @@ def start_conversation(user_request):
     )
     
     column_classifier_agent = ConversableAgent(
-    name="Column_Classifier_Agent",
-    llm_config=llm_config,
-     system_message="""You classify column names to match Faker attributes for synthetic data generation.  
-    Return a Python dictionary where the column name is the key and the Faker attribute is the value.  
+        name="Column_Classifier_Agent",
+        llm_config=llm_config,
+        system_message="""You classify column names to match Faker attributes for synthetic data generation.  
+        Return a Python dictionary where the column name is the key and the Faker attribute is the value.  
 
-    Classification Rules:  
-    1. If the column name exactly matches a keyword in the predefined list, use that classification.  
-    2. If the column name contains a relevant keyword (e.g., 'name', 'age', 'percentage'), assign the corresponding Faker attribute.  
-    3. If the column name suggests a numerical value (e.g., 'percentage', 'ratio', 'rate', 'proportion'), classify it as 'pyfloat'.  
-    4. If no match is found, classify it as 'text'.  
+        Classification Rules:  
+        1. If the column name exactly matches a keyword in the predefined list, use that classification.  
+        2. If the column name contains a relevant keyword (e.g., 'name', 'age', 'percentage'), assign the corresponding Faker attribute.  
+        3. If the column name suggests a numerical value (e.g., 'percentage', 'ratio', 'rate', 'proportion'), classify it as 'pyfloat'.  
+        4. If no match is found, classify it as 'text'.  
 
-    Examples:  
-    - 'employee_name' → 'name'  
-    - 'client_lastname' → 'last_name'  
-    - 'personal_email' → 'email'  
-    - 'discount_percentage' → 'pyfloat'  
-    - 'user_ID' → 'uuid4'  
-    - 'customer_comment' → 'text'  
-    - 'value_ratio' → 'pyfloat'  
+        Examples:  
+        - 'employee_name' → 'name'  
+        - 'client_lastname' → 'last_name'  
+        - 'personal_email' → 'email'  
+        - 'discount_percentage' → 'pyfloat'  
+        - 'user_ID' → 'uuid4'  
+        - 'customer_comment' → 'text'  
+        - 'value_ratio' → 'pyfloat'  
 
-    DO NOT PROVIDE PYTHON CODE.
-    Only return a JSON dictionary.  
-    """,
-    description="Classifies column names before dataset generation.",
-)
+        DO NOT PROVIDE PYTHON CODE.
+        Only return a JSON dictionary.  
+        """,
+        description="Classifies column names before dataset generation.",
+    )
     
     user_proxy = ConversableAgent(
         name="User_Proxy",
@@ -266,13 +266,8 @@ def start_conversation(user_request):
         constraints=user_request.get('constraints', {})
     )
     
-    file_path = "synthetic_data.csv"
-    
-    try:
-        dataset.to_csv(file_path, index=False)
-        print(f"Dataset guardado en {file_path}")
-    except Exception as e:
-        print(f"Error al guardar el dataset: {e}")
+    # Eliminamos la parte que guarda el archivo físicamente
+    print(f"Dataset generado correctamente con {len(dataset)} registros")
     
     return dataset
 
@@ -292,7 +287,7 @@ def main():
         print("\nOpciones:")
         print("1. Eliminar columna")
         print("2. Añadir columna")
-        print("3. Finalizar y guardar")
+        print("3. Finalizar")  # Cambiado el texto
         
         choice = input("Seleccione una opción: ").strip()
         
@@ -316,12 +311,8 @@ def main():
                 dataset[new_column_name] = [faker.text() for _ in range(len(dataset))]
             print(f"Columna '{new_column_name}' añadida.")
         elif choice == "3":
-            file_path = "synthetic_data_modified.csv"
-            try:
-                dataset.to_csv(file_path, index=False)
-                print(f"Dataset modificado guardado en {file_path}")
-            except Exception as e:
-                print(f"Error al guardar el dataset: {e}")
+            print("Proceso finalizado. Dataset en memoria.")
+            # Ya no guardamos en archivo
             break
         else:
             print("Opción no válida. Intente de nuevo.")

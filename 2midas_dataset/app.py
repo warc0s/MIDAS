@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import os
+from io import StringIO, BytesIO
 from dotenv import load_dotenv
 from agents_dataset import start_conversation, detect_column_type, generate_synthetic_data
 
@@ -42,7 +43,15 @@ st.markdown(
             font-weight: bold;
         }}
 
-
+        .download-button {{
+            background-color: #DAA520;
+            color: white;
+            font-weight: bold;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+            display: inline-block;
+        }}
     </style>
     <div class="title-container">
         <img src="{logo_url}" alt="Logo">
@@ -151,11 +160,39 @@ if 'dataset' in st.session_state:
                     st.error(f"❌ Error al añadir la columna: {e}")
             st.markdown('</div>', unsafe_allow_html=True)
 
-    # Guardar dataset
-    if st.button("💾 Guardar Dataset Modificado", key="guardar"):
-        file_path = "synthetic_data_modified.csv"
-        try:
-            st.session_state.dataset.to_csv(file_path, index=False)
-            st.success(f"✅ Dataset guardado en {file_path}")
-        except Exception as e:
-            st.error(f"❌ Error al guardar el dataset: {e}")
+    # Función para convertir el DataFrame a CSV
+    def convert_df_to_csv(df):
+        return df.to_csv(index=False).encode('utf-8')
+    
+    # Opciones de descarga
+    st.markdown("---")
+    st.header("Descargar Dataset")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        # Botón para descargar CSV
+        csv = convert_df_to_csv(st.session_state.dataset)
+        st.download_button(
+            label="📥 Descargar como CSV",
+            data=csv,
+            file_name="midas_synthetic_data.csv",
+            mime="text/csv",
+            help="Descarga el dataset generado en formato CSV"
+        )
+    
+    with col2:
+        # Botón para descargar Excel (opcional)
+        buffer = BytesIO()
+        with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
+            st.session_state.dataset.to_excel(writer, sheet_name='Dataset', index=False)
+        
+        excel_data = buffer.getvalue()
+        
+        st.download_button(
+            label="📥 Descargar como Excel",
+            data=excel_data,
+            file_name="midas_synthetic_data.xlsx",
+            mime="application/vnd.ms-excel",
+            help="Descarga el dataset generado en formato Excel"
+        )
