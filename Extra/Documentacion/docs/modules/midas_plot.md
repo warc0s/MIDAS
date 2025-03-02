@@ -86,3 +86,5 @@ El backend se organiza mediante un **CrewAI Flow** que gestiona el proceso compl
 ## Capturas:
 
 ![Midas Imagen](https://github.com/warc0s/MIDAS/blob/main/Extra/Imagenes/Midas_Plot_4_1.png?raw=true)
+
+![Midas Imagen](https://github.com/warc0s/MIDAS/blob/main/Extra/Imagenes/Plot_Full_Captura.png?raw=true)

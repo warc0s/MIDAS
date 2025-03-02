@@ -91,3 +91,5 @@ Para interactuar con Midas Architect:
 ## Capturas:
 
 ![Midas Imagen](https://github.com/warc0s/MIDAS/blob/main/Extra/Imagenes/Midas_Architech.png?raw=true)
+
+![Midas Imagen](https://github.com/warc0s/MIDAS/blob/main/Extra/Imagenes/Arch_Full_Captura.png?raw=true)

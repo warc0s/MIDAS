@@ -36,12 +36,12 @@ nav:
       - Página Principal: index.md
       - Arquitectura: architecture.md
   - Componentes MIDAS:
-      - Architect: modules/midas_architect.md
+      - Assistant: modules/midas_assistant.md
+      - Dataset: modules/midas_dataset.md
       - Plot: modules/midas_plot.md
       - Touch: modules/midas_touch.md
-      - Help: modules/midas_help.md
       - Test: modules/midas_test.md
       - Deploy: modules/midas_deploy.md
-      - Assistant: modules/midas_assistant.md
+      - Architect: modules/midas_architect.md
+      - Help: modules/midas_help.md
   - FAQ: faq.md
-  - Changelog: changelog.md

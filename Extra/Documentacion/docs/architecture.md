@@ -101,4 +101,4 @@ La arquitectura actual presenta algunas limitaciones que podrían abordarse en v
 4. **Ausencia de orquestación central**: No existe un componente que coordine automáticamente el flujo completo
 5. **Limitaciones de escalabilidad**: Algunos componentes están optimizados para datasets de tamaño pequeño a mediano
 
-[Empezar →](/modules/plot)
+[Empezar →](/modules/midas_assistant)

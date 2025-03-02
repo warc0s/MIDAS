@@ -19,6 +19,8 @@ MIDAS ofrece un conjunto completo de herramientas para científicos de datos, de
 
 ## Componentes del Sistema
 
+![Midas Main Website](https://github.com/warc0s/MIDAS/blob/main/Extra/Imagenes/Midas_Main.png?raw=true)
+
 MIDAS está compuesto por ocho módulos especializados que pueden funcionar de manera independiente o como parte de un flujo de trabajo integrado:
 
 ### [Midas Dataset](./modules/midas_dataset.md)
@@ -78,4 +80,4 @@ MIDAS nace de la visión de democratizar y automatizar los procesos de ciencia d
 
 MIDAS ha sido desarrollado como un Trabajo Fin de Máster (TFM) y se beneficia de múltiples frameworks y tecnologías de código abierto como AG2, CrewAI, Streamlit, Pandas, Scikit-learn y otros.
 
-[Empezar →](/modules/plot)
+[Empezar →](/modules/midas_assistant)

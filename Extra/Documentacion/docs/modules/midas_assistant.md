@@ -77,3 +77,5 @@ Este componente se basa en LiteLLM como framework de abstracción, permitiendo l
 ## Capturas:
 
 ![Midas Imagen](https://github.com/warc0s/MIDAS/blob/main/Extra/Imagenes/Midas_Assistant.png?raw=true)
+
+![Midas Imagen](https://github.com/warc0s/MIDAS/blob/main/Extra/Imagenes/Assistant_Full_Captura.png?raw=true)

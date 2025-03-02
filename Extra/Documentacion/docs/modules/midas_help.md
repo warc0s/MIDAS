@@ -63,3 +63,5 @@ La expansión de estas capacidades fue contemplada, pero no implementada por fal
 ## Capturas:
 
 ![Midas Imagen](https://github.com/warc0s/MIDAS/blob/main/Extra/Imagenes/Midas_Help_7_3.png?raw=true)
+
+![Midas Imagen](https://github.com/warc0s/MIDAS/blob/main/Extra/Imagenes/Help_Full_Captura.png?raw=true)
