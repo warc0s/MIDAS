@@ -1,9 +1,9 @@
 # Midas Deploy
 
 ## Descripción General
-MIDAS Deploy es un sistema automatizado que genera interfaces de usuario personalizadas para modelos de aprendizaje automático. Utilizando tecnologías de IA, específicamente LLMs (Large Language Models), MIDAS Deploy analiza modelos guardados en formato joblib y crea aplicaciones Streamlit que permiten a los usuarios interactuar con estos modelos sin necesidad de programación adicional.
+MIDAS Deploy es el componente MIDAS que genera interfaces de usuario personalizadas para modelos de ML. Utilizando tecnologías de IA, específicamente LLMs, MIDAS Deploy analiza modelos guardados en formato joblib y crea aplicaciones Streamlit que permiten a los usuarios interactuar con estos modelos sin necesidad de programación adicional.
 
-El sistema se basa en el framework AG2 para orquestar una conversación entre agentes de IA especializados que analizan el modelo, diseñan una interfaz y generan código ejecutable.
+El sistema utiliza AG2 para orquestar una conversación entre agentes de IA especializados que analizan el modelo, diseñan una interfaz y generan código ejecutable.
 
 ## Arquitectura Técnica
 
@@ -19,7 +19,7 @@ El sistema se basa en el framework AG2 para orquestar una conversación entre ag
   - *UI_Designer*: Agente encargado de diseñar la interfaz de usuario basada en el análisis del modelo
   - *Code_Generator*: Agente que implementa código funcional de Streamlit basado en el diseño de UI
   - *User_Proxy*: Orquestador del flujo de trabajo entre agentes especializados
-  - *process_joblib*: Módulo utilitario para extraer información de archivos joblib
+  - *process_joblib*: Función utilitaria para extraer información de archivos joblib
 
 - **Modelo LLM utilizado:** 
   - Meta-Llama/Llama-3.3-70B-Instruct-Turbo a través de la API de DeepInfra
@@ -76,14 +76,36 @@ Para un modelo que predice la probabilidad de una condición médica basada en e
 - MIDAS Deploy generará una aplicación Streamlit con campos de entrada para edad, altura y peso
 - La aplicación permitirá a los usuarios ingresar estos datos y obtener predicciones en tiempo real
 
+## Implementación Técnica
+MIDAS Deploy utiliza ConversableAgent de AG2 para crear agentes especializados:
+
+1. **Model_Analyzer**: Analiza el modelo joblib y extrae metadatos como:
+   - Tipo de modelo
+   - Número de características
+   - Nombres de características (si están disponibles)
+   - Parámetros del modelo
+   - Estructura del pipeline (si aplica)
+
+2. **UI_Designer**: Diseña una interfaz adaptada al modelo basándose en:
+   - El número de características requeridas
+   - La descripción del propósito del modelo
+   - El tipo de predicción (clasificación o regresión)
+
+3. **Code_Generator**: Crea código Streamlit funcional que:
+   - Carga correctamente el modelo joblib
+   - Implementa campos de entrada para todas las características necesarias
+   - Procesa adecuadamente los datos de entrada
+   - Muestra el resultado de la predicción del modelo
+   
+4. **User_Proxy**: Orquesta la conversación entre los agentes, siguiendo un flujo secuencial de análisis, diseño y generación.
+
 ## Referencias y Recursos
-- Documentación de AG2: https://docs.ag2.ai/docs/user-guide/basic-concepts/installing-ag2
+- Documentación de AG2: https://docs.ag2.ai/docs/home/home
 - Documentación de Streamlit: https://docs.streamlit.io/
 - DeepInfra (para acceso a LLM): https://deepinfra.com/
 - Scikit-learn (para modelos ML): https://scikit-learn.org/
 
 ## Limitaciones Actuales
-- Actualmente solo soporta modelos compatibles con scikit-learn guardados en formato joblib
+- Solo soporta modelos compatibles con scikit-learn guardados en formato joblib
 - Opciones de personalización limitadas para la interfaz generada
 - Puede generar interfaces que necesiten ajustes menores para modelos complejos
-- No incluye funcionalidades de explicabilidad de modelos avanzada

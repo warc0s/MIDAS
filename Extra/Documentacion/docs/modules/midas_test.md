@@ -2,9 +2,9 @@
 
 ## Descripción General
 
-MIDAS Test es un componente especializado en la evaluación exhaustiva de modelos de machine learning almacenados en formato joblib. Su propósito principal es analizar la calidad, rendimiento y robustez de modelos ML mediante una arquitectura de agentes colaborativos basados en IA.
+MIDAS Test es el componente MIDAS especializado en la evaluación exhaustiva de modelos de machine learning almacenados en formato joblib. Su propósito principal es analizar la calidad, rendimiento y robustez de modelos ML mediante una arquitectura de agentes conversacionales basados en IA.
 
-El sistema utiliza tecnología LLM (Large Language Models) para coordinar múltiples agentes especializados que evalúan diferentes aspectos de los modelos ML. MIDAS Test implementa un enfoque de colaboración multi-agente donde cada agente aporta su perspectiva especializada para generar un informe completo.
+El sistema utiliza Large Language Models (LLM) para coordinar múltiples agentes especializados que evalúan diferentes aspectos de los modelos ML. MIDAS Test implementa un enfoque de colaboración multi-agente donde cada agente aporta su perspectiva especializada para generar un informe completo.
 
 MIDAS Test se basa en el framework AG2 para la gestión de agentes conversacionales y utiliza Streamlit para proporcionar una interfaz de usuario accesible.
 
@@ -12,11 +12,13 @@ MIDAS Test se basa en el framework AG2 para la gestión de agentes conversaciona
 
 ### Backend:
 
-- **Lenguaje y Frameworks:** 
+- **Lenguaje y Bibliotecas:** 
   - Python 3.x
   - AG2 para la gestión de agentes IA
   - Scikit-learn para manipulación de modelos ML
   - Joblib para carga/guardado de modelos
+  - DeepInfra API para acceder a modelos LLM
+  - deep_translator para traducir informes al español
 
 - **Componentes Clave:**
   - *Agentes Especializados*:
@@ -35,19 +37,23 @@ MIDAS Test se basa en el framework AG2 para la gestión de agentes conversaciona
   
   - *Módulos de Procesamiento*:
     - **load_model**: Carga modelos joblib y mide tiempo de carga.
+    - **check_model_validity**: Verifica si el modelo es compatible con Scikit-learn.
     - **measure_latency**: Evalúa tiempos de respuesta en diferentes tamaños de batch.
-    - **check_robustness**: Prueba comportamiento ante valores nulos, extremos y tipos incorrectos.
+    - **measure_memory_usage**: Mide el uso de memoria.
+    - **measure_memory_and_cpu_during_prediction**: Evalúa el uso de recursos durante predicciones.
     - **validate_predictions**: Verifica la consistencia y formato de las predicciones.
+    - **check_robustness**: Prueba comportamiento ante valores nulos, extremos y tipos incorrectos.
+    - **translate_to_spanish**: Traduce el informe al español.
     - **generate_markdown_report**: Compila los hallazgos en formato Markdown estructurado.
 
 - **Flujo de Procesamiento**:
   1. Carga del modelo joblib.
   2. Validación inicial del modelo (compatibilidad con Scikit-learn).
   3. Generación de datos de muestra para pruebas.
-  4. Ejecución paralela de pruebas de rendimiento, robustez y validación.
+  4. Ejecución de pruebas de rendimiento, robustez y validación.
   5. Compilación de métricas y resultados.
   6. Activación de agentes IA para análisis especializado.
-  7. Generación de informe final en formato Markdown.
+  7. Generación de informe final en formato Markdown en español.
 
 ### Frontend:
 
@@ -63,13 +69,13 @@ MIDAS Test se basa en el framework AG2 para la gestión de agentes conversaciona
 
 ## Funcionalidad
 
-- **Análisis Profundo de Modelos ML**: Evalúa múltiples aspectos del modelo incluyendo validez, rendimiento y robustez.
+- **Análisis de Modelos ML**: Evalúa múltiples aspectos del modelo incluyendo validez, rendimiento y robustez.
 
 - **Métricas de Rendimiento**: 
   - Tiempo de carga del modelo
   - Uso de memoria durante predicciones
   - Utilización de CPU
-  - Latencia en diferentes tamaños de batch
+  - Latencia en diferentes tamaños de batch (1, 100, 1000, 10000)
   - Throughput (predicciones por segundo)
 
 - **Pruebas de Robustez**:
@@ -79,13 +85,13 @@ MIDAS Test se basa en el framework AG2 para la gestión de agentes conversaciona
   - Consistencia de predicciones
 
 - **Validación de Salidas**:
-  - Verificación de formato correcto
-  - Validación de rangos esperados
-  - Comprobación de probabilidades (cuando aplica)
+  - Verificación de formato correcto (array NumPy)
+  - Validación de rangos de valores
+  - Comprobación de suma de probabilidades igual a 1 (cuando aplica)
 
-- **Recomendación Automatizada**: Clasificación del modelo como "APTO" o "NO APTO" basada en criterios objetivos.
+- **Recomendación Automatizada**: Clasificación del modelo como "APTO" o "NO APTO" basada en la validez del modelo y la consistencia de sus predicciones.
 
-- **Reporte Markdown**: Generación automática de documentación estructurada con los hallazgos y recomendaciones.
+- **Reporte Markdown**: Generación automática de documentación estructurada en español con los hallazgos y recomendaciones.
 
 ## Guía de Uso
 
@@ -94,13 +100,13 @@ MIDAS Test se basa en el framework AG2 para la gestión de agentes conversaciona
 1. Inicie la aplicación ejecutando:
    *streamlit run app.py*
 
-2. En la interfaz web, haga clic en "📂 Carga un archivo .joblib" y seleccione el modelo a evaluar.
+2. En la interfaz web, haga clic en el cargador de archivos y seleccione el modelo joblib a evaluar.
 
 3. Una vez cargado el modelo, pulse el botón "🔄 Iniciar Evaluación con los Agentes" para comenzar el análisis.
 
-4. El sistema mostrará el progreso del análisis en tiempo real.
+4. El sistema mostrará un mensaje indicando que la evaluación está en proceso.
 
-5. Al finalizar, pulse "📄 Finalizar Análisis y Descargar Reporte" para obtener los resultados.
+5. Después de unos 90 segundos, pulse "📄 Finalizar Análisis y Descargar Reporte" para ver y descargar los resultados.
 
 6. Explore los resultados en las secciones expandibles:
    - "📌 Información del Modelo": Datos básicos como tiempo de carga y tamaño
@@ -116,51 +122,42 @@ MIDAS Test se basa en el framework AG2 para la gestión de agentes conversaciona
 
 2. Cuando se solicite, ingrese la ruta completa al archivo joblib que desea analizar.
 
-3. El sistema ejecutará automáticamente todas las pruebas y generará un informe en el archivo "model_analysis_report.md".
+3. El sistema ejecutará automáticamente todas las pruebas y generará un informe en el archivo "informe_analisis_modelo.md".
 
 ### Ejemplo de Salida:
 
 El reporte generado contendrá secciones como:
 
-# 📊 Model Analysis Report
-**Generated on:** 2025-02-28 15:30:45
+# 📊 Informe de Análisis del Modelo
+**Generado el:** 2025-03-02 15:30:45
 
 ---
 
-## 🔍 Model Overview
+## 🔍 Resumen del Modelo
 [Información general sobre el modelo y sus características]
 
-## ⚙️ Performance Metrics
+## ⚙️ Métricas de Rendimiento
 [Detalles sobre rendimiento, memoria y CPU]
 
-## ⏳ Latency Analysis
+## ⏳ Análisis de Latencia
 [Análisis de tiempos de respuesta]
 
-## ✅ Predictions Validity
+## ✅ Validez de Predicciones
 [Validación de las salidas del modelo]
 
-## 🛡️ Robustness Tests
+## 🛡️ Pruebas de Robustez
 [Resultados de pruebas de resistencia]
 
-## 📌 Final Recommendation
+## 📌 Recomendación Final
 **APTO**
 
-## 🔧 Suggested Improvements
+## 🔧 Sugerencias de Mejora
 [Recomendaciones para mejorar el modelo]
-
-## Referencias y Recursos
-
-- **Frameworks Utilizados**:
-  - AG2: [https://docs.ag2.ai/docs/user-guide/basic-concepts/installing-ag2](https://docs.ag2.ai/docs/user-guide/basic-concepts/installing-ag2)
-  - Streamlit: [https://streamlit.io/](https://streamlit.io/)
-  - DeepInfra API: [https://deepinfra.com/](https://deepinfra.com/)
-
-- **Modelos LLM**:
-  - Llama 3.3 70B: https://huggingface.co/meta-llama/Llama-3.3-70B-Instruct
 
 ## Limitaciones Actuales
 
 - El componente está optimizado para modelos Scikit-learn y puede tener limitaciones con otros frameworks de ML.
-- Las pruebas de robustez son algo básicas y no cubren todos los escenarios posibles de entrada anómala.
-- La evaluación actual no incluye comparativas con otros modelos similares.
-- El rendimiento puede variar dependiendo del LLM utilizado.
+- Las pruebas de robustez son básicas y no cubren todos los escenarios posibles de entrada anómala.
+- La evaluación actual se centra en la validez del modelo y consistencia de predicciones, sin métricas específicas de calidad predictiva.
+- El rendimiento de los agentes puede variar dependiendo de la calidad de las respuestas del LLM utilizado.
+- La traducción automática al español puede contener imprecisiones en terminología técnica.
