@@ -5,6 +5,9 @@ import sklearn
 from sklearn.pipeline import Pipeline
 from sklearn.base import BaseEstimator
 
+from dotenv import load_dotenv
+load_dotenv()
+
 def get_model_info(model):
     """Extrae información relevante de un modelo de machine learning cargado."""
     try:
