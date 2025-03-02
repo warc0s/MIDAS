@@ -24,6 +24,8 @@
 
 ## 🌟 Visión General
 
+![Midas Main Website](https://github.com/warc0s/MIDAS/blob/main/Extra/Imagenes/Midas_Main.png?raw=true)
+
 MIDAS es un proyecto de Trabajo Final de Máster (TFM) que propone un sistema innovador para automatizar el desarrollo de modelos de machine learning. A través de una arquitectura multiagente compuesta por 8 componentes especializados, MIDAS aborda los desafíos técnicos y las barreras de entrada que existen en el campo de la ciencia de datos. El sistema cubre todo el ciclo de desarrollo ML: desde la generación de datos y visualizaciones, pasando por el entrenamiento y validación de modelos, hasta su despliegue final, permitiendo que profesionales con diversos niveles de experiencia puedan crear e implementar soluciones ML efectivas de manera más ágil y accesible.
 
 ---
@@ -55,6 +57,8 @@ El sistema implementa una arquitectura modular innovadora a través de 8 compone
 | **🏗️ Midas Architect** | Guía el diseño del sistema multiagente. |
 | **❓ Midas Help** | Proporciona soporte técnico contextual de nuestro TFM basado en RAG. |
 
+![Midas Diagrama](https://github.com/warc0s/MIDAS/blob/main/Extra/Imagenes/Diagrama_ArquitecturaModular.png?raw=true)
+
 Profesional, escalable y orientado a resultados, MIDAS redefine la automatización en proyectos de Machine Learning. Su arquitectura modular, donde cada componente está estratégicamente diseñado y optimizado, establece un nuevo paradigma en el desarrollo de modelos ML. El sistema demuestra que la verdadera "transformación en oro" va más allá de convertir datos en modelos precisos - consiste en hacer accesible todo el proceso de ML a través de interacciones naturales e intuitivas, democratizando así el desarrollo de modelos para equipos de cualquier tamaño y experiencia.
 
 ---
@@ -64,6 +68,8 @@ Profesional, escalable y orientado a resultados, MIDAS redefine la automatizaci�
 MIDAS implementa múltiples estrategias de obtención de datos, alineadas con las diferentes necesidades que pueden surgir a lo largo del ciclo de vida de un proyecto de machine learning:
 
 ### 2.1 Generación sintética mediante Midas Dataset 🧬
+
+![Midas Dataset](https://github.com/warc0s/MIDAS/blob/main/Extra/Imagenes/Midas_Dataset_2_1.png?raw=true)
 
 **El componente Midas Dataset** constituye una herramienta efectiva para la generación automatizada de conjuntos de datos sintéticos. Esta funcionalidad es fundamental en escenarios donde:
 
@@ -91,6 +97,10 @@ El proceso de generación es **simple pero potente**:
 2. El sistema detecta automáticamente los tipos de datos adecuados basándose en los nombres
 3. Para columnas numéricas, se pueden definir valores mínimos y máximos
 4. Se genera el dataset completo que puede ser modificado posteriormente
+
+<p align="center">
+  <img src="https://github.com/warc0s/MIDAS/blob/main/Extra/Imagenes/Midas_Dataset_2_1_2.png?raw=true" alt="Midas Dataset Resultado" width="500">
+</p>
 
 ### 2.2 Carga directa desde fuentes externas 📂
 
@@ -158,7 +168,12 @@ La limpieza y preparación de datos constituye una fase crítica en cualquier pr
   </tr>
 </table>
 
-El sistema documenta el proceso de preprocesamiento en el notebook generado, incluyendo las transformaciones aplicadas a cada tipo de variable.
+El sistema documenta el proceso de preprocesamiento en el notebook generado, incluyendo las transformaciones aplicadas a cada tipo de variable. Concretamente, se vería así tomando como dataset el famoso del Titanic de Kaggle:
+<p align="center">
+  <img src="https://github.com/warc0s/MIDAS/blob/main/Extra/Imagenes/Midas_Touch_Preprocesamiento_3_2.png?raw=true" alt="Midas Touch Preprocesamiento" width="500">
+</p>
+
+<sub><i>Nota: Aquí se puede ver una de las debilidades de Midas Touch, aplica one-hot encoding a las columnas categóricas a pesar de tener alta dimensionalidad.</i></sub>
 
 ### 3.3 Detección y procesamiento de fechas 📅
 **El DataAlchemistAgent** incluye capacidades específicas para el manejo de columnas temporales:
@@ -220,6 +235,8 @@ La exploración y visualización de datos constituye una fase fundamental para c
 - 🚀 **Abstracción de complejidad técnica:** Elimina la necesidad de conocer detalles de implementación en Python
 
 Este enfoque democratiza la creación de visualizaciones, haciéndolas accesibles tanto a cientificos de datos experimentados como a analistas de negocio con conocimientos técnicos limitados.
+
+![Midas Plot](https://github.com/warc0s/MIDAS/blob/main/Extra/Imagenes/Midas_Plot_4_1.png?raw=true)
 
 ### 4.2 Arquitectura basada en CrewAI Flow ⚙️
 
@@ -331,7 +348,9 @@ El proceso completo queda documentado en el notebook generado automáticamente p
 
 ## Sección 6: Entrenamiento del modelo y comprobación del rendimiento
 
-El entrenamiento de modelos y la evaluación exhaustiva de su rendimiento constituyen fases determinantes para garantizar la efectividad de las soluciones de machine learning. **MIDAS** implementa un enfoque integral a través de los componentes **Midas Touch** y **Midas Test**.
+El entrenamiento de modelos y la evaluación exhaustiva de su rendimiento constituyen fases determinantes para garantizar la efectividad de las soluciones de machine learning. **MIDAS** implementa un enfoque integral a través de los componentes **Midas Touch** y **Midas Test**. Concretamente, **Midas Touch** se vería así:
+
+![Midas Touch Interfaz](https://github.com/warc0s/MIDAS/blob/main/Extra/Imagenes/Midas_Touch_Interfaz_6_0.png?raw=true)
 
 ### 6.1 Selección inteligente de algoritmos 🧠
 
@@ -351,6 +370,10 @@ Criterios de Selección:
 El sistema selecciona automáticamente entre estos algoritmos de scikit-learn según las características del dataset, y en caso de fallos repetidos durante el entrenamiento, utiliza modelos baseline como mecanismo de recuperación.
 
 ### 6.2 Evaluación mediante agentes especializados 📊
+
+<p align="center">
+  <img src="https://github.com/warc0s/MIDAS/blob/main/Extra/Imagenes/Midas_Test_Interfaz_6_2.png?raw=true" alt="Midas Test Interfaz" width="500">
+</p>
 
 **El componente Midas Test** coordina un análisis colaborativo mediante múltiples agentes especializados basados en LLM:
 
@@ -414,6 +437,10 @@ El sistema captura y maneja adecuadamente las advertencias de métricas indefini
 Estas métricas se obtienen mediante pruebas directas sobre el modelo cargado utilizando datos sintéticos generados automáticamente y la biblioteca psutil para monitoreo de recursos.
 
 ### 6.5 Generación de reportes detallados 📝
+
+<p align="center">
+  <img src="https://github.com/warc0s/MIDAS/blob/main/Extra/Imagenes/Midas_Test_Reporte_6_5.png?raw=true" alt="Midas Test Reporte" width="500">
+</p>
 
 **Midas Test** produce documentación estructurada en español que sintetiza el análisis completo:
 
@@ -496,7 +523,9 @@ Modelos Generativos Principales:
 - Embeddings BGE-M3
 - Reranker BGE V2 M3
 
-### 7.5 Generación automática de código 💻
+![Midas Help RAG](https://github.com/warc0s/MIDAS/blob/main/Extra/Imagenes/Midas_Help_7_3.png?raw=true)
+
+### 7.4 Generación automática de código 💻
 
 Por último, múltiples componentes de **MIDAS** implementan generación de código mediante NLP (prompt redactado por el usuario):
 
@@ -593,6 +622,10 @@ El sistema adopta un enfoque modular en el desarrollo de interfaces, con impleme
 4. **Resultado final**: Aplicación Streamlit ejecutable
 
 Este componente transforma modelos joblib estáticos en aplicaciones interactivas listas para usuarios finales, completando el ciclo "de datos a aplicación".
+
+<p align="center">
+  <img src="https://github.com/warc0s/MIDAS/blob/main/Extra/Imagenes/Midas_Deploy_8_2.png?raw=true" alt="Midas Deplot Resultado" width="500">
+</p>
 
 ### 8.3 Tecnologías y frameworks frontend 🛠️
 
