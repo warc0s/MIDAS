@@ -1,0 +1,4 @@
+streamlit
+python-dotenv
+ag2[openai]
+scikit-learn

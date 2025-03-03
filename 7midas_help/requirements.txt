@@ -1,0 +1,11 @@
+torch
+flask
+python-dotenv
+transformers
+llama_index
+llama-index-embeddings-deepinfra
+llama-index-llms-deepinfra
+cohere
+llama-index-postprocessor-cohere-rerank
+llama-index-postprocessor-flag-embedding-reranker
+llama-index-llms-gemini
