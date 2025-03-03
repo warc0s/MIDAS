@@ -668,11 +668,11 @@ El desarrollo e implementación de **MIDAS** representa un avance significativo 
 
 El proceso de diseño e implementación de **MIDAS** nos ha dado reflexiones valiosas:
 
-> 🔄 **Balance agente-herramienta:** La combinación de agentes con herramientas especializadas dio buen resultado 
-> 🎯 **Especialización vs. generalización:** Los agentes especializados mostraron mejor desempeño  
-> 📝 **Importancia de la documentación:** La generación automática de documentación (ipynb en Touch) fue muy útil 
-> 🧩 **Valor de la arquitectura modular:** El diseño desacoplado facilitó evolución y mantenimiento, así como reparto de tareas 
-> 🧠 **Capacidades de LLMs:** Los modelos, bien guiados, demostraron aptitudes sorprendentes en tareas técnicas complejas
+* 🔄 **Balance agente-herramienta:** La combinación de agentes con herramientas especializadas dio buen resultado 
+* 🎯 **Especialización vs. generalización:** Los agentes especializados mostraron mejor desempeño  
+* 📝 **Importancia de la documentación:** La generación automática de documentación (ipynb en Touch) fue muy útil 
+* 🧩 **Valor de la arquitectura modular:** El diseño desacoplado facilitó evolución y mantenimiento, así como reparto de tareas 
+* 🧠 **Capacidades de LLMs:** Los modelos, bien guiados, demostraron aptitudes sorprendentes en tareas técnicas complejas
 
 ### 9.3 Limitaciones actuales ⚠️
 
