@@ -2,28 +2,28 @@
   <img src="https://github.com/warc0s/MIDAS/blob/main/Extra/logo1.png" alt="MIDAS Logo" width="50%">
   <h1>MIDAS - Multi-agent Intelligent Data Automation System 🤖</h1>
   <p><em>Convierte tus ideas en modelos ML listos para producción</em></p>
-  
-  <div align="center">
-    <table>
-      <tr>
-        <td align="center">
-          <a href="https://midastfm.com" style="text-decoration: none;">
-            <img src="https://img.shields.io/badge/🌐_Web_Principal-midastfm.com-2962FF?style=for-the-badge&logo=globe&logoColor=white" alt="Web Principal"/>
-          </a>
-        </td>
-        <td align="center">
-          <a href="https://docs.midastfm.com" style="text-decoration: none;">
-            <img src="https://img.shields.io/badge/📚_Documentación-docs.midastfm.com-22A699?style=for-the-badge&logo=gitbook&logoColor=white" alt="Documentación"/>
-          </a>
-        </td>
-        <td align="center">
-          <a href="#" style="text-decoration: none;">
-            <img src="https://img.shields.io/badge/🎥_Video_Explicativo-Próximamente-FF5757?style=for-the-badge&logo=youtube&logoColor=white" alt="Video Explicativo"/>
-          </a>
-        </td>
-      </tr>
-    </table>
-  </div>
+</div>
+
+<!-- Enlaces Rápidos -->
+<div align="center">
+  <p>
+    <a href="https://midastfm.com" target="_blank">
+      <img width="300" src="https://img.shields.io/badge/🌐_WEB_PRINCIPAL-midastfm.com-2962FF?style=for-the-badge&labelColor=1A49CD&logo=globe&logoColor=white" alt="Web Principal"/>
+    </a>
+    &nbsp;&nbsp;
+    <a href="https://docs.midastfm.com" target="_blank">
+      <img width="300" src="https://img.shields.io/badge/📚_DOCUMENTACIÓN-docs.midastfm.com-22A699?style=for-the-badge&labelColor=15756C&logo=gitbook&logoColor=white" alt="Documentación"/>
+    </a>
+  </p>
+  <p>
+    <a href="https://presentacion.midastfm.com" target="_blank">
+      <img width="300" src="https://img.shields.io/badge/🎯_PRESENTACIÓN-presentacion.midastfm.com-FF9E00?style=for-the-badge&labelColor=D97F00&logo=googleslides&logoColor=white" alt="Presentación"/>
+    </a>
+    &nbsp;&nbsp;
+    <a href="#" target="_blank">
+      <img width="300" src="https://img.shields.io/badge/🎥_VIDEO_EXPLICATIVO-Próximamente-FF5757?style=for-the-badge&labelColor=D63030&logo=youtube&logoColor=white" alt="Video Explicativo"/>
+    </a>
+  </p>
 </div>
 
 ## 📑 Índice
