@@ -491,7 +491,7 @@ El Procesamiento de Lenguaje Natural (NLP) constituye una tecnología fundamenta
 Modelos Generativos Principales:
 - <b>Meta Llama 3.3 (70B):</b> Utilizado en Midas Dataset, Deploy, Help y Test<br>
 - <b>Gemini 2.0 Flash:</b> Implementado en Midas Touch, Architech, Plot y Help<br>
-- <b>Deepseek V3:</b> Empleado únicamente en Midas Help para consultas técnicas avanzadas
+- <b>Deepseek V3:</b> Empleado anteriormente en Midas Help para consultas técnicas avanzadas. Fue eliminado por su alta latencia y tiempo de respuesta.
 
 | Modelo Especializado | Uso Principal | Componente |
 |----------------------|---------------|------------|

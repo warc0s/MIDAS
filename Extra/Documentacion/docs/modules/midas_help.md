@@ -18,10 +18,9 @@ El backend está desarrollado en Python utilizando el framework Flask y se encar
 - Modelo de **embeddings BGE-M3** de BAAI para la representación vectorial de los textos (tanto de la consulta como de los documentos). Para cada consulta, se seleccionan los 30 chunks mas relevantes según su similitud vectorial.
 - **Reranker BGE V2 M3:** Este componente reordena los resultados obtenidos por la búsqueda inicial basada en embeddings.  El reranker evalúa la relevancia de cada documento recuperado *con respecto a la consulta específica del usuario*, utilizando un modelo de lenguaje más sofisticado que la simple comparación de embeddings. Esto ayuda a filtrar el ruido y a asegurar que los documentos más relevantes sean presentados al LLM para la generación de la respuesta final. Toma los 30 chunks que salen del proceso de embedding, y los "filtra" para pasarle al LLM solo los 10 realmente mas relevantes.
 - **Selector de LLM:** Permite elegir entre diferentes modelos de lenguaje, o usar el modo automatico para usar un modelo u otro dependiendo de la clasificación del BERT Fine-tuneado:
-    -   **Modo Automático:** Utiliza el clasificador de preguntas (BERT) para seleccionar el LLM óptimo (Llama o Deepseek).
+    -   **Modo Automático:** Utiliza el clasificador de preguntas (BERT) para seleccionar el LLM óptimo (Llama o Gemini).
     -   **Llama 3.3 70B:** Un modelo de lenguaje eficiente, ideal para preguntas fáciles.  *(Usado por defecto en el modo automático si la pregunta se clasifica como "fácil").*
-    -   **Deepseek V3:** Un modelo más potente, diseñado para preguntas difíciles que requieren mayor capacidad de razonamiento. *(Usado por defecto en el modo automático si la pregunta se clasifica como "difícil").*
-    -   **Gemini 2.0 Flash:** El modelo que recomendamos, rápido e inteligente. *(No se usa por defecto, debes forzarlo en el selector).*
+    -   **Gemini 2.0 Flash:** Un modelo más potente, diseñado para preguntas difíciles que requieren mayor capacidad de razonamiento. *(Usado por defecto en el modo automático si la pregunta se clasifica como "difícil").*
 
 ### Frontend
 La interfaz de usuario está construida con HTML, JavaScript y Tailwind CSS, proporcionando una experiencia moderna y responsive.
