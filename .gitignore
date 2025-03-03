@@ -1,0 +1,9 @@
+# Archivos de variables de entorno
+.env
+.env.*
+
+# Caché de Streamlit
+.streamlit/
+__pycache__/
+*.pyc
+.cache/
