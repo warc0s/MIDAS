@@ -310,7 +310,6 @@
                         <select id="llmSelector" class="appearance-none bg-[#121828] border border-[#2D3748] text-[#FFD700] rounded-xl px-4 py-2 pr-10 focus:outline-none focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] transition-all duration-200 hover:border-[#D4AF37] cursor-pointer shadow-sm hover:shadow-md">
                             <option value="Automatico" selected>🤖 Automático</option>
                             <option value="Llama 3.3 70B">🦙 Llama 3.3 70B</option>
-                            <option value="DeepSeek V3">🔍 DeepSeek V3</option>
                             <option value="Gemini 2.0 Flash">💫 Gemini 2.0 Flash</option>
                         </select>
                         <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
@@ -384,7 +383,16 @@
                 this.loadingMessageId = null
                 this.loadingTimer = null
                 this.loadingStepIndex = 0
-                this.progressSteps = ["Obteniendo embeddings", "Utilizando el reranker", "Escribiendo respuesta"]
+                this.progressSteps = [
+                    "Obteniendo embeddings", 
+                    "Utilizando el reranker", 
+                    "Escribiendo respuesta",
+                    "Refinando los detalles",
+                    "Elaborando conclusiones",
+                    "Verificando información",
+                    "Añadiendo retoques finales",
+                    "Completando respuesta"
+                ]
                 this.welcomeMessage = {
                     role: 'assistant',
                     content: '### Midas Help\n\nHola, soy tu asistente de inteligencia artificial sobre el TFM Midas. ¿En qué puedo ayudarte hoy?'
@@ -562,16 +570,29 @@
                 this.container.appendChild(div)
                 this.scrollToBottom()
                 this.loadingStepIndex = 0;
-                // Actualiza el mensaje cada 2 segundos, avanzando por los pasos hasta el último
+                
+                // Actualiza el mensaje cada 7 segundos para las primeras etapas, luego cada 5 segundos
                 this.loadingTimer = setInterval(() => {
-                    if (this.loadingStepIndex < this.progressSteps.length - 1) {
+                    const progressElement = document.querySelector("#loadingMessage .progress-text");
+                    if (!progressElement) return;
+                    
+                    if (this.loadingStepIndex < 2) {
+                        // Para las primeras dos etapas (embeddings y reranker), avanzamos cada 7 segundos
                         this.loadingStepIndex++;
-                        const progressElement = document.querySelector("#loadingMessage .progress-text");
-                        if (progressElement) {
-                            progressElement.innerText = this.progressSteps[this.loadingStepIndex];
+                        progressElement.innerText = this.progressSteps[this.loadingStepIndex];
+                        
+                        // Si llegamos a la etapa de escritura, cambiamos el intervalo a 5 segundos
+                        if (this.loadingStepIndex === 2) {
+                            clearInterval(this.loadingTimer);
+                            this.loadingTimer = setInterval(() => {
+                                // Rotar entre los mensajes de escritura (índices 2 a 7)
+                                this.loadingStepIndex++;
+                                if (this.loadingStepIndex > 7) this.loadingStepIndex = 2; // Volver a los mensajes de escritura
+                                progressElement.innerText = this.progressSteps[this.loadingStepIndex];
+                            }, 5000);
                         }
                     }
-                }, 2000);
+                }, 7000);
             }
 
             removeLoading() {

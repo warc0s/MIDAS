@@ -65,8 +65,8 @@ Dependiendo de los componentes que utilice, puede necesitar:
 - API key de DeepInfra (para componentes que usan Llama 3.3)
 - API key de Google AI (para componentes que usan Gemini)
 
-### ¿MIDAS puede explicar sus decisiones?
-Sí, un enfoque clave de MIDAS es la explicabilidad. Midas Touch genera notebooks detallados que documentan cada paso del proceso, Midas Test proporciona informes completos, y Midas Deploy incluye comentarios en el código generado.
+### ¿MIDAS Touch puede explicar sus decisiones?
+Sí, un enfoque clave de MIDAS Touch es la explicabilidad. Genera notebooks detallados que documentan cada paso del proceso, proporciona informes completos, y incluso Midas Deploy incluye comentarios en el código generado.
 
 ### ¿Cuáles son las limitaciones actuales más importantes?
 Algunas limitaciones importantes incluyen:
@@ -75,6 +75,13 @@ Algunas limitaciones importantes incluyen:
 - Ausencia de optimización avanzada de hiperparámetros
 - Falta de integración completa entre todos los componentes
 - Dependencia de servicios externos para LLMs
+
+### ¿Cómo se genera el .ipynb en Midas Touch?
+Primero se genera un json nbformat vacio y se va llenando. Cada agente llama a "NotebookScribeAgent" cada vez que realiza una acción, de forma que queda reflejado en tiempo real en este cuaderno jupyter. Se realiza en pares de markdown-python para que cada código utilizado tenga su explicación en markdown.
+
+### ¿Cuándo se usa un LLM en Midas Touch? ¿O algún tipo de IA generativa?
+Solo al inicio, para extraer la columna a predecir y si es un problema de regresion o clasificacion a partir del prompt del usuario. El resto de la ejecución es un conjunto de reglas expertas, definidas a nivel de código, con varios agentes cada uno con tareas específicas.
+Probamos a usar un enfoque full-LLM pero tenia demasiada latencia, costes (+100 llamadas para entrenar un pequeño modelo), y un pequeño fallo en el formato del json o similares, rompía el flujo de ejecución. Por eso decidimos usar este enfoque híbrido.
 
 ## Problemas Comunes
 

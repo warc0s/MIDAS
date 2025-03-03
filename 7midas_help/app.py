@@ -73,7 +73,8 @@ def clean_inactive_sessions():
             del processing_queries[session_id]
     
     if inactive_sessions:
-        logger.info(f"Eliminadas {len(inactive_sessions)} sesiones inactivas")
+        #logger.info(f"Eliminadas {len(inactive_sessions)} sesiones inactivas")
+        pass
 
 def get_conversation_history(session_id):
     """Obtiene o crea un historial de conversación para el ID de sesión dado"""
@@ -82,7 +83,7 @@ def get_conversation_history(session_id):
     
     if session_id not in conversation_history:
         conversation_history[session_id] = []
-        logger.info(f"Creada nueva sesión con ID: {session_id}")
+        #logger.info(f"Creada nueva sesión con ID: {session_id}")
     
     # Actualizar timestamp de última actividad
     last_activity[session_id] = datetime.now()
@@ -99,7 +100,7 @@ def add_to_history(session_id, role, content):
         })
         # Actualizar timestamp de última actividad
         last_activity[session_id] = datetime.now()
-        logger.info(f"Añadido mensaje de {role} a sesión {session_id}")
+        #logger.info(f"Añadido mensaje de {role} a sesión {session_id}")
     
 def format_conversation_history(history, max_messages=5):
     """Formatea el historial de conversación para incluirlo en el prompt"""
@@ -180,12 +181,6 @@ Settings.llm = DeepInfraLLM(
     temperature=0.3
 )
 
-llm_deepseek = DeepInfraLLM(
-    model="deepseek-ai/DeepSeek-V3",
-    api_key=DEEPINFRA_API_KEY,
-    temperature=0.3
-)
-
 llm_gemini = Gemini(
     model="models/gemini-2.0-flash",
     api_key=GOOGLE_API_KEY,
@@ -206,16 +201,16 @@ def get_or_create_index():
     # Intentar cargar el índice desde almacenamiento
     if os.path.exists(INDEX_STORAGE_PATH):
         try:
-            logger.info("Loading index from storage...")
+            #logger.info("Loading index from storage...")
             storage_context = StorageContext.from_defaults(persist_dir=INDEX_STORAGE_PATH)
             index = load_index_from_storage(storage_context=storage_context)
-            logger.info("Index loaded successfully.")
+            #logger.info("Index loaded successfully.")
             return index
         except Exception as e:
             logger.warning(f"Error loading index: {e}. Creating new index...")
     
     # Si no existe o hay error, crear nuevo índice
-    logger.info("Creating new vector index...")
+    #logger.info("Creating new vector index...")
     documents = SimpleDirectoryReader(execution_dir).load_data()
     documents = [doc for doc in documents if doc.metadata.get('file_name') == md_filename]
     
@@ -232,7 +227,7 @@ def get_or_create_index():
     
     # Persistir el índice
     index.storage_context.persist(persist_dir=INDEX_STORAGE_PATH)
-    logger.info("Index created and persisted successfully.")
+    #logger.info("Index created and persisted successfully.")
     return index
 
 # Obtener o crear índice
@@ -290,7 +285,6 @@ def create_enhanced_query_engine(llm_model, similarity_top_k=30):
 
 # Crear los query engines mejorados
 query_engine = create_enhanced_query_engine(Settings.llm)
-query_engine_deepseek = create_enhanced_query_engine(llm_deepseek)
 query_engine_gemini = create_enhanced_query_engine(llm_gemini)
 
 # Sistema de concurrencia por sesión (reemplaza el sistema global)
@@ -321,7 +315,7 @@ def handle_query():
         
         # Añadir la consulta actual al historial
         add_to_history(session_id, 'user', user_input)
-        logger.info(f"Consulta registrada. Sesión {session_id} tiene {len(history)} mensajes")
+        #logger.info(f"Consulta registrada. Sesión {session_id} tiene {len(history)} mensajes")
 
         # Verificar si esta sesión específica ya está procesando una consulta
         with processing_lock:
@@ -337,9 +331,6 @@ def handle_query():
                 if selected_llm == "Llama 3.3 70B":
                     current_engine = query_engine
                     llm_usado = 'Llama 3.3 70B'
-                elif selected_llm == "DeepSeek V3":
-                    current_engine = query_engine_deepseek
-                    llm_usado = 'DeepSeek V3'
                 elif selected_llm == "Gemini 2.0 Flash":
                     current_engine = query_engine_gemini
                     llm_usado = 'Gemini 2.0 Flash'
@@ -348,11 +339,11 @@ def handle_query():
                     with processing_lock:
                         processing_queries[session_id] = False
                     return jsonify({'error': 'Opción de LLM no reconocida.'}), 400
-                logger.info(f"LLM forzado: {llm_usado}")
+                #logger.info(f"LLM forzado: {llm_usado}")
             else:
                 # Flujo automático: clasificar el prompt con BERT
                 dificultad = clasificar_dificultad(user_input)
-                logger.info(f"Prompt classified with difficulty: {dificultad}")
+                #logger.info(f"Prompt classified with difficulty: {dificultad}")
                 
                 if dificultad == 2:
                     response_text = "Lo siento, no puedo responder a eso. Si crees que se trata de un error, por favor, reformula la pregunta."
@@ -375,22 +366,22 @@ def handle_query():
                     current_engine = query_engine
                     llm_usado = 'Llama 3.3 70B'
                 elif dificultad == 1:
-                    current_engine = query_engine_deepseek
-                    llm_usado = 'DeepSeek V3'
+                    current_engine = query_engine_gemini
+                    llm_usado = 'Gemini 2.0 Flash'
                 else:
                     # Liberar el bloqueo antes de retornar error
                     with processing_lock:
                         processing_queries[session_id] = False
                     return jsonify({'error': 'Clasificación de pregunta desconocida.'}), 400
 
-            logger.info(f"Procesando consulta con contexto. Sesión: {session_id}")
+            #logger.info(f"Procesando consulta con contexto. Sesión: {session_id}")
             
             # Obtener historial previo (excluyendo la consulta actual recién añadida)
             previous_history = history[:-1] if len(history) > 1 else []
             
             # Modificar la consulta para incluir el historial relevante
             enhanced_query = modify_query_with_history(previous_history, user_input)
-            logger.info(f"Consulta mejorada creada con contexto. Longitud historia: {len(previous_history)}")
+            #logger.info(f"Consulta mejorada creada con contexto. Longitud historia: {len(previous_history)}")
             
             # Realizar la consulta con el contexto mejorado
             response = current_engine.query(enhanced_query)
@@ -398,7 +389,7 @@ def handle_query():
             
             # Añadir la respuesta al historial
             add_to_history(session_id, 'assistant', response_text)
-            logger.info(f"Respuesta añadida. Ahora la sesión tiene {len(history)} mensajes")
+            #logger.info(f"Respuesta añadida. Ahora la sesión tiene {len(history)} mensajes")
             
             response_data = {
                 'response': response_text,
@@ -432,7 +423,7 @@ def clear_conversation_history():
         
         if session_id and session_id in conversation_history:
             conversation_history[session_id] = []
-            logger.info(f"Historial borrado para sesión {session_id}")
+            #logger.info(f"Historial borrado para sesión {session_id}")
             # Actualizar timestamp de última actividad
             last_activity[session_id] = datetime.now()
             return jsonify({
