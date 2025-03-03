@@ -6,24 +6,28 @@
 
 <!-- Enlaces Rápidos -->
 <div align="center">
-  <p>
-    <a href="https://midastfm.com" target="_blank">
-      <img width="300" src="https://img.shields.io/badge/🌐_WEB_PRINCIPAL-midastfm.com-2962FF?style=for-the-badge&labelColor=1A49CD&logo=globe&logoColor=white" alt="Web Principal"/>
-    </a>
-    &nbsp;&nbsp;
-    <a href="https://docs.midastfm.com" target="_blank">
-      <img width="300" src="https://img.shields.io/badge/📚_DOCUMENTACIÓN-docs.midastfm.com-22A699?style=for-the-badge&labelColor=15756C&logo=gitbook&logoColor=white" alt="Documentación"/>
-    </a>
-  </p>
-  <p>
-    <a href="https://presentacion.midastfm.com" target="_blank">
-      <img width="300" src="https://img.shields.io/badge/🎯_PRESENTACIÓN-presentacion.midastfm.com-FF9E00?style=for-the-badge&labelColor=D97F00&logo=googleslides&logoColor=white" alt="Presentación"/>
-    </a>
-    &nbsp;&nbsp;
-    <a href="#" target="_blank">
-      <img width="300" src="https://img.shields.io/badge/🎥_VIDEO_EXPLICATIVO-Próximamente-FF5757?style=for-the-badge&labelColor=D63030&logo=youtube&logoColor=white" alt="Video Explicativo"/>
-    </a>
-  </p>
+  <div class="quick-links">
+    <div class="quick-link">
+      <a href="https://midastfm.com" target="_blank">
+        <img src="https://img.shields.io/badge/🌐_WEB_PRINCIPAL-midastfm.com-2962FF?style=for-the-badge&labelColor=1A49CD&logo=globe&logoColor=white" alt="Web Principal"/>
+      </a>
+    </div>
+    <div class="quick-link">
+      <a href="https://docs.midastfm.com" target="_blank">
+        <img src="https://img.shields.io/badge/📚_DOCUMENTACIÓN-docs.midastfm.com-22A699?style=for-the-badge&labelColor=15756C&logo=gitbook&logoColor=white" alt="Documentación"/>
+      </a>
+    </div>
+    <div class="quick-link">
+      <a href="https://presentacion.midastfm.com" target="_blank">
+        <img src="https://img.shields.io/badge/🎯_PRESENTACIÓN-presentacion.midastfm.com-FF9E00?style=for-the-badge&labelColor=D97F00&logo=googleslides&logoColor=white" alt="Presentación"/>
+      </a>
+    </div>
+    <div class="quick-link">
+      <a href="#" target="_blank">
+        <img src="https://img.shields.io/badge/🎥_VIDEO_EXPLICATIVO-Próximamente-FF5757?style=for-the-badge&labelColor=D63030&logo=youtube&logoColor=white" alt="Video Explicativo"/>
+      </a>
+    </div>
+  </div>
 </div>
 
 ## 📑 Índice
