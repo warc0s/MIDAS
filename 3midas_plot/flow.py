@@ -103,30 +103,63 @@ class FlowPlotV1(Flow):
             )
         
         prompt = f"""
-Genera código Python para crear un {user_request} usando matplotlib.
-{csv_instructions}
+    Genera código Python para crear un {user_request} usando matplotlib.
+    {csv_instructions}
 
-Requisitos estrictos:
-1. Usar matplotlib y pandas (si se necesita).
-2. Codificar la imagen como base64 en memoria usando io.BytesIO.
-3. Imprimir EXCLUSIVAMENTE el string base64 sin ningún texto adicional.
-4. No guardes archivos en disco (excepto leer el CSV si existe).
-5. Redacta en español los títulos de las graficas.
-6. Usa colores visuales y estilos que faciliten la lectura y visualización de la gráfica generada.
-7. Formato obligatorio:
+    REQUISITOS OBLIGATORIOS:
+    1. Usa ÚNICAMENTE matplotlib y pandas para la visualización y procesamiento de datos.
+    2. NO uses librerías como plotly, seaborn u otras que puedan causar problemas de serialización.
+    3. Codifica la imagen EXCLUSIVAMENTE como base64 en memoria usando io.BytesIO.
+    4. El código debe imprimir SOLAMENTE el string base64 resultante - nada más, nada menos.
+    5. NO guardes archivos en disco (todo debe procesarse en memoria).
+    6. Usa ÚNICAMENTE CARACTERES ASCII en todos los textos (títulos, etiquetas, leyendas).
+    7. NO uses tildes, ñ, ni caracteres especiales en ningún texto.
 
-import matplotlib.pyplot as plt
-import io
-import base64
+    TRATAMIENTO DE DATOS:
+    8. Limpia el dataset antes de visualizarlo:
+       - Maneja explícitamente valores nulos o faltantes (reemplaza numéricos con 0, texto con "sin datos")
+       - Elimina o filtra filas/columnas completamente vacías si es necesario
+       - Verifica y convierte tipos de datos según sea necesario
 
-# Tu código para generar el gráfico...
+    VISUALIZACIÓN:
+    9. Usa una paleta de colores contrastante y accesible.
+    10. Asegura que todos los elementos (títulos, etiquetas, leyendas) sean claros y legibles.
+    11. Ajusta automáticamente tamaños y escalas para evitar superposiciones o texto cortado.
+    12. Usa un tamaño de figura adecuado (mínimo 10x6 pulgadas) para buena resolución.
 
-buf = io.BytesIO()
-plt.savefig(buf, format='png')
-buf.seek(0)
+    ESTRUCTURA DE CÓDIGO OBLIGATORIA:
 
-print(base64.b64encode(buf.read()).decode('utf-8'))
-"""
+    import matplotlib.pyplot as plt
+    import pandas as pd
+    import io
+    import base64
+    import numpy as np  # Si es necesario
+
+    # Configuración para evitar problemas
+    plt.rcParams['axes.unicode_minus'] = False
+    plt.figure(figsize=(10, 6), dpi=100)
+
+    try:
+        # Tu código para procesar datos y generar el gráfico
+        # ASEGÚRATE de manejar excepciones y valores faltantes
+        
+        # Guarda la figura en memoria
+        buf = io.BytesIO()
+        plt.savefig(buf, format='png', bbox_inches='tight')
+        buf.seek(0)
+        # IMPRIME SOLO el base64, nada más
+        print(base64.b64encode(buf.read()).decode('utf-8'))
+    except Exception as e:
+        # En caso de error, genera una imagen simple con mensaje de error
+        plt.figure(figsize=(8, 4))
+        plt.text(0.5, 0.5, f"Error en visualización: {{str(e)}}", 
+                 ha='center', va='center', fontsize=12)
+        plt.axis('off')
+        buf = io.BytesIO()
+        plt.savefig(buf, format='png')
+        buf.seek(0)
+        print(base64.b64encode(buf.read()).decode('utf-8'))
+    """
 
         # Llamamos a la función de litellm para obtener la respuesta (código)
         response = completion(
