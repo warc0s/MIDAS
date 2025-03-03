@@ -4,7 +4,9 @@ import os
 import time
 import numpy as np
 import psutil
+import pandas as pd
 import datetime
+import tracemalloc
 from deep_translator import GoogleTranslator
 from sklearn.pipeline import Pipeline
 from sklearn.base import BaseEstimator
@@ -101,21 +103,29 @@ def measure_memory_usage():
 
 def measure_memory_and_cpu_during_prediction(model, X_sample):
     process = psutil.Process(os.getpid())
+    
+    tracemalloc.start()  # Iniciar monitoreo de memoria
+
     mem_before = process.memory_info().rss / (1024 * 1024)
     cpu_before = psutil.cpu_percent(interval=None)
 
     start_time = time.time()
-    model.predict(X_sample)
+    model.predict(X_sample)  # Ejecutar predicción
     end_time = time.time()
+
+    current, peak = tracemalloc.get_traced_memory()  # Obtener pico de memoria
+    tracemalloc.stop()  # Detener monitoreo de memoria
 
     mem_after = process.memory_info().rss / (1024 * 1024)
     cpu_after = psutil.cpu_percent(interval=None)
 
     return {
-        "memory_peak": mem_after - mem_before,
-        "cpu_usage": cpu_after - cpu_before,
+        "memory_peak": peak / (1024 * 1024),  # Convertir a MB
+        "memory_used": mem_after - mem_before,  # Diferencia antes/después
+        "cpu_usage": abs(cpu_after - cpu_before),
         "prediction_time": (end_time - start_time) * 1000  # en ms
     }
+
 
 
 def validate_predictions(model, X_sample):
@@ -148,14 +158,34 @@ def check_robustness(model, X_sample):
 
     return robustness_tests
 
+def generate_valid_input(model):
+    """Genera una entrada de prueba compatible con el modelo."""
+    num_features = getattr(model, "n_features_in_", None)
+    feature_names = getattr(model, "feature_names_in_", None)
+
+    if num_features is None:
+        raise ValueError("No se pudo determinar el número de características de entrada.")
+
+    X_sample = np.random.rand(1, num_features)
+
+    # Si el modelo tiene nombres de características, convertir X_sample en DataFrame
+    if feature_names is not None:
+        X_sample = pd.DataFrame(X_sample, columns=feature_names)
+
+    return X_sample
+
 def process_joblib(file_path):
     model, load_time, size_on_disk = load_model(file_path)
     if model is None:
         return {"error": "Error loading model."}
     
     validity = check_model_validity(model)
-    num_features = getattr(model, "n_features_in_", 2)
-    X_sample = np.random.rand(1, num_features)
+
+    try:
+        X_sample = generate_valid_input(model)
+    except ValueError as e:
+        return {"error": str(e)}
+
     latencies = measure_latency(model, X_sample)
     performance_metrics = measure_memory_and_cpu_during_prediction(model, X_sample)
     memory_usage = measure_memory_usage()
@@ -176,7 +206,6 @@ def process_joblib(file_path):
         "throughput": throughput,
         "final_recommendation": "APTO" if validity and robustness["consistent_predictions"] else "NO APTO"
     }
-
 
 
 def translate_to_spanish(text):

@@ -112,7 +112,7 @@ st.markdown(
 )
 
 
-uploaded_file = st.file_uploader("", type=["joblib"])
+uploaded_file = st.file_uploader("Insertar joblib: ", type=["joblib"], label_visibility="collapsed")
 
 
 
@@ -127,7 +127,7 @@ if uploaded_file:
     if "error" in model_info:
         st.error(model_info["error"])
     else:
-        st.success("✅ Modelo analizado con éxito")
+        st.success("✅ Modelo recibido con éxito")
 
         # Colocar ambos botones siempre visibles
         col1, col2 = st.columns(2)
@@ -148,11 +148,10 @@ if uploaded_file:
             st.success("✅ Evaluación en proceso. Espera unos segundos...")
 
         if finalizar_analisis:
-            if len(groupchat.messages) < 3:
+            if len(groupchat.messages) < 3 and not "See you soon!" in groupchat.messages:
                 st.warning("⚠️ Los agentes siguen trabajando... Por favor, espera a que terminen.")
             else:
                 st.subheader("📊 Resultados del Modelo")
-
                 with st.expander("📌 Información del Modelo"):
                     st.write(f"**Tiempo de carga:** {model_info['load_time']:.4f} segundos")
                     st.write(f"**Tamaño en disco:** {model_info['size_on_disk']:.4f} MB")
