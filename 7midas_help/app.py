@@ -181,12 +181,6 @@ Settings.llm = DeepInfraLLM(
     temperature=0.3
 )
 
-llm_deepseek = DeepInfraLLM(
-    model="deepseek-ai/DeepSeek-V3",
-    api_key=DEEPINFRA_API_KEY,
-    temperature=0.3
-)
-
 llm_gemini = Gemini(
     model="models/gemini-2.0-flash",
     api_key=GOOGLE_API_KEY,
@@ -291,7 +285,6 @@ def create_enhanced_query_engine(llm_model, similarity_top_k=30):
 
 # Crear los query engines mejorados
 query_engine = create_enhanced_query_engine(Settings.llm)
-query_engine_deepseek = create_enhanced_query_engine(llm_deepseek)
 query_engine_gemini = create_enhanced_query_engine(llm_gemini)
 
 # Sistema de concurrencia por sesión (reemplaza el sistema global)
@@ -338,9 +331,6 @@ def handle_query():
                 if selected_llm == "Llama 3.3 70B":
                     current_engine = query_engine
                     llm_usado = 'Llama 3.3 70B'
-                elif selected_llm == "DeepSeek V3":
-                    current_engine = query_engine_deepseek
-                    llm_usado = 'DeepSeek V3'
                 elif selected_llm == "Gemini 2.0 Flash":
                     current_engine = query_engine_gemini
                     llm_usado = 'Gemini 2.0 Flash'
@@ -376,8 +366,8 @@ def handle_query():
                     current_engine = query_engine
                     llm_usado = 'Llama 3.3 70B'
                 elif dificultad == 1:
-                    current_engine = query_engine_deepseek
-                    llm_usado = 'DeepSeek V3'
+                    current_engine = query_engine_gemini
+                    llm_usado = 'Gemini 2.0 Flash'
                 else:
                     # Liberar el bloqueo antes de retornar error
                     with processing_lock:
