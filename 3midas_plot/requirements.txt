@@ -1,0 +1,4 @@
+streamlit
+chardet
+crewai
+e2b-code-interpreter
