@@ -1,0 +1,7 @@
+streamlit
+python-dotenv
+ag2[openai]
+joblib
+psutil
+deep_translator
+scikit-learn
