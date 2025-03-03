@@ -74,6 +74,7 @@ def clean_inactive_sessions():
     
     if inactive_sessions:
         #logger.info(f"Eliminadas {len(inactive_sessions)} sesiones inactivas")
+        pass
 
 def get_conversation_history(session_id):
     """Obtiene o crea un historial de conversación para el ID de sesión dado"""
