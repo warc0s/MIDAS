@@ -1,22 +1,3 @@
-Directory structure:
-└── warc0s-midas/
-    ├── README.md
-    └── Extra/
-        └── Documentacion/
-            └── docs/
-                ├── architecture.md
-                ├── faq.md
-                ├── index.md
-                └── modules/
-                    ├── midas_architect.md
-                    ├── midas_assistant.md
-                    ├── midas_dataset.md
-                    ├── midas_deploy.md
-                    ├── midas_help.md
-                    ├── midas_plot.md
-                    ├── midas_test.md
-                    └── midas_touch.md
-
 ================================================
 File: README.md
 ================================================
@@ -24,28 +5,28 @@ File: README.md
   <img src="https://github.com/warc0s/MIDAS/blob/main/Extra/logo1.png" alt="MIDAS Logo" width="50%">
   <h1>MIDAS - Multi-agent Intelligent Data Automation System 🤖</h1>
   <p><em>Convierte tus ideas en modelos ML listos para producción</em></p>
-  
-  <div align="center">
-    <table>
-      <tr>
-        <td align="center">
-          <a href="https://midastfm.com" style="text-decoration: none;">
-            <img src="https://img.shields.io/badge/🌐_Web_Principal-midastfm.com-2962FF?style=for-the-badge&logo=globe&logoColor=white" alt="Web Principal"/>
-          </a>
-        </td>
-        <td align="center">
-          <a href="https://docs.midastfm.com" style="text-decoration: none;">
-            <img src="https://img.shields.io/badge/📚_Documentación-docs.midastfm.com-22A699?style=for-the-badge&logo=gitbook&logoColor=white" alt="Documentación"/>
-          </a>
-        </td>
-        <td align="center">
-          <a href="#" style="text-decoration: none;">
-            <img src="https://img.shields.io/badge/🎥_Video_Explicativo-Próximamente-FF5757?style=for-the-badge&logo=youtube&logoColor=white" alt="Video Explicativo"/>
-          </a>
-        </td>
-      </tr>
-    </table>
-  </div>
+</div>
+
+<!-- Enlaces Rápidos -->
+<div align="center">
+  <p>
+    <a href="https://midastfm.com" target="_blank">
+      <img width="300" src="https://img.shields.io/badge/🌐_WEB_PRINCIPAL-midastfm.com-2962FF?style=for-the-badge&labelColor=1A49CD&logo=globe&logoColor=white" alt="Web Principal"/>
+    </a>
+    &nbsp;&nbsp;
+    <a href="https://docs.midastfm.com" target="_blank">
+      <img width="300" src="https://img.shields.io/badge/📚_DOCUMENTACIÓN-docs.midastfm.com-22A699?style=for-the-badge&labelColor=15756C&logo=gitbook&logoColor=white" alt="Documentación"/>
+    </a>
+  </p>
+  <p>
+    <a href="https://presentacion.midastfm.com" target="_blank">
+      <img width="300" src="https://img.shields.io/badge/🎯_PRESENTACIÓN-presentacion.midastfm.com-FF9E00?style=for-the-badge&labelColor=D97F00&logo=googleslides&logoColor=white" alt="Presentación"/>
+    </a>
+    &nbsp;&nbsp;
+    <a href="#" target="_blank">
+      <img width="300" src="https://img.shields.io/badge/🎥_VIDEO_EXPLICATIVO-Próximamente-FF5757?style=for-the-badge&labelColor=D63030&logo=youtube&logoColor=white" alt="Video Explicativo"/>
+    </a>
+  </p>
 </div>
 
 ## 📑 Índice
@@ -144,7 +125,7 @@ El proceso de generación es **simple pero potente**:
 
 ### 2.2 Carga directa desde fuentes externas 📂
 
-**Los componentes Midas Touch y Midas Plot** permiten a los usuarios cargar sus propios conjuntos de datos en múltiples formatos:
+Además, **los componentes Midas Touch y Midas Plot** permiten a los usuarios cargar sus propios conjuntos de datos en múltiples formatos:
 
 | Formato | Compatibilidad | Características |
 |---------|----------------|----------------|
@@ -155,26 +136,16 @@ El proceso de generación es **simple pero potente**:
 
 Los datos son subidos a través de interfaces intuitivas implementadas en Streamlit, que permiten la previsualización inmediata y validación básica antes del procesamiento. De igual forma, recomendamos usar siempre CSV.
 
-### 2.3 Adquisición de conocimiento para módulos RAG 🧠
+### 2.3 Adquisición de conocimiento para módulos concretos 🧠
 
-**Los componentes Midas Help y Midas Architect** implementan sistemas de Recuperación Aumentada Generativa (RAG) para proporcionar asistencia contextualizada. Estos módulos obtienen sus datos mediante:
+Por último, **los componentes Midas Help y Midas Architect** implementan sistemas de Recuperación Aumentada Generativa (RAG) para proporcionar asistencia contextualizada. Para estos módulos hemos obtenido sus datos mediante:
 
-- **Web crawling:** El sistema utiliza Crawl4AI para extraer documentación técnica en formato Markdown
-- **Embeddings vectoriales:** Se procesan mediante el modelo text-embedding-3-small (1536 dimensiones)
-- **Fine-tuning especializado:** Midas Help incorpora un modelo BERT específicamente afinado para clasificar las consultas de los usuarios
-
-### 2.4 Integración de cargas de datos en el flujo completo ⚙️
-
-El diseño modular de MIDAS permite que los datos fluyan naturalmente entre componentes:
-
-**Flujo principal:**
-1. **Midas Dataset** ➡️ **Midas Touch** ➡️ **Midas Test**
-
-**Flujos alternativos:**
-- **Midas Touch** ➡️ **Midas Plot** (para visualización)
-- **Midas Test** ➡️ **Midas Deploy** (para implementación)
-
-Esta flexibilidad garantiza que los usuarios puedan elegir la fuente de datos más adecuada para cada etapa del proceso.
+- **Web crawling:** En Midas Architech, para obtener la documentación de cada framework. Usamos <a href="https://github.com/unclecode/crawl4ai" target="_blank" rel="noopener noreferrer">crawl4ai</a>
+ para extraer documentación técnica en formato Markdown
+- **Fine-tuning en el Bert:** Midas Help incorpora un modelo BERT específicamente afinado para clasificar las consultas de los usuarios. El dataset de este Bert fue obtenido de forma sintética, puedes verlo en: <a href="https://github.com/warc0s/MIDAS/blob/main/7midas_help/Cuadernos_PredecirDificultad/Bert_Spanish__Predecir_Dificultad_Help.ipynb" target="_blank" rel="noopener noreferrer">
+    BERT Spanish - Predecir Dificultad Prompt
+</a>
+- **Midas Help:** La documentación en la que se basa (RAG) para responder está extraida de este repositorio. Este readme y la carpeta "Documentación", dentro de "Extras".
 
 ---
 
@@ -188,7 +159,7 @@ La limpieza y preparación de datos constituye una fase crítica en cualquier pr
 - ✅ **Ajuste dinámico de estrategias:** Aplica diferentes enfoques de preprocesamiento según el tipo de datos (numéricos o categóricos)
 
 ### 3.2 Tratamiento de valores nulos 🧩
-**Midas Touch** implementa estrategias específicas para la gestión de valores faltantes:
+**Midas Touch** implementa estrategias específicas para la gestión de valores **faltantes**:
 <table>
   <tr>
     <th>Tipo de Variable</th>
@@ -218,23 +189,23 @@ El sistema documenta el proceso de preprocesamiento en el notebook generado, inc
 ### 3.3 Detección y procesamiento de fechas 📅
 **El DataAlchemistAgent** incluye capacidades específicas para el manejo de columnas temporales:
 
-- 🔍 **Detección automática**: Identifica columnas que parecen contener fechas mediante expresiones regulares
+- 🔍 **Detección automática**: Identifica columnas que parecen contener fechas mediante **expresiones regulares**
 - 🔍 **Extracción de componentes**: Convierte fechas detectadas en características útiles como año, mes, día y día de la semana
 - 🔍 **Transformación estructurada**: Reemplaza las fechas originales con componentes numéricos que pueden ser utilizados por los modelos
 
 Este procesamiento permite que la información temporal sea aprovechada efectivamente por los algoritmos de machine learning, que típicamente requieren entradas numéricas.
 
 ### 3.4 Validación de calidad de datos ✓
-**Midas Touch** incluye validaciones básicas para garantizar la viabilidad del análisis:
+**Midas Touch** también incluye validaciones básicas para garantizar la viabilidad del análisis:
 
 - 📋 **Validación de la columna objetivo**: Verifica que exista, no tenga demasiados valores faltantes y contenga suficiente variabilidad
 - 📋 **Detección de columnas problemáticas**: Identifica y elimina columnas con más del 70% de valores faltantes
 - 📋 **Verificación de tamaño mínimo**: Comprueba que el dataset tenga suficientes filas para el entrenamiento
-- 📋 **Alerta sobre columnas de alta cardinalidad**: Detecta variables categóricas con gran número de valores únicos
+- 📋 **Alerta sobre columnas de alta cardinalidad**: Detecta variables categóricas con gran número de valores únicos. Solo alerta.
 
 Estas verificaciones se registran en el log del sistema y se documentan en el notebook generado, permitiendo entender las decisiones tomadas durante el preprocesamiento.
 
-### 3.5 Descripción detallada de los atributos 📝
+### 3.5 Descripción detallada del proceso 📝
 
 Cada conjunto de datos procesado por **Midas Touch** es documentado automáticamente por el agente **NotebookScribeAgent**, generando:
 
@@ -278,7 +249,7 @@ Este enfoque democratiza la creación de visualizaciones, haciéndolas accesible
 
 ![Midas Plot](https://github.com/warc0s/MIDAS/blob/main/Extra/Imagenes/Midas_Plot_4_1.png?raw=true)
 
-### 4.2 Arquitectura basada en CrewAI Flow ⚙️
+### 4.2 Arquitectura Midas PLot ⚙️
 
 **Midas Plot** emplea una arquitectura de flujo secuencial basada en CrewAI Flow que comprende cuatro pasos fundamentales:
 
@@ -322,7 +293,7 @@ La preparación adecuada de los datos constituye un elemento crítico para el é
 
 ### 5.1 Ingeniería de características adaptativa 🛠️
 
-**El DataAlchemistAgent de Midas Touch** implementa estrategias básicas de ingeniería de características que se adaptan al tipo de datos:
+**El DataAlchemistAgent de Midas Touch** implementa estrategias básicas de ingeniería de características que se adaptan al tipo de datos, como ya explicamos en el punto 3:
 
 <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; border-left: 5px solid #4caf50;">
 <b>Características Implementadas:</b><br>
@@ -350,11 +321,6 @@ Estas transformaciones se aplican automáticamente dentro de un pipeline de scik
 - ✅ **Reproducibilidad:** Las transformaciones se aplican consistentemente a los datos
 - 🔄 **Preprocesamiento modular:** Separación de transformaciones para columnas numéricas y categóricas
 - 📝 **Documentación detallada:** Los pasos del pipeline quedan documentados en el notebook generado
-
-Específicamente, el sistema implementa:
-- Un pipeline para variables numéricas con imputación por mediana y escalado estándar
-- Un pipeline para variables categóricas con imputación por moda y codificación one-hot
-- Un ColumnTransformer que aplica cada pipeline al tipo de columna correspondiente
 
 ### 5.4 Manejo de diferentes tipos de columnas
 **El DataAlchemistAgent** identifica y procesa diferentes tipos de datos:
@@ -528,7 +494,7 @@ El Procesamiento de Lenguaje Natural (NLP) constituye una tecnología fundamenta
 Modelos Generativos Principales:
 - <b>Meta Llama 3.3 (70B):</b> Utilizado en Midas Dataset, Deploy, Help y Test<br>
 - <b>Gemini 2.0 Flash:</b> Implementado en Midas Touch, Architech, Plot y Help<br>
-- <b>Deepseek V3:</b> Empleado únicamente en Midas Help para consultas técnicas avanzadas
+- <b>Deepseek V3:</b> Empleado anteriormente en Midas Help para consultas técnicas avanzadas. Fue eliminado por su alta latencia y tiempo de respuesta.
 
 | Modelo Especializado | Uso Principal | Componente |
 |----------------------|---------------|------------|
@@ -538,18 +504,9 @@ Modelos Generativos Principales:
 | **BGE-M3** | Embeddings para RAG | Midas Help |
 | **BGE V2 M3** | Reranking de resultados | Midas Help |
 
-### 7.2 Tokenización y procesamiento de prompts 🔤
+### 7.2 Sistemas RAG (Retrieval-Augmented Generation) 📚
 
-**Los componentes Midas Dataset, Touch y Plot** implementan técnicas avanzadas de procesamiento de texto:
-
-> 🔍 **Normalización de prompts:** Limpieza, eliminación de stopwords y estandarización  
-> 🎯 **Detección de intención:** Extracción de columna objetivo y tipo de problema  
-> 📋 **Parsing de especificaciones:** Interpretación de requisitos técnicos  
-> 🔄 **Expansión semántica:** Enriquecimiento de consultas para mejorar respuestas
-
-### 7.3 Sistemas RAG (Retrieval-Augmented Generation) 📚
-
-**MIDAS** implementa arquitecturas RAG sofisticadas en sus componentes de documentación:
+Además, **MIDAS** implementa arquitecturas RAG sofisticadas en sus componentes de documentación:
 
 **🏗️ MIDAS ARCHITECT (Sistema RAG Agéntico)**
 - Segmentación inteligente de textos
@@ -567,7 +524,7 @@ Modelos Generativos Principales:
 
 ![Midas Help RAG](https://github.com/warc0s/MIDAS/blob/main/Extra/Imagenes/Midas_Help_7_3.png?raw=true)
 
-### 7.4 Generación automática de código 💻
+### 7.3 Generación automática de código 💻
 
 Por último, múltiples componentes de **MIDAS** implementan generación de código mediante NLP (prompt redactado por el usuario):
 
@@ -712,13 +669,13 @@ El desarrollo e implementación de **MIDAS** representa un avance significativo 
 
 ### 9.2 Reflexiones sobre el desarrollo 🤔
 
-El proceso de diseño e implementación de **MIDAS** ha revelado reflexiones valiosas:
+El proceso de diseño e implementación de **MIDAS** nos ha dado reflexiones valiosas:
 
-> 🔄 **Balance agente-herramienta:** La combinación de agentes con herramientas especializadas resultó óptima  
+> 🔄 **Balance agente-herramienta:** La combinación de agentes con herramientas especializadas dio buen resultado 
 > 🎯 **Especialización vs. generalización:** Los agentes especializados mostraron mejor desempeño  
-> 📝 **Importancia de la documentación:** La generación automática de documentación resultó crucial  
-> 🧩 **Valor de la arquitectura modular:** El diseño desacoplado facilitó evolución y mantenimiento  
-> 🧠 **Capacidades de LLMs:** Los modelos demostraron aptitudes sorprendentes en tareas técnicas complejas
+> 📝 **Importancia de la documentación:** La generación automática de documentación (ipynb en Touch) fue muy útil 
+> 🧩 **Valor de la arquitectura modular:** El diseño desacoplado facilitó evolución y mantenimiento, así como reparto de tareas 
+> 🧠 **Capacidades de LLMs:** Los modelos, bien guiados, demostraron aptitudes sorprendentes en tareas técnicas complejas
 
 ### 9.3 Limitaciones actuales ⚠️
 
@@ -726,7 +683,7 @@ A pesar de sus logros, **MIDAS** presenta limitaciones que deben reconocerse:
 
 - 🔌 **Dependencia de servicios externos** de LLM
 - 🔄 **Diversidad de frameworks** que aumenta complejidad de mantenimiento
-- 📊 **No tan óptimo** en datasets de gran tamaño (+25K filas)
+- 📊 **No tan óptimo** en datasets de gran tamaño tanto en filas como columnas
 - 🧮 **Soporte limitado** de algoritmos ML
 - 🔄 **Ausencia de un orquestador central** completo
 
@@ -759,13 +716,12 @@ A pesar de sus logros, **MIDAS** presenta limitaciones que deben reconocerse:
 
 ### 9.5 Líneas futuras de desarrollo 🔮
 
-El proyecto establece bases sólidas para evoluciones posteriores:
+No obstante, el proyecto establece bases sólidas para evoluciones posteriores:
 
-- 🔄 **Integración profunda:** Desarrollo de un orquestador central para flujos end-to-end
-- 🧠 **Expansión de algoritmos:** Incorporación de deep learning y modelos especializados
+- 🔄 **Integración completa:** Desarrollo de un orquestador central para flujos end-to-end
+- 🧠 **Expansión de algoritmos:** Incorporación de deep learning y más modelos ML
 - 📊 **Optimización para grandes datos:** Adaptaciones para datasets masivos
-- 🔍 **Explicabilidad avanzada:** Integración de técnicas como SHAP o LIME
-- 👥 **Personalización interactiva:** Implementación de modo "semi-manual" consultivo
+- 👥 **Personalización interactiva:** Implementación de modo "semi-manual" consultivo en Midas Touch
 - 🏠 **Independencia de APIs:** Exploración de despliegues locales de LLMs más ligeros
 
 ### 9.6 Reflexión final 💭
@@ -779,7 +735,6 @@ La metáfora del "toque de Midas" refleja adecuadamente esta visión: convertir 
 ---
 
 ## 👥 Creadores
-
 <table>
   <tr>
     <td align="center" width="400">
@@ -788,6 +743,10 @@ La metáfora del "toque de Midas" refleja adecuadamente esta visión: convertir 
           <a href="https://warcos.dev">
             <img src="https://github.com/warc0s.png" width="220" alt="Marcos García" style="border-radius: 50%; border: 2px solid #FFF; box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);">
           </a>
+        </div>
+        <div style="margin: 10px auto; background-color: rgba(255, 215, 0, 0.1); border-radius: 10px; padding: 5px; width: 80%;">
+          <div style="background-color: #FFD700; width: 65%; height: 10px; border-radius: 5px;"></div>
+          <p style="color: #FFD700; margin: 5px 0; font-weight: bold; font-size: 14px; text-align: center;">Contribución: 70%</p>
         </div>
         <h2 style="color: #FFD700; margin: 15px 0; font-family: 'Helvetica Neue', sans-serif;">Marcos García Estévez</h2>
         <div style="display: flex; gap: 10px; justify-content: center; margin-top: 15px;">
@@ -807,6 +766,10 @@ La metáfora del "toque de Midas" refleja adecuadamente esta visión: convertir 
         <a href="https://github.com/jesusact">
           <img src="https://github.com/jesusact.png" width="220" alt="Jesús Aceituno" style="border-radius: 50%; border: 2px solid #FFF; box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);">
         </a>
+      </div>
+      <div style="margin: 10px auto; background-color: rgba(255, 215, 0, 0.1); border-radius: 10px; padding: 5px; width: 80%;">
+        <div style="background-color: #FFD700; width: 35%; height: 10px; border-radius: 5px;"></div>
+        <p style="color: #FFD700; margin: 5px 0; font-weight: bold; font-size: 14px; text-align: center;">Contribución: 30%</p>
       </div>
       <h2 style="color: #FFD700; margin: 15px 0; font-family: 'Helvetica Neue', sans-serif;">Jesús Aceituno Valero</h2>
       <div style="display: flex; gap: 10px; justify-content: center; margin-top: 15px;">
@@ -1001,8 +964,8 @@ Dependiendo de los componentes que utilice, puede necesitar:
 - API key de DeepInfra (para componentes que usan Llama 3.3)
 - API key de Google AI (para componentes que usan Gemini)
 
-### ¿MIDAS puede explicar sus decisiones?
-Sí, un enfoque clave de MIDAS es la explicabilidad. Midas Touch genera notebooks detallados que documentan cada paso del proceso, Midas Test proporciona informes completos, y Midas Deploy incluye comentarios en el código generado.
+### ¿MIDAS Touch puede explicar sus decisiones?
+Sí, un enfoque clave de MIDAS Touch es la explicabilidad. Genera notebooks detallados que documentan cada paso del proceso, proporciona informes completos, y incluso Midas Deploy incluye comentarios en el código generado.
 
 ### ¿Cuáles son las limitaciones actuales más importantes?
 Algunas limitaciones importantes incluyen:
@@ -1011,6 +974,13 @@ Algunas limitaciones importantes incluyen:
 - Ausencia de optimización avanzada de hiperparámetros
 - Falta de integración completa entre todos los componentes
 - Dependencia de servicios externos para LLMs
+
+### ¿Cómo se genera el .ipynb en Midas Touch?
+Primero se genera un json nbformat vacio y se va llenando. Cada agente llama a "NotebookScribeAgent" cada vez que realiza una acción, de forma que queda reflejado en tiempo real en este cuaderno jupyter. Se realiza en pares de markdown-python para que cada código utilizado tenga su explicación en markdown.
+
+### ¿Cuándo se usa un LLM en Midas Touch? ¿O algún tipo de IA generativa?
+Solo al inicio, para extraer la columna a predecir y si es un problema de regresion o clasificacion a partir del prompt del usuario. El resto de la ejecución es un conjunto de reglas expertas, definidas a nivel de código, con varios agentes cada uno con tareas específicas.
+Probamos a usar un enfoque full-LLM pero tenia demasiada latencia, costes (+100 llamadas para entrenar un pequeño modelo), y un pequeño fallo en el formato del json o similares, rompía el flujo de ejecución. Por eso decidimos usar este enfoque híbrido.
 
 ## Problemas Comunes
 
@@ -1033,6 +1003,7 @@ Sí, MIDAS es un proyecto de código abierto desarrollado como Trabajo Fin de M�
 
 ### ¿Cómo puedo contribuir al proyecto?
 Las contribuciones son bienvenidas. Puede contribuir reportando problemas, sugiriendo mejoras o enviando pull requests al repositorio GitHub.
+
 
 ================================================
 File: Extra/Documentacion/docs/index.md
@@ -1487,6 +1458,7 @@ El sistema utiliza AG2 para orquestar una conversación entre agentes de IA espe
   - *Code_Generator*: Agente que implementa código funcional de Streamlit basado en el diseño de UI
   - *User_Proxy*: Orquestador del flujo de trabajo entre agentes especializados
   - *process_joblib*: Función utilitaria para extraer información de archivos joblib
+  - *load_json*: Función para cargar archivos JSON que contienen información sobre las features y la columna objetivo del modelo
 
 - **Modelo LLM utilizado:** 
   - Meta-Llama/Llama-3.3-70B-Instruct-Turbo a través de la API de DeepInfra
@@ -1494,15 +1466,17 @@ El sistema utiliza AG2 para orquestar una conversación entre agentes de IA espe
 - **Flujo de procesamiento:**
   1. Carga del modelo desde archivo joblib
   2. Extracción de metadatos (características, número de features, tipo de modelo)
-  3. Análisis del modelo por agentes de IA
-  4. Diseño de interfaz adaptada al modelo específico
-  5. Generación de código Streamlit ejecutable
-  6. Entrega del código para implementación
+  3. Carga de información desde un archivo JSON para definir features y la columna objetivo
+  4. Análisis del modelo por agentes de IA
+  5. Diseño de interfaz adaptada al modelo específico
+  6. Generación de código Streamlit ejecutable
+  7. Entrega del código para implementación
 
 ### Frontend:
 - **Tecnología:** Aplicación web Streamlit
 - **Componentes de UI:**
   - Cargador de archivos para modelos joblib
+  - Cargador de archivos JSON con información sobre features
   - Campo de texto para descripción del modelo
   - Botón de generación de interfaz
   - Visualizador de código generado
@@ -1511,6 +1485,7 @@ El sistema utiliza AG2 para orquestar una conversación entre agentes de IA espe
 ## Funcionalidad
 - Análisis automatizado de modelos de aprendizaje automático compatibles con scikit-learn
 - Diseño inteligente de interfaces adaptadas a las especificaciones del modelo
+- Carga de archivos JSON para definir features y la columna objetivo
 - Generación de código Streamlit listo para usar
 - Soporte para diversos tipos de modelos ML (clasificadores, regresores, pipelines)
 - Creación de interfaces que tienen en cuenta los requisitos de entrada del modelo
@@ -1524,6 +1499,7 @@ El sistema utiliza AG2 para orquestar una conversación entre agentes de IA espe
 
 2. **Cargar un modelo:**
    - Utilizar el cargador de archivos para subir un modelo .joblib
+   - Cargar un archivo .json con información de features y la columna objetivo
    - Proporcionar una breve descripción del propósito del modelo (ej. "Predicción de satisfacción del cliente basada en datos demográficos")
 
 3. **Generar la interfaz:**
@@ -1539,6 +1515,7 @@ El sistema utiliza AG2 para orquestar una conversación entre agentes de IA espe
 **Ejemplo práctico:**
 Para un modelo que predice la probabilidad de una condición médica basada en edad, altura y peso:
 - Cargar el archivo model.joblib
+- Opcionalmente, cargar un archivo model_features.json con las features edad, altura y peso, y la columna objetivo diagnostico
 - Describir como "Modelo de predicción de condición médica basado en factores biométricos"
 - MIDAS Deploy generará una aplicación Streamlit con campos de entrada para edad, altura y peso
 - La aplicación permitirá a los usuarios ingresar estos datos y obtener predicciones en tiempo real
@@ -1581,6 +1558,7 @@ MIDAS Deploy utiliza ConversableAgent de AG2 para crear agentes especializados:
 
 ![Midas Imagen](https://github.com/warc0s/MIDAS/blob/main/Extra/Imagenes/Midas_Deploy_8_2.png?raw=true)
 
+
 ================================================
 File: Extra/Documentacion/docs/modules/midas_help.md
 ================================================
@@ -1604,10 +1582,9 @@ El backend está desarrollado en Python utilizando el framework Flask y se encar
 - Modelo de **embeddings BGE-M3** de BAAI para la representación vectorial de los textos (tanto de la consulta como de los documentos). Para cada consulta, se seleccionan los 30 chunks mas relevantes según su similitud vectorial.
 - **Reranker BGE V2 M3:** Este componente reordena los resultados obtenidos por la búsqueda inicial basada en embeddings.  El reranker evalúa la relevancia de cada documento recuperado *con respecto a la consulta específica del usuario*, utilizando un modelo de lenguaje más sofisticado que la simple comparación de embeddings. Esto ayuda a filtrar el ruido y a asegurar que los documentos más relevantes sean presentados al LLM para la generación de la respuesta final. Toma los 30 chunks que salen del proceso de embedding, y los "filtra" para pasarle al LLM solo los 10 realmente mas relevantes.
 - **Selector de LLM:** Permite elegir entre diferentes modelos de lenguaje, o usar el modo automatico para usar un modelo u otro dependiendo de la clasificación del BERT Fine-tuneado:
-    -   **Modo Automático:** Utiliza el clasificador de preguntas (BERT) para seleccionar el LLM óptimo (Llama o Deepseek).
+    -   **Modo Automático:** Utiliza el clasificador de preguntas (BERT) para seleccionar el LLM óptimo (Llama o Gemini).
     -   **Llama 3.3 70B:** Un modelo de lenguaje eficiente, ideal para preguntas fáciles.  *(Usado por defecto en el modo automático si la pregunta se clasifica como "fácil").*
-    -   **Deepseek V3:** Un modelo más potente, diseñado para preguntas difíciles que requieren mayor capacidad de razonamiento. *(Usado por defecto en el modo automático si la pregunta se clasifica como "difícil").*
-    -   **Gemini 2.0 Flash:** El modelo que recomendamos, rápido e inteligente. *(No se usa por defecto, debes forzarlo en el selector).*
+    -   **Gemini 2.0 Flash:** Un modelo más potente, diseñado para preguntas difíciles que requieren mayor capacidad de razonamiento. *(Usado por defecto en el modo automático si la pregunta se clasifica como "difícil").*
 
 ### Frontend
 La interfaz de usuario está construida con HTML, JavaScript y Tailwind CSS, proporcionando una experiencia moderna y responsive.
