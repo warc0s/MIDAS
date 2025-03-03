@@ -743,7 +743,7 @@ La metáfora del "toque de Midas" refleja adecuadamente esta visión: convertir 
         </div>
         <div style="margin: 10px auto; background-color: rgba(255, 215, 0, 0.1); border-radius: 10px; padding: 5px; width: 80%;">
           <div style="background-color: #FFD700; width: 65%; height: 10px; border-radius: 5px;"></div>
-          <p style="color: #FFD700; margin: 5px 0; font-weight: bold; font-size: 14px; text-align: center;">Contribución: X%</p>
+          <p style="color: #FFD700; margin: 5px 0; font-weight: bold; font-size: 14px; text-align: center;">Contribución: 70%</p>
         </div>
         <h2 style="color: #FFD700; margin: 15px 0; font-family: 'Helvetica Neue', sans-serif;">Marcos García Estévez</h2>
         <div style="display: flex; gap: 10px; justify-content: center; margin-top: 15px;">
@@ -766,7 +766,7 @@ La metáfora del "toque de Midas" refleja adecuadamente esta visión: convertir 
       </div>
       <div style="margin: 10px auto; background-color: rgba(255, 215, 0, 0.1); border-radius: 10px; padding: 5px; width: 80%;">
         <div style="background-color: #FFD700; width: 35%; height: 10px; border-radius: 5px;"></div>
-        <p style="color: #FFD700; margin: 5px 0; font-weight: bold; font-size: 14px; text-align: center;">Contribución: X%</p>
+        <p style="color: #FFD700; margin: 5px 0; font-weight: bold; font-size: 14px; text-align: center;">Contribución: 30%</p>
       </div>
       <h2 style="color: #FFD700; margin: 15px 0; font-family: 'Helvetica Neue', sans-serif;">Jesús Aceituno Valero</h2>
       <div style="display: flex; gap: 10px; justify-content: center; margin-top: 15px;">

@@ -93,40 +93,100 @@ class FlowPlotV1(Flow):
         """
         user_request = self._custom_state['inputs']['topic']
         csv_instructions = ""
-        # Si hay CSV, indicamos al LLM cómo cargarlo
+        columns_info = ""
+        
+        # Si hay CSV, preparamos información sobre las columnas
         if self._custom_state['inputs']['csv_content']:
-            csv_instructions = (
-                "El dataset está disponible en '/data.csv'. "
-                "Por ejemplo:\n"
-                "import pandas as pd\n"
-                "df = pd.read_csv('/data.csv')"
-            )
+            try:
+                # Cargamos el CSV en un DataFrame para extraer los nombres de las columnas
+                import pandas as pd
+                from io import StringIO
+                df = pd.read_csv(StringIO(self._custom_state['inputs']['csv_content']))
+                
+                # Información sobre las columnas
+                columns_info = "INFORMACIÓN DE LAS COLUMNAS DISPONIBLES:\n"
+                columns_info += f"- Nombres de columnas: {list(df.columns)}\n"
+                
+                # Añadir información sobre los tipos de datos para las primeras filas
+                columns_info += "- Tipos de datos y ejemplos:\n"
+                for col in df.columns:
+                    data_type = df[col].dtype
+                    examples = df[col].head(3).tolist()
+                    columns_info += f"  * '{col}' (tipo: {data_type}): Ejemplos = {examples}\n"
+                
+                csv_instructions = (
+                    "El dataset está disponible en '/data.csv'. "
+                    "Por ejemplo:\n"
+                    "import pandas as pd\n"
+                    "df = pd.read_csv('/data.csv')"
+                )
+            except Exception as e:
+                csv_instructions = (
+                    "El dataset está disponible en '/data.csv', pero hubo un problema al analizarlo: "
+                    f"{str(e)}. Asegúrate de manejar errores de carga de forma robusta."
+                )
         
         prompt = f"""
-Genera código Python para crear un {user_request} usando matplotlib.
-{csv_instructions}
+    Genera código Python para crear un {user_request} usando matplotlib.
+    {csv_instructions}
 
-Requisitos estrictos:
-1. Usar matplotlib y pandas (si se necesita).
-2. Codificar la imagen como base64 en memoria usando io.BytesIO.
-3. Imprimir EXCLUSIVAMENTE el string base64 sin ningún texto adicional.
-4. No guardes archivos en disco (excepto leer el CSV si existe).
-5. Redacta en español los títulos de las graficas.
-6. Usa colores visuales y estilos que faciliten la lectura y visualización de la gráfica generada.
-7. Formato obligatorio:
+    {columns_info}
 
-import matplotlib.pyplot as plt
-import io
-import base64
+    REQUISITOS OBLIGATORIOS:
+    1. Usa ÚNICAMENTE matplotlib y pandas para la visualización y procesamiento de datos.
+    2. NO uses librerías como plotly, seaborn u otras que puedan causar problemas de serialización.
+    3. Codifica la imagen EXCLUSIVAMENTE como base64 en memoria usando io.BytesIO.
+    4. El código debe imprimir SOLAMENTE el string base64 resultante - nada más, nada menos.
+    5. NO guardes archivos en disco (todo debe procesarse en memoria).
+    6. Usa ÚNICAMENTE CARACTERES ASCII en todos los textos (títulos, etiquetas, leyendas).
+    7. NO uses tildes, ñ, ni caracteres especiales en ningún texto.
+    8. USA EXACTAMENTE LOS NOMBRES DE COLUMNAS TAL COMO SE PROPORCIONAN - NO los traduzcas, NO los pongas en minúsculas.
 
-# Tu código para generar el gráfico...
+    TRATAMIENTO DE DATOS:
+    9. Limpia el dataset antes de visualizarlo:
+       - Maneja explícitamente valores nulos o faltantes (reemplaza numéricos con 0, texto con "sin datos")
+       - Elimina o filtra filas/columnas completamente vacías si es necesario
+       - Verifica y convierte tipos de datos según sea necesario
 
-buf = io.BytesIO()
-plt.savefig(buf, format='png')
-buf.seek(0)
+    VISUALIZACIÓN:
+    10. Usa una paleta de colores contrastante y accesible.
+    11. Asegura que todos los elementos (títulos, etiquetas, leyendas) sean claros y legibles.
+    12. Ajusta automáticamente tamaños y escalas para evitar superposiciones o texto cortado.
+    13. Usa un tamaño de figura adecuado (mínimo 10x6 pulgadas) para buena resolución.
 
-print(base64.b64encode(buf.read()).decode('utf-8'))
-"""
+    ESTRUCTURA DE CÓDIGO OBLIGATORIA:
+
+    import matplotlib.pyplot as plt
+    import pandas as pd
+    import io
+    import base64
+    import numpy as np  # Si es necesario
+
+    # Configuración para evitar problemas
+    plt.rcParams['axes.unicode_minus'] = False
+    plt.figure(figsize=(10, 6), dpi=100)
+
+    try:
+        # Tu código para procesar datos y generar el gráfico
+        # ASEGÚRATE de manejar excepciones y valores faltantes
+        
+        # Guarda la figura en memoria
+        buf = io.BytesIO()
+        plt.savefig(buf, format='png', bbox_inches='tight')
+        buf.seek(0)
+        # IMPRIME SOLO el base64, nada más
+        print(base64.b64encode(buf.read()).decode('utf-8'))
+    except Exception as e:
+        # En caso de error, genera una imagen simple con mensaje de error
+        plt.figure(figsize=(8, 4))
+        plt.text(0.5, 0.5, f"Error en visualización: {{str(e)}}", 
+                 ha='center', va='center', fontsize=12)
+        plt.axis('off')
+        buf = io.BytesIO()
+        plt.savefig(buf, format='png')
+        buf.seek(0)
+        print(base64.b64encode(buf.read()).decode('utf-8'))
+    """
 
         # Llamamos a la función de litellm para obtener la respuesta (código)
         response = completion(
