@@ -20,6 +20,7 @@ El sistema utiliza AG2 para orquestar una conversación entre agentes de IA espe
   - *Code_Generator*: Agente que implementa código funcional de Streamlit basado en el diseño de UI
   - *User_Proxy*: Orquestador del flujo de trabajo entre agentes especializados
   - *process_joblib*: Función utilitaria para extraer información de archivos joblib
+  - *load_json*: Función para cargar archivos JSON que contienen información sobre las features y la columna objetivo del modelo
 
 - **Modelo LLM utilizado:** 
   - Meta-Llama/Llama-3.3-70B-Instruct-Turbo a través de la API de DeepInfra
@@ -27,15 +28,17 @@ El sistema utiliza AG2 para orquestar una conversación entre agentes de IA espe
 - **Flujo de procesamiento:**
   1. Carga del modelo desde archivo joblib
   2. Extracción de metadatos (características, número de features, tipo de modelo)
-  3. Análisis del modelo por agentes de IA
-  4. Diseño de interfaz adaptada al modelo específico
-  5. Generación de código Streamlit ejecutable
-  6. Entrega del código para implementación
+  3. Carga de información desde un archivo JSON para definir features y la columna objetivo
+  4. Análisis del modelo por agentes de IA
+  5. Diseño de interfaz adaptada al modelo específico
+  6. Generación de código Streamlit ejecutable
+  7. Entrega del código para implementación
 
 ### Frontend:
 - **Tecnología:** Aplicación web Streamlit
 - **Componentes de UI:**
   - Cargador de archivos para modelos joblib
+  - Cargador de archivos JSON con información sobre features
   - Campo de texto para descripción del modelo
   - Botón de generación de interfaz
   - Visualizador de código generado
@@ -44,6 +47,7 @@ El sistema utiliza AG2 para orquestar una conversación entre agentes de IA espe
 ## Funcionalidad
 - Análisis automatizado de modelos de aprendizaje automático compatibles con scikit-learn
 - Diseño inteligente de interfaces adaptadas a las especificaciones del modelo
+- Carga de archivos JSON para definir features y la columna objetivo
 - Generación de código Streamlit listo para usar
 - Soporte para diversos tipos de modelos ML (clasificadores, regresores, pipelines)
 - Creación de interfaces que tienen en cuenta los requisitos de entrada del modelo
@@ -57,6 +61,7 @@ El sistema utiliza AG2 para orquestar una conversación entre agentes de IA espe
 
 2. **Cargar un modelo:**
    - Utilizar el cargador de archivos para subir un modelo .joblib
+   - Cargar un archivo .json con información de features y la columna objetivo
    - Proporcionar una breve descripción del propósito del modelo (ej. "Predicción de satisfacción del cliente basada en datos demográficos")
 
 3. **Generar la interfaz:**
@@ -72,6 +77,7 @@ El sistema utiliza AG2 para orquestar una conversación entre agentes de IA espe
 **Ejemplo práctico:**
 Para un modelo que predice la probabilidad de una condición médica basada en edad, altura y peso:
 - Cargar el archivo model.joblib
+- Opcionalmente, cargar un archivo model_features.json con las features edad, altura y peso, y la columna objetivo diagnostico
 - Describir como "Modelo de predicción de condición médica basado en factores biométricos"
 - MIDAS Deploy generará una aplicación Streamlit con campos de entrada para edad, altura y peso
 - La aplicación permitirá a los usuarios ingresar estos datos y obtener predicciones en tiempo real
