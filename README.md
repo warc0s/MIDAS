@@ -23,8 +23,8 @@
       </a>
     </div>
     <div class="quick-link">
-      <a href="#" target="_blank">
-        <img src="https://img.shields.io/badge/🎥_VIDEO_EXPLICATIVO-Próximamente-FF5757?style=for-the-badge&labelColor=D63030&logo=youtube&logoColor=white" alt="Video Explicativo"/>
+      <a href="https://youtu.be/G5KMC8kFZEY" target="_blank">
+        <img src="https://img.shields.io/badge/🎥_VIDEO_EXPLICATIVO-Video Youtube-FF5757?style=for-the-badge&labelColor=D63030&logo=youtube&logoColor=white" alt="Video Explicativo"/>
       </a>
     </div>
   </div>
