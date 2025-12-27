@@ -34,7 +34,13 @@ MIDAS Help facilita:
 - Soporte tanto a desarrolladores como usuarios finales
 
 ## Guía de Uso
-El sistema es accesible a través de [help.midastfm.com](https://help.midastfm.com). Los usuarios pueden realizar consultas como:
+El sistema se ejecuta en local (Flask). Para iniciarlo:
+
+1. Instala dependencias: `pip install -r requirements.txt`
+2. Ejecuta: `python app.py`
+3. Abre: `http://127.0.0.1:5008`
+
+Los usuarios pueden realizar consultas como:
 
 - "¿Qué componentes integran MIDAS?"
 - "¿Qué tipo de gráficos soporta MIDAS Plot?"
@@ -46,7 +52,7 @@ Mientras el sistema procesa la consulta, se muestra información en tiempo real 
 
 ## Referencias y Recursos
 
-- Aplicación: [help.midastfm.com](https://help.midastfm.com)
+- Aplicación (local): http://127.0.0.1:5008
 - Repositorio: [github.com/warc0s/MIDAS](https://github.com/warc0s/MIDAS)
 - Sitio Web Llama Index: [llamaindex.ai](https://www.llamaindex.ai)
 

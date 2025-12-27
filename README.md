@@ -8,18 +8,18 @@
 <div align="center">
   <div class="quick-links">
     <div class="quick-link">
-      <a href="https://midastfm.com" target="_blank">
-        <img src="https://img.shields.io/badge/🌐_WEB_PRINCIPAL-midastfm.com-2962FF?style=for-the-badge&labelColor=1A49CD&logo=globe&logoColor=white" alt="Web Principal"/>
+      <a href="https://github.com/warc0s/MIDAS" target="_blank">
+        <img src="https://img.shields.io/badge/📦_REPOSITORIO-GitHub-181717?style=for-the-badge&labelColor=111111&logo=github&logoColor=white" alt="Repositorio"/>
       </a>
     </div>
     <div class="quick-link">
-      <a href="https://docs.midastfm.com" target="_blank">
-        <img src="https://img.shields.io/badge/📚_DOCUMENTACIÓN-docs.midastfm.com-22A699?style=for-the-badge&labelColor=15756C&logo=gitbook&logoColor=white" alt="Documentación"/>
+      <a href="Extra/Documentacion/docs/index.md" target="_blank">
+        <img src="https://img.shields.io/badge/📚_DOCUMENTACIÓN-Local-22A699?style=for-the-badge&labelColor=15756C&logo=markdown&logoColor=white" alt="Documentación (local)"/>
       </a>
     </div>
     <div class="quick-link">
-      <a href="https://presentacion.midastfm.com" target="_blank">
-        <img src="https://img.shields.io/badge/🎯_PRESENTACIÓN-presentacion.midastfm.com-FF9E00?style=for-the-badge&labelColor=D97F00&logo=googleslides&logoColor=white" alt="Presentación"/>
+      <a href="Extra/Webs/MIDASTFM-Triptico-Final.pdf" target="_blank">
+        <img src="https://img.shields.io/badge/🎯_PRESENTACIÓN-PDF-FF9E00?style=for-the-badge&labelColor=D97F00&logo=googledrive&logoColor=white" alt="Presentación (PDF)"/>
       </a>
     </div>
     <div class="quick-link">

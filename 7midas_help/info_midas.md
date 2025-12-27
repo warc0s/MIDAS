@@ -10,21 +10,21 @@ File: README.md
 <!-- Enlaces Rápidos -->
 <div align="center">
   <p>
-    <a href="https://midastfm.com" target="_blank">
-      <img width="300" src="https://img.shields.io/badge/🌐_WEB_PRINCIPAL-midastfm.com-2962FF?style=for-the-badge&labelColor=1A49CD&logo=globe&logoColor=white" alt="Web Principal"/>
+    <a href="https://github.com/warc0s/MIDAS" target="_blank">
+      <img width="300" src="https://img.shields.io/badge/📦_REPOSITORIO-GitHub-181717?style=for-the-badge&labelColor=111111&logo=github&logoColor=white" alt="Repositorio"/>
     </a>
     &nbsp;&nbsp;
-    <a href="https://docs.midastfm.com" target="_blank">
-      <img width="300" src="https://img.shields.io/badge/📚_DOCUMENTACIÓN-docs.midastfm.com-22A699?style=for-the-badge&labelColor=15756C&logo=gitbook&logoColor=white" alt="Documentación"/>
+    <a href="../Extra/Documentacion/docs/index.md" target="_blank">
+      <img width="300" src="https://img.shields.io/badge/📚_DOCUMENTACIÓN-Local-22A699?style=for-the-badge&labelColor=15756C&logo=markdown&logoColor=white" alt="Documentación (local)"/>
     </a>
   </p>
   <p>
-    <a href="https://presentacion.midastfm.com" target="_blank">
-      <img width="300" src="https://img.shields.io/badge/🎯_PRESENTACIÓN-presentacion.midastfm.com-FF9E00?style=for-the-badge&labelColor=D97F00&logo=googleslides&logoColor=white" alt="Presentación"/>
+    <a href="../Extra/Webs/MIDASTFM-Triptico-Final.pdf" target="_blank">
+      <img width="300" src="https://img.shields.io/badge/🎯_PRESENTACIÓN-PDF-FF9E00?style=for-the-badge&labelColor=D97F00&logo=googledrive&logoColor=white" alt="Presentación (PDF)"/>
     </a>
     &nbsp;&nbsp;
-    <a href="#" target="_blank">
-      <img width="300" src="https://img.shields.io/badge/🎥_VIDEO_EXPLICATIVO-Próximamente-FF5757?style=for-the-badge&labelColor=D63030&logo=youtube&logoColor=white" alt="Video Explicativo"/>
+    <a href="https://youtu.be/G5KMC8kFZEY" target="_blank">
+      <img width="300" src="https://img.shields.io/badge/🎥_VIDEO_EXPLICATIVO-Video Youtube-FF5757?style=for-the-badge&labelColor=D63030&logo=youtube&logoColor=white" alt="Video Explicativo"/>
     </a>
   </p>
 </div>
@@ -1598,7 +1598,13 @@ MIDAS Help facilita:
 - Soporte tanto a desarrolladores como usuarios finales
 
 ## Guía de Uso
-El sistema es accesible a través de [help.midastfm.com](https://help.midastfm.com). Los usuarios pueden realizar consultas como:
+El sistema se ejecuta en local (Flask). Para iniciarlo:
+
+1. Instala dependencias: `pip install -r requirements.txt`
+2. Ejecuta: `python app.py`
+3. Abre: `http://127.0.0.1:5008`
+
+Los usuarios pueden realizar consultas como:
 
 - "¿Qué componentes integran MIDAS?"
 - "¿Qué tipo de gráficos soporta MIDAS Plot?"
@@ -1610,7 +1616,7 @@ Mientras el sistema procesa la consulta, se muestra información en tiempo real 
 
 ## Referencias y Recursos
 
-- Aplicación: [help.midastfm.com](https://help.midastfm.com)
+- Aplicación (local): http://127.0.0.1:5008
 - Repositorio: [github.com/warc0s/MIDAS](https://github.com/warc0s/MIDAS)
 - Sitio Web Llama Index: [llamaindex.ai](https://www.llamaindex.ai)
 

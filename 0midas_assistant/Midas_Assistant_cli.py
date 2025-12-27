@@ -185,7 +185,7 @@ def main():
         print("API_KEY=tu_clave_api_aquí")
         print("MODEL=nombre_completo_del_modelo")
         print("\nEjemplo para usar Gemini 2.0 Flash:")
-        print("API_KEY=AIzaSyDF7tzmLrfr45Y6-45NitTkz5W0k")
+        print("API_KEY=TU_API_KEY_DE_GEMINI")
         print("MODEL=gemini/gemini-2.0-flash")
         sys.exit(1)
         
